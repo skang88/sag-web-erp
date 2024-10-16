@@ -42,6 +42,7 @@ pipeline {
         stage('Check Running Containers') {
             steps {
                 sh 'docker ps -a'
+                sh 'docker exec -it node-app ls -al /usr/src/app'
             }
         }
         
