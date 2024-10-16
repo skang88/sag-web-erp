@@ -1,5 +1,5 @@
 # 베이스 이미지 설정
-FROM node:14
+FROM node:20
 
 # 작업 디렉터리 설정
 WORKDIR /usr/src/app
@@ -10,6 +10,9 @@ RUN npm install
 
 # 앱 파일 복사
 COPY . .
+
+# 디버깅을 위해 현재 디렉터리의 내용 출력
+RUN ls -al
 
 # 앱 실행
 CMD ["node", "app.js"]
