@@ -14,6 +14,7 @@ pipeline {
             steps {
                 sh 'pwd'
                 sh 'dir'
+                sh 'ls server'
                 sh 'docker ps -a'
             }
         }
