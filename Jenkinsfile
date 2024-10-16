@@ -41,6 +41,7 @@ pipeline {
 
         stage('Check Running Containers') {
             steps {
+                // Docker 실행 결과 및 도커 내부 디렉터리 파일 보기
                 sh 'docker ps -a'
                 sh 'docker exec sag-web-erp ls -al /usr/src/app'
                 sh 'docker exec sag-web-erp cat /usr/src/app/app.js'
