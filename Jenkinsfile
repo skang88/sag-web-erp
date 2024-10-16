@@ -45,11 +45,6 @@ pipeline {
             }
         }
         
-        stage('Check Files in Container') {
-            steps {
-                // 여기에서 'node-app'을 실제 컨테이너 이름으로 교체하세요
-                sh 'docker exec -it sag-web-erp ls -al /usr/src/app'
-            }
-        }
+        
     }
 }
