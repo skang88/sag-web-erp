@@ -35,7 +35,7 @@ pipeline {
         stage('Run New Back-end Container') {
             steps {
                 // 새로 빌드한 이미지를 사용하여 새로운 컨테이너 실행
-                sh 'docker run -d --name sag-web-erp -p 8081:3000 -v C:/env/sag-web-erp/back-end/.env:/usr/src/app/.env sag-web-erp'
+                sh 'docker run -d --name sag-web-erp -p 8081:3000 -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env sag-web-erp'
             }
         }
     }
