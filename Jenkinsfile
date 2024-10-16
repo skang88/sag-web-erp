@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sh 'docker ps -a'
                 sh 'docker exec sag-web-erp ls -al /usr/src/app'
-                sh 'docker exec sag-web-erp cat -al /usr/src/app/app.js'
+                sh 'docker exec sag-web-erp cat /usr/src/app/app.js'
                 
             }
         }
