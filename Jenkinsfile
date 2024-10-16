@@ -42,8 +42,8 @@ pipeline {
         stage('Check Running Containers') {
             steps {
                 sh 'docker ps -a'
-                sh 'docker exec sag-web-erp ls -al /usr/scr/app'
-                sh 'docker exec sag-web-erp cat -al /usr/scr/app/app.js'
+                sh 'docker exec sag-web-erp ls -al /usr/src/app'
+                sh 'docker exec sag-web-erp cat -al /usr/src/app/app.js'
                 
             }
         }
