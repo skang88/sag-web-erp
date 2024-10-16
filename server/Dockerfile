@@ -15,4 +15,4 @@ COPY . .
 RUN ls -al
 
 # 앱 실행
-CMD ["node", "app.js"]
+CMD ["node", "server.js"]
