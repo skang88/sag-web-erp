@@ -38,5 +38,18 @@ pipeline {
                 sh 'docker run -d --name sag-web-erp -p 8081:3000 -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env sag-web-erp'
             }
         }
+
+        stage('Check Running Containers') {
+            steps {
+                sh 'docker ps -a'
+            }
+        }
+        
+        stage('Check Files in Container') {
+            steps {
+                // 여기에서 'node-app'을 실제 컨테이너 이름으로 교체하세요
+                sh 'docker exec -it sag-web-erp ls -al /usr/src/app'
+            }
+        }
     }
 }
