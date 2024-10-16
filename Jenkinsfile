@@ -25,6 +25,7 @@ pipeline {
                 }
             }
         }
+
         stage('Stop & Remove Old Container Back-end') {
             steps {
                 // 기존 컨테이너 중지 및 제거 (컨테이너 이름은 'node-app'로 가정)
@@ -32,6 +33,7 @@ pipeline {
                 sh 'docker rm sag-web-erp || true'
             }
         }
+
         stage('Run New Back-end Container') {
             steps {
                 // 새로 빌드한 이미지를 사용하여 새로운 컨테이너 실행
@@ -46,6 +48,13 @@ pipeline {
                 sh 'docker exec sag-web-erp ls -al /usr/src/app'
                 sh 'docker exec sag-web-erp cat /usr/src/app/app.js'
                 
+            }
+        }
+
+        stage('Build Front-end') { 
+            steps {
+                echo 'Hello world!'
+                echo 'Im going to built front-end'
             }
         }
         
