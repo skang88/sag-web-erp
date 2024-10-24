@@ -15,7 +15,7 @@ pipeline {
                 sh 'pwd'
                 sh 'dir'
                 sh 'ls server'
-                sh 'docker ps -a'
+                sh 'sudo docker ps -a'
             }
         }
 
