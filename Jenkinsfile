@@ -82,7 +82,7 @@ pipeline {
                 // Docker 실행 결과 및 도커 내부 디렉터리 파일 보기
                 sh 'docker ps -a'
                 sh 'docker exec sag-web-erp-front ls -al /usr/src/app'
-                sh 'docker exec sag-web-erp-front cat /usr/src/app/app.js'
+                sh 'docker exec sag-web-erp-front cat /usr/src/app/src/app.js'
                 
             }
         }
