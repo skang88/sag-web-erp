@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use('/api/accs', accRoutes);
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('This is the backend server');
 });
 
 module.exports = app;
