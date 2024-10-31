@@ -77,7 +77,7 @@ pipeline {
             }
         }
 
-        stage('Check Running Containers') {
+        stage('Check Running Containers front') {
             steps {
                 // Docker 실행 결과 및 도커 내부 디렉터리 파일 보기
                 sh 'docker ps -a'
