@@ -26,65 +26,69 @@ pipeline {
             }
         }
 
-        stage('Build & Deploy Back-end') {
-            stages {
-                stage('Build Back-end Image') { // 백엔드 도커 이미지 빌드
-                    steps {
-                        dir('server') {
-                            sh "docker build -t ${BACKEND_IMAGE} ."
+        stage('Build & Deploy') { // 백엔드와 프론트엔드를 병렬로 빌드 및 배포
+            parallel {
+                stage('Back-end') {
+                    stages {
+                        stage('Build Back-end Image') { // 백엔드 도커 이미지 빌드
+                            steps {
+                                dir('server') {
+                                    sh "docker build -t ${BACKEND_IMAGE} ."
+                                }
+                            }
+                        }
+
+                        stage('Clean Up Old Back-end Container') { // 기존 백엔드 컨테이너 정리
+                            steps {
+                                script {
+                                    dockerStopRemove(BACKEND_CONTAINER)
+                                }
+                            }
+                        }
+
+                        stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
+                            steps {
+                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env ${BACKEND_IMAGE}"
+                            }
+                        }
+
+                        stage('Verify Back-end Deployment') { // 백엔드 컨테이너 상태 확인
+                            steps {
+                                dockerInspect(BACKEND_CONTAINER, '/usr/src/app/app.js')
+                            }
                         }
                     }
                 }
 
-                stage('Clean Up Old Back-end Container') { // 기존 백엔드 컨테이너 정리
-                    steps {
-                        script {
-                            dockerStopRemove(BACKEND_CONTAINER)
+                stage('Front-end') {
+                    stages {
+                        stage('Build Front-end Image') { // 프론트엔드 도커 이미지 빌드
+                            steps {
+                                dir('client') {
+                                    sh "docker build -t ${FRONTEND_IMAGE} ."
+                                }
+                            }
                         }
-                    }
-                }
 
-                stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
-                    steps {
-                        sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env ${BACKEND_IMAGE}"
-                    }
-                }
-
-                stage('Verify Back-end Deployment') { // 백엔드 컨테이너 상태 확인
-                    steps {
-                        dockerInspect(BACKEND_CONTAINER, '/usr/src/app/app.js')
-                    }
-                }
-            }
-        }
-
-        stage('Build & Deploy Front-end') {
-            stages {
-                stage('Build Front-end Image') { // 프론트엔드 도커 이미지 빌드
-                    steps {
-                        dir('client') {
-                            sh "docker build -t ${FRONTEND_IMAGE} ."
+                        stage('Clean Up Old Front-end Container') { // 기존 프론트엔드 컨테이너 정리
+                            steps {
+                                script {
+                                    dockerStopRemove(FRONTEND_CONTAINER)
+                                }
+                            }
                         }
-                    }
-                }
 
-                stage('Clean Up Old Front-end Container') { // 기존 프론트엔드 컨테이너 정리
-                    steps {
-                        script {
-                            dockerStopRemove(FRONTEND_CONTAINER)
+                        stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
+                            steps {
+                                sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env ${FRONTEND_IMAGE}"
+                            }
                         }
-                    }
-                }
 
-                stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
-                    steps {
-                        sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env ${FRONTEND_IMAGE}"
-                    }
-                }
-
-                stage('Verify Front-end Deployment') { // 프론트엔드 컨테이너 상태 확인
-                    steps {
-                        dockerInspect(FRONTEND_CONTAINER, '/usr/src/app/src/App.js')
+                        stage('Verify Front-end Deployment') { // 프론트엔드 컨테이너 상태 확인
+                            steps {
+                                dockerInspect(FRONTEND_CONTAINER, '/usr/src/app/src/App.js')
+                            }
+                        }
                     }
                 }
             }
