@@ -1,91 +1,104 @@
 pipeline {
     agent any
     tools {
-        nodejs 'NodeJs'
+        nodejs 'NodeJs' // Jenkins에 설치된 Node.js 버전 사용
+    }
+    environment {
+        BACKEND_IMAGE = 'sag-web-erp'
+        FRONTEND_IMAGE = 'sag-web-erp-front'
+        BACKEND_CONTAINER = 'sag-web-erp'
+        FRONTEND_CONTAINER = 'sag-web-erp-front'
+        BACKEND_PORT = '8081:3000'
+        FRONTEND_PORT = '8082:3000'
     }
     stages {
-        stage('Checkout') {
+        stage('Checkout') { // 코드 체크아웃 단계
             steps {
                 git branch: 'main', url: 'https://github.com/skang88/sag-web-erp.git'
             }
         }
 
-        stage('No Install Dependencies') {
+        stage('Prepare Environment') { // 디버깅을 위한 기본 환경 확인
             steps {
                 sh 'pwd'
-                sh 'dir'
-                sh 'ls server'
+                sh 'ls -al'
                 sh 'docker ps -a'
             }
         }
 
-        stage('Build Back-end') { 
-            steps {
-                dir('server') {
-                    sh 'docker build -t sag-web-erp .'
+        stage('Build & Deploy Back-end') {
+            stages {
+                stage('Build Back-end Image') { // 백엔드 도커 이미지 빌드
+                    steps {
+                        dir('server') {
+                            sh "docker build -t ${BACKEND_IMAGE} ."
+                        }
+                    }
+                }
+
+                stage('Clean Up Old Back-end Container') { // 기존 백엔드 컨테이너 정리
+                    steps {
+                        script {
+                            dockerStopRemove(BACKEND_CONTAINER)
+                        }
+                    }
+                }
+
+                stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
+                    steps {
+                        sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env ${BACKEND_IMAGE}"
+                    }
+                }
+
+                stage('Verify Back-end Deployment') { // 백엔드 컨테이너 상태 확인
+                    steps {
+                        dockerInspect(BACKEND_CONTAINER, '/usr/src/app/app.js')
+                    }
                 }
             }
         }
 
-        stage('Stop & Remove Old Container Back-end') {
-            steps {
-                // 기존 컨테이너 중지 및 제거 (컨테이너 이름은 'node-app'로 가정)
-                sh 'docker stop sag-web-erp || true'
-                sh 'docker rm sag-web-erp || true'
-            }
-        }
+        stage('Build & Deploy Front-end') {
+            stages {
+                stage('Build Front-end Image') { // 프론트엔드 도커 이미지 빌드
+                    steps {
+                        dir('client') {
+                            sh "docker build -t ${FRONTEND_IMAGE} ."
+                        }
+                    }
+                }
 
-        stage('Run New Back-end Container') {
-            steps {
-                // 새로 빌드한 이미지를 사용하여 새로운 컨테이너 실행
-                sh 'docker run -d --name sag-web-erp -p 8081:3000 -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env sag-web-erp'
-            }
-        }
+                stage('Clean Up Old Front-end Container') { // 기존 프론트엔드 컨테이너 정리
+                    steps {
+                        script {
+                            dockerStopRemove(FRONTEND_CONTAINER)
+                        }
+                    }
+                }
 
-        stage('Check Running Containers') {
-            steps {
-                // Docker 실행 결과 및 도커 내부 디렉터리 파일 보기
-                sh 'docker ps -a'
-                sh 'docker exec sag-web-erp ls -al /usr/src/app'
-                sh 'docker exec sag-web-erp cat /usr/src/app/app.js'
-                
-            }
-        }
+                stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
+                    steps {
+                        sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env ${FRONTEND_IMAGE}"
+                    }
+                }
 
-        stage('Build Front-end') { 
-            steps {
-                echo 'Hello world!'
-                echo 'Im going to built front-end'
-                dir('client') {
-                    sh 'docker build -t sag-web-erp-front .'
+                stage('Verify Front-end Deployment') { // 프론트엔드 컨테이너 상태 확인
+                    steps {
+                        dockerInspect(FRONTEND_CONTAINER, '/usr/src/app/src/App.js')
+                    }
                 }
             }
         }
-
-        stage('Stop & Remove Old Container Front-end') {
-            steps {
-                // 기존 컨테이너 중지 및 제거 (컨테이너 이름은 'node-app'로 가정)
-                sh 'docker stop sag-web-erp-front || true'
-                sh 'docker rm sag-web-erp-front || true'
-            }
-        }
-        
-        stage('Run New Front-end Container') {
-            steps {
-                // 새로 빌드한 이미지를 사용하여 새로운 컨테이너 실행
-                sh 'docker run -d --name sag-web-erp-front -p 8082:3000 -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env sag-web-erp-front'
-            }
-        }
-
-        stage('Check Running Containers front') {
-            steps {
-                // Docker 실행 결과 및 도커 내부 디렉터리 파일 보기
-                sh 'docker ps -a'
-                sh 'docker exec sag-web-erp-front ls -al /usr/src/app'
-                sh 'docker exec sag-web-erp-front cat /usr/src/app/src/App.js'
-                
-            }
-        }
-        
     }
+}
+
+def dockerStopRemove(containerName) {
+    sh "docker stop ${containerName} || true"
+    sh "docker rm ${containerName} || true"
+}
+
+def dockerInspect(containerName, filePath) {
+    sh 'docker ps -a' // 현재 실행 중인 모든 도커 컨테이너 확인
+    sh "docker exec ${containerName} ls -al /usr/src/app" // 내부 파일 목록 확인
+    sh "docker exec ${containerName} cat ${filePath}" // 주요 파일 내용 출력
 }
