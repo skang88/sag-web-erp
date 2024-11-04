@@ -4,12 +4,12 @@ pipeline {
         nodejs 'NodeJs' // Jenkins에 설치된 Node.js 버전 사용
     }
     environment {
-        BACKEND_IMAGE = 'sag-web-erp'
+        BACKEND_IMAGE = 'sag-web-erp-backend'
         FRONTEND_IMAGE = 'sag-web-erp-front'
-        BACKEND_CONTAINER = 'sag-web-erp'
+        BACKEND_CONTAINER = 'sag-web-erp-backend'
         FRONTEND_CONTAINER = 'sag-web-erp-front'
-        BACKEND_PORT = '8081:3000'
-        FRONTEND_PORT = '8082:3000'
+        BACKEND_PORT = '8001:3000'
+        FRONTEND_PORT = '8000:3000'
     }
     stages {
         stage('Checkout') { // 코드 체크아웃 단계
