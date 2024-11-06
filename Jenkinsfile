@@ -48,7 +48,7 @@ pipeline {
 
                         stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env ${BACKEND_IMAGE}"
+                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
                             }
                         }
 
@@ -80,7 +80,7 @@ pipeline {
 
                         stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env ${FRONTEND_IMAGE}"
+                                sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
                             }
                         }
 
