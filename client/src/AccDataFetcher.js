@@ -100,11 +100,11 @@ const AccDataFetcher = () => {
   const columns = useMemo(
     () => [
       { Header: '사번', accessor: 'SABUN', Filter: DefaultColumnFilter },
-      { Header: 'FNAME', accessor: 'FNAME', Filter: DefaultColumnFilter },
-      { Header: 'KDATE', accessor: 'KDATE', Filter: DefaultColumnFilter },
-      { Header: 'MINTIME', accessor: 'MINTIME', Filter: DefaultColumnFilter },
-      { Header: 'MAXTIME', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
-      { Header: 'DTIME', accessor: 'DTIME', Filter: DefaultColumnFilter }
+      { Header: '이름', accessor: 'FNAME', Filter: DefaultColumnFilter },
+      { Header: '출근일자', accessor: 'KDATE', Filter: DefaultColumnFilter },
+      { Header: '시작시각', accessor: 'MINTIME', Filter: DefaultColumnFilter },
+      { Header: '종료시각', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
+      { Header: '근무시간(분)', accessor: 'DTIME', Filter: DefaultColumnFilter }
     ],
     []
   );
