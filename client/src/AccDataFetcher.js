@@ -99,7 +99,7 @@ const AccDataFetcher = () => {
 
   const columns = useMemo(
     () => [
-      { Header: 'SABUN', accessor: 'SABUN', Filter: DefaultColumnFilter },
+      { Header: '사번', accessor: 'SABUN', Filter: DefaultColumnFilter },
       { Header: 'FNAME', accessor: 'FNAME', Filter: DefaultColumnFilter },
       { Header: 'KDATE', accessor: 'KDATE', Filter: DefaultColumnFilter },
       { Header: 'MINTIME', accessor: 'MINTIME', Filter: DefaultColumnFilter },
