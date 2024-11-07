@@ -148,6 +148,7 @@ const AccDataFetcher = () => {
   return (
     <div>
       <h2>근태 기록 기초데이터</h2>
+      <p>매일 새벽 2시에 업데이트</p>
       <DownloadButton instance={tableInstance} />
       <DataTable columns={columns} data={data} instance={tableInstance} />
     </div>
