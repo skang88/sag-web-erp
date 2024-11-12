@@ -1,33 +1,29 @@
-// server/config/dbConfig.js
 require('dotenv').config(); // .env 파일 로드
 
-const sql = require('mssql');
+const mysql = require('mysql2');
 
 const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_DATABASE,
-  port: parseInt(process.env.DB_PORT, 10), // 포트 번호를 환경 변수에서 가져옵니다
-  options: {
-    encrypt: true, // 암호화 설정 (Azure SQL Server에서는 true로 설정)
-    trustServerCertificate: true, // 개발 환경에서는 true로 설정
-  },
+  host: process.env.DB_SERVER, // MySQL 서버 주소
+  user: process.env.DB_USER, // DB 사용자
+  password: process.env.DB_PASSWORD, // DB 비밀번호
+  database: process.env.DB_DATABASE, // DB 이름
+  port: parseInt(process.env.DB_PORT, 10), // 포트 번호
+  waitForConnections: true, // 연결 대기
+  connectionLimit: 10, // 최대 연결 수
+  queueLimit: 0, // 대기열 제한 (0이면 무제한)
 };
 
-const poolPromise = sql.connect(config)
-  .then(pool => {
-    if (pool.connecting) {
-      console.log('Connecting to MS SQL Server...');
-    }
-    return pool;
-  })
-  .catch(err => {
+const pool = mysql.createPool(config); // 풀 생성
+
+// 연결 테스트
+pool.getConnection((err, connection) => {
+  if (err) {
     console.error('Database connection failed:', err);
-    process.exit(1);
-  });
+    process.exit(1); // 실패 시 종료
+  } else {
+    console.log('Connected to MySQL');
+    connection.release(); // 연결 해제
+  }
+});
 
-module.exports = {
-  sql,
-  poolPromise
-};
+module.exports = pool.promise(); // promise 기반의 API를 반환

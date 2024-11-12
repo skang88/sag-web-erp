@@ -70,8 +70,6 @@ const DataTable = ({ instance }) => {
 
 // DownloadButton Component
 const DownloadButton = ({ instance }) => {
-  // const { state: { filters, sortBy } } = instance;
-
   const downloadExcel = () => {
     if (!instance || !instance.rows.length) return;
 
@@ -99,12 +97,12 @@ const AccDataFetcher = () => {
 
   const columns = useMemo(
     () => [
-      { Header: '사번', accessor: 'SABUN', Filter: DefaultColumnFilter },
       { Header: '이름', accessor: 'FNAME', Filter: DefaultColumnFilter },
-      { Header: '출근일자', accessor: 'KDATE', Filter: DefaultColumnFilter },
-      { Header: '시작시각', accessor: 'MINTIME', Filter: DefaultColumnFilter },
-      { Header: '종료시각', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
-      { Header: '근무시간(분)', accessor: 'DTIME', Filter: DefaultColumnFilter }
+      { Header: '근무일자', accessor: 'workdate', Filter: DefaultColumnFilter },
+      { Header: '출근시간', accessor: 'finger_start', Filter: DefaultColumnFilter },
+      { Header: '퇴근시간', accessor: 'finger_end', Filter: DefaultColumnFilter },
+      { Header: '배치시작', accessor: 'staffing_start', Filter: DefaultColumnFilter },
+      { Header: '배치종료', accessor: 'staffing_end', Filter: DefaultColumnFilter }
     ],
     []
   );
@@ -119,7 +117,7 @@ const AccDataFetcher = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(process.env.REACT_APP_API_URL);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/accs`);  // API URL 수정
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -150,7 +148,7 @@ const AccDataFetcher = () => {
       <h2>근태 기록 기초데이터</h2>
       <p>매일 새벽 2시에 업데이트</p>
       <DownloadButton instance={tableInstance} />
-      <DataTable columns={columns} data={data} instance={tableInstance} />
+      <DataTable instance={tableInstance} />
     </div>
   );
 };
