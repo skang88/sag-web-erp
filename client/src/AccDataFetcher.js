@@ -29,22 +29,25 @@ const DataTable = ({ instance }) => {
   return (
     <table {...getTableProps()} style={{ width: '80%', margin: '20px auto', borderCollapse: 'collapse' }}>
       <thead>
+        {/* 그룹 헤더 추가 */}
+        <tr>
+          <th colSpan="2" style={{ textAlign: 'center' }}>기본 정보</th>
+          <th colSpan="2" style={{ textAlign: 'center' }}>지문 기록</th>
+          <th colSpan="2" style={{ textAlign: 'center' }}>스태핑 기록</th>
+        </tr>
+        {/* 기본 헤더 */}
         {headerGroups.map(headerGroup => (
           <tr {...headerGroup.getHeaderGroupProps()}>
             {headerGroup.headers.map(column => (
               <th
                 {...column.getHeaderProps(column.getSortByToggleProps())}
-                style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd' }}
+                style={{ textAlign: 'center', cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd' }}
               >
                 {column.render('Header')}
                 <span>
-                  {column.isSorted
-                    ? column.isSortedDesc
-                      ? ' 🔽'
-                      : ' 🔼'
-                    : ''}
+                  {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
                 </span>
-                <div>{column.render('Filter')}</div>
+                <div>{column.canFilter ? column.render('Filter') : null}</div>
               </th>
             ))}
           </tr>
@@ -73,9 +76,7 @@ const DownloadButton = ({ instance }) => {
   const downloadExcel = () => {
     if (!instance || !instance.rows.length) return;
 
-    // Get the filtered and sorted data
     const filteredSortedData = instance.rows.map(row => row.original);
-
     const worksheet = XLSX.utils.json_to_sheet(filteredSortedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -99,15 +100,14 @@ const AccDataFetcher = () => {
     () => [
       { Header: '이름', accessor: 'FNAME', Filter: DefaultColumnFilter },
       { Header: '근무일자', accessor: 'workdate', Filter: DefaultColumnFilter },
-      { Header: '출근시간', accessor: 'finger_start', Filter: DefaultColumnFilter },
-      { Header: '퇴근시간', accessor: 'finger_end', Filter: DefaultColumnFilter },
-      { Header: '배치시작', accessor: 'staffing_start', Filter: DefaultColumnFilter },
-      { Header: '배치종료', accessor: 'staffing_end', Filter: DefaultColumnFilter }
+      { Header: '시작시각', accessor: 'finger_start', Filter: DefaultColumnFilter },
+      { Header: '종료시각', accessor: 'finger_end', Filter: DefaultColumnFilter },
+      { Header: '시작시각', accessor: 'staffing_start', Filter: DefaultColumnFilter },
+      { Header: '종료시각', accessor: 'staffing_end', Filter: DefaultColumnFilter }
     ],
     []
   );
 
-  // Use useTable hook to create table instance
   const tableInstance = useTable(
     { columns, data },
     useFilters,
@@ -117,10 +117,8 @@ const AccDataFetcher = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/accs`);  // API URL 수정
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/accs`);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const contentType = response.headers.get('Content-Type');
         if (!contentType || !contentType.includes('application/json')) {
