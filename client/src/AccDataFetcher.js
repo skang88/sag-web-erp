@@ -100,10 +100,10 @@ const AccDataFetcher = () => {
     () => [
       { Header: '이름', accessor: 'FNAME', Filter: DefaultColumnFilter },
       { Header: '근무일자', accessor: 'workdate', Filter: DefaultColumnFilter },
-      { Header: '시작시각', accessor: 'finger_start', Filter: DefaultColumnFilter },
-      { Header: '종료시각', accessor: 'finger_end', Filter: DefaultColumnFilter },
-      { Header: '시작시각', accessor: 'staffing_start', Filter: DefaultColumnFilter },
-      { Header: '종료시각', accessor: 'staffing_end', Filter: DefaultColumnFilter }
+      { Header: '지문시작', accessor: 'finger_start', Filter: DefaultColumnFilter },
+      { Header: '지문시각', accessor: 'finger_end', Filter: DefaultColumnFilter },
+      { Header: '스태핑시작', accessor: 'staffing_start', Filter: DefaultColumnFilter },
+      { Header: '스태핑종료', accessor: 'staffing_end', Filter: DefaultColumnFilter }
     ],
     []
   );
