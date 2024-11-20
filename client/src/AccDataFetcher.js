@@ -144,7 +144,8 @@ const AccDataFetcher = () => {
   return (
     <div>
       <h2>근태 기록 기초데이터</h2>
-      <p>매일 새벽 2시에 업데이트</p>
+      <p>2024년 11월 14일 이후 업데이트 중지</p>
+      <p>중지사유: HR팀에서 지문 활용 근태기록 이용 종료 통보</p>
       <DownloadButton instance={tableInstance} />
       <DataTable instance={tableInstance} />
     </div>
