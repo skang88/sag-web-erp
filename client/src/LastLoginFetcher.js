@@ -146,6 +146,7 @@ const LastLoginFetcher = () => {
         <div>
             <h2>마지막 지문 출입 기록</h2>
             <p>전일 기준 최신 로그인 기록</p>
+            <p>전체 등록 인원: {data.length}명</p> {/* 추가된 코드 */}
             <DownloadButton instance={tableInstance} />
             <DataTable instance={tableInstance} />
         </div>
