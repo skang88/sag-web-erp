@@ -100,6 +100,7 @@ const LastLoginFetcher = () => {
 
     const columns = useMemo(
         () => [
+            { Header: '고유ID', accessor: 'L_ID', Filter: DefaultColumnFilter },
             { Header: '사번', accessor: 'C_Unique', Filter: DefaultColumnFilter },
             { Header: '이름', accessor: 'C_Name', Filter: DefaultColumnFilter },
             { Header: '마지막 로그인', accessor: 'LastLoginDateTime', Filter: DefaultColumnFilter },
