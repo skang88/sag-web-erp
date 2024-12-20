@@ -5,7 +5,7 @@ import AccDataFetcher from './AccDataFetcher';
 import LastLoginFetcher from './LastLoginFetcher';
 
 function Login() {
-  return <h2>Login Page</h2>;
+  return <h2>Hi, Login Page.</h2>;
 }
 
 function Home() {
