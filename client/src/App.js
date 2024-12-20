@@ -14,7 +14,7 @@ function Home() {
 
 function App() {
 
-    const openPopup = () => {
+  const openPopup = () => {
     const popupWidth = window.screen.width; // 팝업 창 너비
     const popupHeight = window.screen.height; // 팝업 창 높이
     const left = window.screenX + (window.outerWidth - popupWidth) / 2; // 화면 중앙에 위치
@@ -26,7 +26,7 @@ function App() {
       `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=yes,scrollbars=yes`
     );
   };
-  
+
   return (
     <Router>
       <div className="App">
@@ -35,11 +35,11 @@ function App() {
             <ul>
               {/* 로고 추가 */}
               <li className="logo-item">
-                <img src={"/logo.png"} alt="Company Logo" className="logo"/>
+                <Link to="/home">
+                  <img src={"/logo.png"} alt="Company Logo" className="logo" />
+                </Link>
               </li>
-              <li className="menu-item">
-                <Link to="/home">Home</Link>
-              </li>
+
               <li className="menu-item">
                 <button onClick={openPopup} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                   KPI
