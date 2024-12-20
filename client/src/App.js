@@ -14,14 +14,14 @@ function Home() {
 
 function App() {
 
-  const openPopup = () => {
+    const openPopup = () => {
     const popupWidth = window.screen.width; // 팝업 창 너비
     const popupHeight = window.screen.height; // 팝업 창 높이
     const left = window.screenX + (window.outerWidth - popupWidth) / 2; // 화면 중앙에 위치
     const top = window.screenY + (window.outerHeight - popupHeight) / 2;
 
     window.open(
-      'http://172.16.220.32:3838', // 외부 앱 URL
+      `${process.env.REACT_APP_SHINY_URL}`, // 외부 앱 URL
       'KPI Dashboard', // 팝업 창 이름
       `width=${popupWidth},height=${popupHeight},top=${top},left=${left},resizable=yes,scrollbars=yes`
     );
@@ -33,13 +33,14 @@ function App() {
         <header className="App-header">
           <nav>
             <ul>
-              <li>
-                <Link to="/">Login</Link>
+              {/* 로고 추가 */}
+              <li className="logo-item">
+                <img src={"/logo.png"} alt="Company Logo" className="logo"/>
               </li>
-              <li>
+              <li className="menu-item">
                 <Link to="/home">Home</Link>
               </li>
-              <li>
+              <li className="menu-item">
                 <button onClick={openPopup} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
                   KPI
                 </button>

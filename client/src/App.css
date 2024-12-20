@@ -22,7 +22,10 @@ body {
 
 /* 네비게이션 스타일 */
 nav {
-  background-color: #343a40; /* 어두운 회색 배경 */
+  background-color: #0B4DA3; /* 서한오토 조지아 CI 색상 배경 */
+  display: flex;
+  justify-content: space-between; /* 로고는 왼쪽, 메뉴는 중앙 정렬 */
+  align-items: center; /* 세로 정렬 */
   padding: 10px;
   width: 100%;
   position: fixed;
@@ -36,6 +39,7 @@ nav ul {
   padding: 0;
   margin: 0;
   display: flex;
+  align-items: center; /* 메뉴 항목들을 세로로 정렬 */
   justify-content: center;
 }
 
@@ -44,7 +48,8 @@ nav ul li {
   position: relative; /* 하위 메뉴를 위한 상대적인 위치 지정 */
 }
 
-nav ul li a, nav ul li button {
+nav ul li a, 
+nav ul li button {
   color: #ffffff; /* 흰색 텍스트 */
   text-decoration: none;
   font-weight: bold;
@@ -59,31 +64,30 @@ nav ul li a:hover, nav ul li button:hover {
 }
 
 .menu-item {
-  position: relative;
+  display: inline-block;
 }
 
 .submenu {
-  display: none; /* 기본적으로 숨김 */
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: #f1f1f1;
-  min-width: 200px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-  z-index: 1;
+  display: none;
+  min-width: 200;
+  list-style-type: none;
 }
 
 .menu-item:hover .submenu {
-  display: block; /* 마우스를 올리면 하위 메뉴 표시 */
+  display: block;
+  position: absolute;
+  background-color: #2a73d3;
+  top: 100;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .submenu li {
-  padding: 8px;
+  padding: 5px 0;
 }
 
 .submenu li a {
-  color: black;
-  text-decoration: none;
+  color: white;
 }
 
 .submenu li a:hover {
@@ -161,4 +165,12 @@ h2 {
   font-size: 1.5em;
   color: #333; /* 어두운 회색 텍스트 색상 */
   margin-bottom: 20px;
+}
+
+
+/* 로고 크기 조정 */
+.logo {
+  height: 40px; /* 로고의 높이를 40px로 설정 */
+  margin-right: 50px; /* 로고와 네비게이션 링크들 사이의 간격 */
+  width: auto;
 }
