@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import * as XLSX from 'xlsx';
 import { useTable, useFilters, useSortBy } from 'react-table';
+import DataTable from './DataTable';
+import DownloadButton from './DownloadButton';
 
 // 필터 컴포넌트 정의
 const DefaultColumnFilter = ({ column: { filterValue, preFilteredRows, setFilter } }) => {
@@ -16,81 +17,6 @@ const DefaultColumnFilter = ({ column: { filterValue, preFilteredRows, setFilter
   );
 };
 
-// Table Component
-const DataTable = ({ instance }) => {
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = instance;
-
-  return (
-    <table {...getTableProps()} style={{ width: '80%', margin: '20px auto', borderCollapse: 'collapse' }}>
-      <thead>
-        {/* 그룹 헤더 추가 */}
-        <tr>
-          <th colSpan="2" style={{ textAlign: 'center' }}>기본 정보</th>
-          <th colSpan="2" style={{ textAlign: 'center' }}>지문 기록</th>
-          <th colSpan="2" style={{ textAlign: 'center' }}>스태핑 기록</th>
-        </tr>
-        {/* 기본 헤더 */}
-        {headerGroups.map(headerGroup => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map(column => (
-              <th
-                {...column.getHeaderProps(column.getSortByToggleProps())}
-                style={{ textAlign: 'center', cursor: 'pointer', padding: '10px', borderBottom: '1px solid #ddd' }}
-              >
-                {column.render('Header')}
-                <span>
-                  {column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ''}
-                </span>
-                <div>{column.canFilter ? column.render('Filter') : null}</div>
-              </th>
-            ))}
-          </tr>
-        ))}
-      </thead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map(row => {
-          prepareRow(row);
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map(cell => (
-                <td {...cell.getCellProps()} style={{ padding: '10px', borderBottom: '1px solid #ddd' }}>
-                  {cell.render('Cell')}
-                </td>
-              ))}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  );
-};
-
-// DownloadButton Component
-const DownloadButton = ({ instance }) => {
-  const downloadExcel = () => {
-    if (!instance || !instance.rows.length) return;
-
-    const filteredSortedData = instance.rows.map(row => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(filteredSortedData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'data.xlsx');
-  };
-
-  return (
-    <button onClick={downloadExcel} className="download-button">
-      Download as Excel
-    </button>
-  );
-};
-
-// Main Component
 const AccDataFetcher = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
