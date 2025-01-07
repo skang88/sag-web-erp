@@ -1,5 +1,6 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
+import "./DownloadButton.css"
 
 const DownloadButton = ({ instance }) => {
   const downloadExcel = () => {

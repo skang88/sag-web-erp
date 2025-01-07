@@ -20,79 +20,6 @@ body {
   padding-top: 60px; /* 네비게이션 바 높이만큼 패딩 추가 */
 }
 
-/* 네비게이션 스타일 */
-nav {
-  background-color: #0B4DA3; /* 서한오토 조지아 CI 색상 배경 */
-  display: flex;
-  justify-content: space-between; /* 로고는 왼쪽, 메뉴는 중앙 정렬 */
-  align-items: center; /* 세로 정렬 */
-  padding: 10px;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-}
-
-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: center; /* 메뉴 항목들을 세로로 정렬 */
-  justify-content: center;
-}
-
-nav ul li {
-  margin: 0 15px;
-  position: relative; /* 하위 메뉴를 위한 상대적인 위치 지정 */
-}
-
-nav ul li a, 
-nav ul li button {
-  color: #ffffff; /* 흰색 텍스트 */
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 1.2em;
-  background: none; /* 버튼 배경 제거 */
-  border: none; /* 버튼 테두리 제거 */
-  cursor: pointer;
-}
-
-nav ul li a:hover, nav ul li button:hover {
-  text-decoration: underline;
-}
-
-.menu-item {
-  display: inline-block;
-}
-
-.submenu {
-  display: none;
-  min-width: 200;
-  list-style-type: none;
-}
-
-.menu-item:hover .submenu {
-  display: block;
-  position: absolute;
-  background-color: #2a73d3;
-  top: 100;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-.submenu li {
-  padding: 5px 0;
-}
-
-.submenu li a {
-  color: white;
-}
-
-.submenu li a:hover {
-  background-color: #ddd;
-}
 
 /* 테이블 스타일 */
 .table-container {
@@ -129,27 +56,7 @@ tr:hover {
   background-color: #e2e6ea; /* 약간 어두운 회색 배경 */
 }
 
-/* 버튼 스타일 */
-.button-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
-}
 
-.download-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff; /* 파란색 배경 */
-  color: white; /* 흰색 텍스트 */
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.download-button:hover {
-  background-color: #0056b3; /* 어두운 파란색 배경 */
-}
 
 /* 입력 필드 스타일 */
 input[type="text"], input[type="search"] {
@@ -170,7 +77,7 @@ h2 {
 
 /* 로고 크기 조정 */
 .logo {
-  height: 40px; /* 로고의 높이를 40px로 설정 */
+  height: 35px; /* 로고의 높이를 40px로 설정 */
   margin-right: 50px; /* 로고와 네비게이션 링크들 사이의 간격 */
   width: auto;
 }

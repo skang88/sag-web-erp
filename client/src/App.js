@@ -2,10 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
-import Home from './pages/Home';
-import Login from './pages/Login';
-import AccessData from './pages/AccessData';
-import LastLogin from './pages/LastLogin';
+import Home from './pages/HomePage';
+import Login from './pages/LoginPage';
+import AccessData from './pages/AccessDataPage';
+import LastLogin from './pages/LastLoginPage';
 
 function App() {
   return (

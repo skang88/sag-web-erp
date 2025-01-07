@@ -1,0 +1,73 @@
+/* 네비게이션 스타일 */
+nav {
+    background-color: #0B4DA3; /* CI 색상 배경 */
+    display: flex;
+    justify-content: space-between; /* 로고와 메뉴 간 정렬 */
+    align-items: center; /* 세로 정렬 */
+    padding: 10px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
+  
+  nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center; /* 메뉴 항목 세로 정렬 */
+    margin: 0;
+    padding: 0;
+  }
+  
+  nav ul li {
+    margin: 0 15px;
+    position: relative;
+  }
+  
+  nav ul li a, 
+  nav ul li button {
+    color: #ffffff; /* 흰색 텍스트 */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.2em;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  
+  nav ul li a:hover, 
+  nav ul li button:hover {
+    text-decoration: underline;
+  }
+  
+  .submenu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #2a73d3;
+    padding: 10px;
+    border-radius: 5px;
+    list-style: none;
+    width: 150px; /* 가로 크기를 늘림 */
+  }
+  
+  .menu-item:hover .submenu {
+    display: block;
+  }
+  
+  .submenu li {
+    padding: 5px 0;
+  }
+  
+  .submenu li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .submenu li a:hover {
+    background-color: #ddd;
+    color: #000;
+  }
+  
