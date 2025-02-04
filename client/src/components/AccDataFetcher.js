@@ -29,7 +29,7 @@ const AccDataFetcher = () => {
       { Header: '근무일자', accessor: 'KDATE', Filter: DefaultColumnFilter },
       { Header: '출입시작', accessor: 'MINTIME', Filter: DefaultColumnFilter },
       { Header: '출입종료', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
-      { Header: '출입시간(차이, 분)', accessor: 'DTIME', Filter: DefaultColumnFilter },
+      { Header: '차이(분)', accessor: 'DTIME', Filter: DefaultColumnFilter },
       { Header: '출입횟수', accessor: 'N_Time', Filter: DefaultColumnFilter }
     ],
     []
