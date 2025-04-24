@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
-import KPIButton from './KPIButton';
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -13,11 +12,6 @@ const Navbar = () => {
           <Link to="/home">
             <Logo />
           </Link>
-        </li>
-
-        {/* KPI 버튼 */}
-        <li>
-          <KPIButton />
         </li>
 
         {/* HR 메뉴 */}
