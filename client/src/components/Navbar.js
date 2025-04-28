@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
-// 안녕 이것은 두번째 버전이야
+// 새로운 커밋이에요..
 
 const Navbar = () => {
   return (
