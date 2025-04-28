@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
 // 새로운 커밋이에요..
+// 첫번 째 버전입니다 ㅋ
 
 function Navbar() {
   return (
