@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
 // Hi
+// Debugging Completed
+
 
 function Navbar() {
   return (
