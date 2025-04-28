@@ -4,7 +4,7 @@ import Logo from './Logo';
 import "./Navbar.css";
 // 새로운 커밋이에요..
 
-const Navbar = () => {
+function Navbar() {
   return (
     <nav>
       <ul>
@@ -27,6 +27,6 @@ const Navbar = () => {
       </ul>
     </nav>
   );
-};
+}
 
 export default Navbar;
