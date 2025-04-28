@@ -2,11 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
-// 새로운 커밋이에요..
-// 엥 두번 째 버전인데 왜 첫번째로 돌아간거야?
-// 이거 메인이로 가려면?
 
-const Navbar = () => {
+function Navbar() {
   return (
     <nav>
       <ul>
@@ -29,6 +26,6 @@ const Navbar = () => {
       </ul>
     </nav>
   );
-};
+}
 
 export default Navbar;
