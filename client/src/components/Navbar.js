@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
+// 안녕 이것은 두번째 버전이야
 
 const Navbar = () => {
   return (
