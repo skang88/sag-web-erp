@@ -70,4 +70,19 @@ nav {
     background-color: #ddd;
     color: #000;
   }
-  
+ 
+
+/* 기본 로고 스타일 (큰 화면용 - logo.png) */
+.logo {
+  max-width: 200px; /* 예시 크기, 필요에 따라 조절 */
+  height: auto;
+}
+
+/* 모바일 화면 (예: 최대 너비 768px) */
+@media (max-width: 768px) {
+  .logo {
+    max-width: 80px; /* 모바일에서 작은 로고 크기 */
+    /* 이미지 경로를 작은 로고로 변경 */
+    content: url('../../public/logo_small.png');
+  }
+}
