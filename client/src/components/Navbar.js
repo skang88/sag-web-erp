@@ -16,6 +16,16 @@ function Navbar() {
             <Logo />
           </Link>
         </li>
+        {/* Inventory 메뉴 */}
+        <li className="menu-item">
+          <Link to="#">재고</Link>
+          {/* 하위 메뉴 */}
+          <ul className="submenu">
+            <li><Link to="/inventory-count">재고 카운터</Link></li>
+            <li><Link to="/camera-test">카메라 테스터</Link></li>
+      
+          </ul>
+        </li>
 
         {/* HR 메뉴 */}
         <li className="menu-item">

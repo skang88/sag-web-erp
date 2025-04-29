@@ -6,6 +6,8 @@ import Home from './pages/HomePage';
 import Login from './pages/LoginPage';
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
+import InventoryCounter from './pages/InventoryCounter';
+import CameraTest from './pages/CameraTest';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/access" element={<AccessData />} />
               <Route path="/lastlogin" element={<LastLogin />} />
+              <Route path="/inventory-count" element={<InventoryCounter />} /> {/* 재고 카운터 페이지 */}
+              <Route path="/camera-test" element={<CameraTest />} /> {/* 재고 카운터 페이지 */}
             </Routes>
           </main>
         </header>
