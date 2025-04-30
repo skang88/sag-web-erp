@@ -12,7 +12,7 @@ function InventoryCounter() {
     const [productCode, setProductCode] = useState(null); // 파싱된 품번 상태
     const [quantity, setQuantity] = useState(null); // 파싱된 수량 상태
     const [inventory, setInventory] = useState({});
-    const resetTimeout = useRef(null); 
+    const resetTimeout = useRef(null);
 
     const videoConstraints = {
         facingMode: { exact: "environment" }
@@ -201,25 +201,25 @@ function InventoryCounter() {
 
 
     return (
-      <div>
-          <h2>바코드(QR) 스캐너</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <div className="webcam-container" style={{ width: '300px', height: '200px', display: 'flex', justifyContent: 'center' }}>
-                  <Webcam
-                      audio={false}
-                      ref={webcamRef}
-                      screenshotFormat="image/jpeg"
-                      videoConstraints={videoConstraints}
-                      style={{ width: '100%', height: 'auto' }}
-                  />
-              </div>
-              <div>
-                  <h3>스캔된 품번과 수량:</h3>
-                  <p style={{ wordBreak: 'break-all' }}>
-                      품번: {productCode || '파싱 대기 중...'} 수량: {quantity !== null ? quantity : '파싱 대기 중...'}
-                  </p>
-              </div>
-              <div>
+        <div>
+            <h2>바코드(QR) 스캐너</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div className="webcam-container" style={{ width: '300px', height: '200px', display: 'flex', justifyContent: 'center' }}>
+                    <Webcam
+                        audio={false}
+                        ref={webcamRef}
+                        screenshotFormat="image/jpeg"
+                        videoConstraints={videoConstraints}
+                        style={{ width: '100%', height: 'auto' }}
+                    />
+                </div>
+                <div>
+                    <h3>스캔된 품번과 수량:</h3>
+                    <p style={{ wordBreak: 'break-all' }}>
+                        품번: {productCode || '파싱 대기 중...'} 수량: {quantity !== null ? quantity : '파싱 대기 중...'}
+                    </p>
+                </div>
+                <div>
                     <h3>현재 재고:</h3>
                     <ul>
                         {Object.entries(inventory).map(([itemCode, itemCount]) => (
@@ -230,8 +230,13 @@ function InventoryCounter() {
                     </ul>
                 </div>
                 {/* 초기화 버튼 추가 */}
-                <button onClick={handleResetInventory}>재고 초기화</button>
-                
+                <button
+                    onClick={handleResetInventory}
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200"
+                >
+                    재고 초기화
+                    </button>
+
                 <div>
                     <h3>디버깅 정보</h3>
                     <h3>스캔된 코드:</h3>

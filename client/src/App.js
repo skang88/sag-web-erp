@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
+import './index.css';
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
 import Home from './pages/HomePage';
 import Login from './pages/LoginPage';

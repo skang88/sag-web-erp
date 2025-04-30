@@ -1,13 +1,88 @@
+/* index.css 또는 global.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 공통 스타일 */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #f8f9fa; /* 페이지 배경색 */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #f8f9fa; /* 연한 회색 배경 */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px; /* 네비게이션 바 높이만큼 패딩 추가 */
+}
+
+
+/* 테이블 스타일 */
+.table-container {
+  position: relative;
+  width: 80%;
+  margin: 20px auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff; /* 흰색 배경 */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 약한 그림자 */
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid #dee2e6; /* 연한 회색 테두리 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 넘치는 내용에 '...' 표시 */
+}
+
+th {
+  background-color: #e9ecef; /* 연한 회색 배경 */
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa; /* 연한 회색 배경 */
+}
+
+tr:hover {
+  background-color: #e2e6ea; /* 약간 어두운 회색 배경 */
+}
+
+
+
+/* 입력 필드 스타일 */
+input[type="text"], input[type="search"] {
+  margin-top: 5px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+/* 제목 스타일 */
+h2 {
+  font-size: 1.5em;
+  color: #333; /* 어두운 회색 텍스트 색상 */
+  margin-bottom: 20px;
+}
+
+
+/* 로고 크기 조정 */
+.logo {
+  height: 35px; /* 로고의 높이를 40px로 설정 */
+  margin-right: 50px; /* 로고와 네비게이션 링크들 사이의 간격 */
+  width: auto;
 }

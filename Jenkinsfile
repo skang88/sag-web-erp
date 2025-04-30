@@ -48,7 +48,7 @@ pipeline {
 
                         stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
+                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env -v c:/env/sag-web-erp/back-end/certs:/usr/src/app/certs -e HTTPS=true --restart always ${BACKEND_IMAGE}"
                             }
                         }
 
