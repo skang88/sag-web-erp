@@ -21,8 +21,8 @@ function Navbar() {
           <Link to="#">재고</Link>
           {/* 하위 메뉴 */}
           <ul className="submenu">
-            <li><Link to="/inventory-count">재고 카운터</Link></li>
-            <li><Link to="/camera-test">카메라 테스터</Link></li>
+            <li><Link to="/inventory-count-camera">재고 카운터 (카메라)</Link></li>
+            
       
           </ul>
         </li>

@@ -4,7 +4,7 @@ import jsQR from 'jsqr'; // QR 코드 인식 라이브러리
 import { BrowserMultiFormatReader, BarcodeFormat } from '@zxing/library';
 import './InventoryCounter.css'; // CSS 파일 import
 
-function CameraTest() {
+function InventoryCounter() {
     const webcamRef = useRef(null);
     const [scannedCode, setScannedCode] = useState('');
     const zxingReader = useRef(null); // zxing reader 인스턴스를 ref로 관리
@@ -12,6 +12,7 @@ function CameraTest() {
     const [productCode, setProductCode] = useState(null); // 파싱된 품번 상태
     const [quantity, setQuantity] = useState(null); // 파싱된 수량 상태
     const [inventory, setInventory] = useState({});
+    const resetTimeout = useRef(null); 
 
     const videoConstraints = {
         facingMode: { exact: "environment" }
@@ -86,6 +87,7 @@ function CameraTest() {
         return () => clearInterval(pdf417IntervalId);
     }, [scanPDF417]);
 
+    // 스캔값 상태 업데이트
     useEffect(() => {
         const hexValues = Array.from(scannedCode).map(char =>
             char.charCodeAt(0).toString(16).padStart(4, '0')
@@ -105,10 +107,28 @@ function CameraTest() {
                 updatedInventory[parsedCode] = (updatedInventory[parsedCode] || 0) + parsedQuantity;
                 return updatedInventory;
             });
+
+            // 스캔 성공 후 3초 뒤에 스캔값 초기화
+            if (resetTimeout.current) {
+                clearTimeout(resetTimeout.current); // 이전 타임아웃 제거
+            }
+            resetTimeout.current = setTimeout(() => {
+                setScannedCode('');
+                setProductCode(null);
+                setQuantity(null);
+                setUnicodeValuesHex([]);
+                console.log('스캔값이 자동으로 초기화되었습니다.');
+            }, 3000); // 3000ms = 3초
         } else {
             setProductCode(parsedCode || ''); // 파싱 실패 시에도 품번 UI 업데이트 (선택 사항)
             setQuantity(parsedQuantity !== null ? parsedQuantity : null); // UI 업데이트
         }
+
+        return () => {
+            if (resetTimeout.current) {
+                clearTimeout(resetTimeout.current); // 컴포넌트 언마운트 시 타임아웃 제거
+            }
+        };
     }, [scannedCode]);
 
     // 파싱 함수
@@ -231,4 +251,4 @@ function CameraTest() {
 }
 
 
-export default CameraTest;
+export default InventoryCounter;
