@@ -7,6 +7,7 @@ import Login from './pages/LoginPage';
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
 import InventoryCounter from './pages/InventoryCounter';
+import BarcodeScanner from './pages/BarcodeScanner;';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
               <Route path="/access" element={<AccessData />} />
               <Route path="/lastlogin" element={<LastLogin />} />
               <Route path="/inventory-count-camera" element={<InventoryCounter />} /> {/* 재고 카운터 페이지 */}
+              <Route path="/barcode-scanner" element={<BarcodeScanner />} /> {/* 재고 카운터 페이지 */}
               
             </Routes>
           </main>
