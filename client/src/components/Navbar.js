@@ -10,7 +10,7 @@ function Navbar() {
       <ul>
         {/* 로고 */}
         <li>
-          <Link to="/home">
+          <Link className='' to="/home" style={{ textDecoration: 'none' }}>
             <Logo />
           </Link>
         </li>
