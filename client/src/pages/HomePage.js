@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Home = () => {
-  return <h2>Welcome to SAG Web ERP</h2>;
+  return <h2>Welcome to Seohan Auto Georgia</h2>;
 };
 
 export default Home;
