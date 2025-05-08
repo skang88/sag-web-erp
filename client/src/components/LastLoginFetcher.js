@@ -55,9 +55,9 @@ const LastLoginFetcher = () => {
 
     return (
         <div>
-            <h2>마지막 지문 출입 기록</h2>
-            <p>전일 기준 최신 로그인 기록</p>
-            <p>전체 등록 인원: {data.length}명</p>
+            <h2> Most recent fingerprint access log </h2>
+            <p> Latest login activity (previous day) </p>
+            <p> Total number of registered individuals: {data.length} </p>
             <DownloadButton instance={tableInstance} />
             <DataTable instance={tableInstance} />
         </div>
