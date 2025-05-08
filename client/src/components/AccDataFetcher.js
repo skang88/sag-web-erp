@@ -24,13 +24,13 @@ const AccDataFetcher = () => {
 
   const columns = useMemo(
     () => [
-      { Header: '사번', accessor: 'SABUN', Filter: DefaultColumnFilter },
-      { Header: '이름', accessor: 'FNAME', Filter: DefaultColumnFilter },
-      { Header: '근무일자', accessor: 'KDATE', Filter: DefaultColumnFilter },
-      { Header: '출입시작', accessor: 'MINTIME', Filter: DefaultColumnFilter },
-      { Header: '출입종료', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
-      { Header: '차이(분)', accessor: 'DTIME', Filter: DefaultColumnFilter },
-      { Header: '출입횟수', accessor: 'N_Time', Filter: DefaultColumnFilter }
+      { Header: 'ID', accessor: 'SABUN', Filter: DefaultColumnFilter },
+      { Header: 'Name', accessor: 'FNAME', Filter: DefaultColumnFilter },
+      { Header: 'Date', accessor: 'KDATE', Filter: DefaultColumnFilter },
+      { Header: 'In', accessor: 'MINTIME', Filter: DefaultColumnFilter },
+      { Header: 'Out', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
+      { Header: 'Diff (Min)', accessor: 'DTIME', Filter: DefaultColumnFilter },
+      { Header: 'Count', accessor: 'N_Time', Filter: DefaultColumnFilter }
     ],
     []
   );
@@ -70,7 +70,7 @@ const AccDataFetcher = () => {
 
   return (
     <div>
-      <h2>근태 기록 기초데이터</h2>
+      <h2>Staffing Check In and Out</h2>
       <DownloadButton instance={tableInstance} />
       <DataTable instance={tableInstance} />
     </div>
