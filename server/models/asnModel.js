@@ -25,16 +25,16 @@ const getASN = async (date, ship_group) => {
               UniqueShipYmds
       )
       SELECT
-          LEFT(bhis.SHIP_YMDS, 8) AS Date,
-          FORMAT(rsy.group_rn, '00') AS 'Shipping Group',
-          bhis.SPEC_TX AS 'Pallet Serial',
-          bhis.ITMNO as 'Part Number',
-          mapping.SHORT_NAME as 'Description',     -- MAT_ITMMAPPING 테이블의 SHORT_NAME 컬럼 추가
-          bhis.ITM_QTY as 'Delivery Qty',
+          LEFT(bhis.SHIP_YMDS, 8) AS date,
+          FORMAT(rsy.group_rn, '00') AS 'shippingGroup',
+          bhis.SPEC_TX AS 'palletSerial',
+          bhis.ITMNO as 'partNumber',
+          mapping.SHORT_NAME as 'description',     -- MAT_ITMMAPPING 테이블의 SHORT_NAME 컬럼 추가
+          bhis.ITM_QTY as 'deliveryQty',
           'EA' as Unit,
-          '5500003006' as 'PO/SA Number',
-          mapping.ORD as 'PO/SA Item',           -- MAT_ITMMAPPING 테이블의 ORD 컬럼 추가
-          'RETURNABLE' as Packaging
+          '5500003006' as 'poNumber',
+          mapping.ORD as 'poItem',           -- MAT_ITMMAPPING 테이블의 ORD 컬럼 추가
+          'RETURNABLE' as packaging
           
       FROM
           dbo.MAT_BARCODE_HIS bhis
