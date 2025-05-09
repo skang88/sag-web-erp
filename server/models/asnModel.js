@@ -31,7 +31,7 @@ const getASN = async (date, ship_group) => {
           bhis.ITMNO as 'partNumber',
           mapping.SHORT_NAME as 'description',     -- MAT_ITMMAPPING 테이블의 SHORT_NAME 컬럼 추가
           bhis.ITM_QTY as 'deliveryQty',
-          'EA' as Unit,
+          'EA' as unit,
           '5500003006' as 'poNumber',
           mapping.ORD as 'poItem',           -- MAT_ITMMAPPING 테이블의 ORD 컬럼 추가
           'RETURNABLE' as packaging
