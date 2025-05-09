@@ -26,7 +26,7 @@ const getASN = async (date, ship_group) => {
       )
       SELECT
           LEFT(bhis.SHIP_YMDS, 8) AS Date,
-          FORMAT(rsy.group_rn, '00') AS Shipping Group,
+          FORMAT(rsy.group_rn, '00') AS 'Shipping Group',
           bhis.SPEC_TX AS 'Pallet Serial',
           bhis.ITMNO as 'Part Number',
           mapping.SHORT_NAME as 'Description',     -- MAT_ITMMAPPING 테이블의 SHORT_NAME 컬럼 추가
