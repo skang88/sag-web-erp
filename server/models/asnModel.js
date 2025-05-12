@@ -25,11 +25,17 @@ const getASN = async (date, ship_group) => {
         ON matl.ITMNO = mapping.ITMNO
       WHERE LEFT(LOCAT, 8) = @date 
         AND RIGHT(LOCAT, 2) = @group
+        AND STS <> 'D'
       ORDER BY partNumber, palletSerial;
     `;
 
     const result = await request.query(sqlQuery);
-    return result.recordset;
+    
+    return {
+      count: result.recordset.length,
+      data: result.recordset
+    };
+
   } catch (err) {
     console.error('Database query failed in getASN with mapping:', err);
     throw new Error('Database query failed');
