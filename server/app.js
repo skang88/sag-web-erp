@@ -3,11 +3,13 @@ const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
 const accRoutes = require('./routes/accRoutes');
 const authRoutes = require('./routes/authRoutes');
-const asnRoutes = require('./routes/asnRoutes')
+const asnRoutes = require('./routes/asnRoutes');
+const trailerRoutes = require ('./routes/trailerRoutes');
+
 require('dotenv').config(); // .env 파일 로드
 
 const app = express();
@@ -28,6 +30,7 @@ app.use(bodyParser.json());
 app.use('/api/accs', accRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asn', asnRoutes);
+app.use('/api/trailer', trailerRoutes);
 
 app.get('/', (req, res) => {
   res.send('This is the backend server');
