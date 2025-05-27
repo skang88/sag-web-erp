@@ -8,7 +8,8 @@ const bodyParser = require('body-parser');
 const accRoutes = require('./routes/accRoutes');
 const authRoutes = require('./routes/authRoutes');
 const asnRoutes = require('./routes/asnRoutes');
-const trailerRoutes = require ('./routes/trailerRoutes');
+const packingRoutes = require ('./routes/packingRoutes');
+const itemRoutes = require('./routes/itemRoutes');
 
 require('dotenv').config(); // .env 파일 로드
 
@@ -30,7 +31,8 @@ app.use(bodyParser.json());
 app.use('/api/accs', accRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/asn', asnRoutes);
-app.use('/api/trailer', trailerRoutes);
+app.use('/api/packing', packingRoutes);
+app.use('/api/items', itemRoutes);
 
 app.get('/', (req, res) => {
   res.send('This is the backend server');

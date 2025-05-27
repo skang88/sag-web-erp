@@ -24,6 +24,12 @@ function Navbar() {
             <li><Link to="/lastlogin">Last Login</Link></li>
           </ul>
         </li>
+        <li className='menu-item'>
+          <Link to="/">MAT</Link>
+          <ul className="submenu">
+            <li><Link to="/">Trailer</Link></li>
+          </ul>
+        </li>
       </ul>
     </nav>
   );
