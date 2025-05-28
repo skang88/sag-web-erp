@@ -7,7 +7,8 @@ import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
 import PackingSummary from './pages/PackingSummaryPage';
 import PackingItems from './pages/PackingItems';
-// import PalletPackingPage from './pages/PalletPacking';
+import ContainerPackingViz from './components/ContainerPackingViz'; // 위에서 만든 컴포넌트 임포트
+import TestPage from './pages/TestPage'
 
 function App() {
   return (
@@ -23,7 +24,8 @@ function App() {
               <Route path="/lastlogin" element={<LastLogin />} />
               <Route path="/packing" element={<PackingSummary />} />
               <Route path="/packing/items" element={<PackingItems />} />
-              {/* <Route path="/pallet" element={<PalletPackingPage />} /> */}
+              <Route path="/packing/pallets" element={<ContainerPackingViz />} />
+              <Route path="/test" element={<TestPage />} />
             </Routes>
           </main>
         </header>

@@ -28,6 +28,7 @@ function Navbar() {
           <ul className="submenu">
             <li><Link to="/packing">Packing Summary</Link></li>
             <li><Link to="/packing/items">Packing items</Link></li>
+            <li><Link to="/packing/pallets">Packing Plans</Link></li>
             {/* <li><Link to="/pallet">Pallet Packing</Link></li> */}
           </ul>
         </li>
