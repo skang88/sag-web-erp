@@ -26,7 +26,8 @@ function Navbar() {
         <li className='menu-item'>
           <Link to="/packing">MAT</Link>
           <ul className="submenu">
-            <li><Link to="/packing">Packing List</Link></li>
+            <li><Link to="/packing">Packing Summary</Link></li>
+            <li><Link to="/packing/items">Packing items</Link></li>
             {/* <li><Link to="/pallet">Pallet Packing</Link></li> */}
           </ul>
         </li>

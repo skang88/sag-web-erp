@@ -50,7 +50,7 @@ nav {
     padding: 10px;
     border-radius: 5px;
     list-style: none;
-    width: 180px; /* 가로 크기를 늘림 */
+    width: 200px; /* 가로 크기를 늘림 */
   }
   
   .menu-item:hover .submenu {
