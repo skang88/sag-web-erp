@@ -167,6 +167,7 @@ exports.getASNItems = async (req, res) => {
         itemName: itemInfo?.itemName || '',
         itemType: itemInfo?.itemType || '',
         itemWeightPerUnit,
+        dimensions: itemInfo?.dimensions
         
       };
     });
