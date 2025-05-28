@@ -6,6 +6,8 @@ import Home from './pages/HomePage';
 import Login from './pages/LoginPage';
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
+import PackingItems from './components/PackingItemsFetcher';
+import PalletPackingPage from './pages/PalletPacking';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
               <Route path="/home" element={<Home />} />
               <Route path="/access" element={<AccessData />} />
               <Route path="/lastlogin" element={<LastLogin />} />
+              <Route path="/packing" element={<PackingItems />} />
+              <Route path="/pallet" element={<PalletPackingPage />} />
             </Routes>
           </main>
         </header>
