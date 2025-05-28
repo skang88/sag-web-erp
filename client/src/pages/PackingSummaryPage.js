@@ -101,7 +101,7 @@ function PackingItemsFetcher() {
   // 데이터 조회 성공 시 표시할 UI
   return (
     <div style={{ padding: '20px' }}>
-      <h1>트레일러 적재 예정 아이템 조회</h1>
+      <h1>트레일러 적재 예정 아이템 Summary 조회</h1>
 
       {/* 파라미터 입력 UI */}
       <div style={{ marginBottom: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
