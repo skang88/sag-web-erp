@@ -160,6 +160,7 @@ function PackingItemsFetcher() {
                 <th style={tableHeaderStyle}>Pallet Serial</th>
                 <th style={tableHeaderStyle}>Delivery Qty</th>
                 <th style={tableHeaderStyle}>Unit Weight</th>
+                <th style={tableHeaderStyle}>규격 (W x D x H)</th>
               </tr>
             </thead>
             <tbody>
@@ -172,6 +173,9 @@ function PackingItemsFetcher() {
                   <td style={tableCellStyle}>{item.palletSerial}</td>
                   <td style={tableCellStyle}>{item.deliveryQty}</td>
                   <td style={tableCellStyle}>{item.itemWeightPerUnit.toLocaleString()}</td>
+                  <td style={tableCellStyle}>
+                  {`${item.dimensions.width} x ${item.dimensions.depth} x ${item.dimensions.height}`}
+                </td>
                 </tr>
               ))}
             </tbody>
