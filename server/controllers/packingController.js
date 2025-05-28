@@ -2,7 +2,7 @@
 const path = require('path');
 const fetch = require('node-fetch');
 const Item = require('../models/itemModel.js');
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); 
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 // 외부 ASN API URL (로컬에서 실행되는 당신의 ASN API 주소)
 const ASN_API_BASE_URL = process.env.ASN_API_BASE_URL; // 필요에 따라 변경하세요
@@ -110,3 +110,77 @@ exports.getASNItemsSummary = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+exports.getASNItems = async (req, res) => {
+  const { date, group } = req.query;
+
+  if (!date || !group) {
+    return res.status(400).json({ msg: '날짜(date)와 그룹(group) 파라미터는 필수입니다.' });
+  }
+
+  try {
+    // 1. ASN API 호출
+    const asnApiUrl = `${ASN_API_BASE_URL}?date=${date}&group=${group}`;
+    console.log(`ASN API 호출: ${asnApiUrl}`);
+
+    const asnResponse = await fetch(asnApiUrl);
+
+    if (!asnResponse.ok) {
+      const errorText = await asnResponse.text();
+      console.error(`ASN API 오류: ${asnResponse.status} ${asnResponse.statusText} - ${errorText}`);
+      return res.status(asnResponse.status).json({ msg: `ASN API 호출 오류: ${asnResponse.statusText}` });
+    }
+
+    const asnData = await asnResponse.json();
+    const asnItems = asnData.data;
+
+    if (!asnItems || asnItems.length === 0) {
+      return res.status(404).json({ msg: '해당 조건에 맞는 ASN 데이터가 없습니다.' });
+    }
+
+    // 2. 중복 없는 partNumber 목록 추출 후 Item 정보 조회
+    const uniquePartNumbers = [...new Set(asnItems.map(item => item.partNumber))];
+    const itemDetails = await Item.find({ itemNo: { $in: uniquePartNumbers } });
+
+    const itemDetailsMap = new Map();
+    itemDetails.forEach(item => {
+      itemDetailsMap.set(item.itemNo, item);
+    });
+
+    // 3. 각 ASN 항목에 Item 정보 붙이기 및 totalWeight 계산
+    let totalWeight = 0;
+
+    const finalSummary = asnItems.map(asnItem => {
+      const itemInfo = itemDetailsMap.get(asnItem.partNumber);
+
+      const itemWeightPerUnit = itemInfo?.weight ?? 0;
+      const qty = asnItem.deliveryQty ?? 0;
+
+      const itemTotalWeight = itemWeightPerUnit * qty;
+      totalWeight += itemWeightPerUnit;
+
+      return {
+        partNumber: asnItem.partNumber,
+        palletSerial: asnItem.palletSerial,
+        deliveryQty: qty,
+        description: asnItem.description,
+        itemName: itemInfo?.itemName || '',
+        itemType: itemInfo?.itemType || '',
+        itemWeightPerUnit,
+        
+      };
+    });
+
+    // 4. 응답
+    return res.status(200).json({
+      count: finalSummary.length,
+      totalWeight,
+      data: finalSummary
+    });
+
+  } catch (error) {
+    console.error('서버 오류:', error);
+    return res.status(500).json({ msg: '서버 내부 오류가 발생했습니다.' });
+  }
+};
+
