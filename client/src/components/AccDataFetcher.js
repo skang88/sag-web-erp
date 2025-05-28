@@ -1,44 +1,80 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useTable, useFilters, useSortBy } from 'react-table';
+import { useState, useEffect, useMemo } from 'react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 import DataTable from './DataTable';
-import DownloadButton from './DownloadButton';
-
-// 필터 컴포넌트 정의
-const DefaultColumnFilter = ({ column: { filterValue, preFilteredRows, setFilter } }) => {
-  const count = preFilteredRows.length;
-
-  return (
-    <input
-      value={filterValue || ''}
-      onChange={e => setFilter(e.target.value || undefined)}
-      placeholder={`Search ${count} records...`}
-      style={{ width: '100%' }}
-    />
-  );
-};
 
 const AccDataFetcher = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+
+  // 페이지네이션 상태를 직접 관리
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 20,
+  });
+
   const columns = useMemo(
     () => [
-      { Header: 'ID', accessor: 'SABUN', Filter: DefaultColumnFilter },
-      { Header: 'Name', accessor: 'FNAME', Filter: DefaultColumnFilter },
-      { Header: 'Date', accessor: 'KDATE', Filter: DefaultColumnFilter },
-      { Header: 'In', accessor: 'MINTIME', Filter: DefaultColumnFilter },
-      { Header: 'Out', accessor: 'MAXTIME', Filter: DefaultColumnFilter },
-      { Header: 'Diff (Min)', accessor: 'DTIME', Filter: DefaultColumnFilter },
-      { Header: 'Count', accessor: 'N_Time', Filter: DefaultColumnFilter }
+      {
+        accessorKey: 'SABUN',
+        header: 'ID',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'FNAME',
+        header: 'Name',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'KDATE',
+        header: 'Date',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'MINTIME',
+        header: 'In',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'MAXTIME',
+        header: 'Out',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'DTIME',
+        header: 'Diff (Min)',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
+      {
+        accessorKey: 'N_Time',
+        header: 'Count',
+        cell: info => info.getValue(),
+        enableColumnFilter: true,
+        filterFn: 'includesString',
+      },
     ],
     []
-  );
-
-  const tableInstance = useTable(
-    { columns, data },
-    useFilters,
-    useSortBy
   );
 
   useEffect(() => {
@@ -65,14 +101,158 @@ const AccDataFetcher = () => {
     fetchData();
   }, []);
 
+  const table = useReactTable({
+    data,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      pagination, // 여기
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onPaginationChange: setPagination, // 여기 꼭 추가
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  const pageIndex = pagination.pageIndex;
+  const pageSize = pagination.pageSize;
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <div>
+    <div style={{ paddingBottom: '50px' }}>
       <h2>Staffing Check In and Out</h2>
-      <DownloadButton instance={tableInstance} />
-      <DataTable instance={tableInstance} />
+
+      {/* Filter UI */}
+      {table.getHeaderGroups().map(headerGroup => (
+        <div
+          key={headerGroup.id}
+          style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.3rem' }} // 간격 줄임
+        >
+          {headerGroup.headers.map(header => (
+            <div
+              key={header.id}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',   // 중앙 정렬
+                justifyContent: 'flex-start',
+                padding: '0 4px',
+                minWidth: 0,            // 너비 유동적
+              }}
+            >
+              <label
+                htmlFor={`filter-${header.id}`}
+                style={{
+                  fontWeight: '600',
+                  fontSize: '0.75rem',
+                  color: '#444',
+                  userSelect: 'none',
+                  marginBottom: '2px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {header.column.columnDef.header}
+              </label>
+              {header.column.getCanFilter() ? (
+                <input
+                  id={`filter-${header.id}`}
+                  value={
+                    columnFilters.find(f => f.id === header.column.id)?.value || ''
+                  }
+                  onChange={e => {
+                    const value = e.target.value;
+                    setColumnFilters(old => {
+                      const others = old.filter(f => f.id !== header.column.id);
+                      return value ? [...others, { id: header.column.id, value }] : others;
+                    });
+                  }}
+                  placeholder={`Search`}
+                  style={{
+                    width: '100%',
+                    maxWidth: '120px',   // 최대 넓이 제한
+                    padding: '4px 8px',
+                    fontSize: '0.85rem',
+                    borderRadius: '4px',
+                    border: '1px solid #ccc',
+                    boxSizing: 'border-box',
+                    transition: 'border-color 0.2s ease',
+                  }}
+                  onFocus={e => (e.target.style.borderColor = '#4a90e2')}
+                  onBlur={e => (e.target.style.borderColor = '#ccc')}
+                />
+              ) : (
+                <div style={{ height: '26px' }} /> // 필터 없는 칸 높이 맞추기용
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+
+
+
+
+      <DataTable table={table} />
+
+      {/* 페이지네이션 컨트롤 */}
+      <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+          {'<<'}
+        </button>
+        <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+          {'<'}
+        </button>
+        <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          {'>'}
+        </button>
+        <button
+          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+          disabled={!table.getCanNextPage()}
+        >
+          {'>>'}
+        </button>
+        <span>
+          Page{' '}
+          <strong>
+            {pageIndex + 1} of {table.getPageCount() || 1}
+          </strong>{' '}
+        </span>
+        <span>
+          | Go to page:{' '}
+          <input
+            type="number"
+            min={1}
+            max={table.getPageCount()}
+            value={pageIndex + 1}
+            onChange={e => {
+              let page = e.target.value ? Number(e.target.value) - 1 : 0;
+              if (page < 0) page = 0;
+              else if (page >= table.getPageCount()) page = table.getPageCount() - 1;
+              table.setPageIndex(page);
+            }}
+            style={{ width: '50px' }}
+          />
+        </span>
+        <select
+          value={pageSize}
+          onChange={e => {
+            table.setPageSize(Number(e.target.value));
+          }}
+          style={{ marginLeft: '1rem' }}
+        >
+          {[10, 20, 30, 40, 50].map(size => (
+            <option key={size} value={size}>
+              Show {size}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 };

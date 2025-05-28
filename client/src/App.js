@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
@@ -7,7 +6,7 @@ import Login from './pages/LoginPage';
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
 import PackingItems from './components/PackingItemsFetcher';
-import PalletPackingPage from './pages/PalletPacking';
+// import PalletPackingPage from './pages/PalletPacking';
 
 function App() {
   return (
@@ -22,7 +21,7 @@ function App() {
               <Route path="/access" element={<AccessData />} />
               <Route path="/lastlogin" element={<LastLogin />} />
               <Route path="/packing" element={<PackingItems />} />
-              <Route path="/pallet" element={<PalletPackingPage />} />
+              {/* <Route path="/pallet" element={<PalletPackingPage />} /> */}
             </Routes>
           </main>
         </header>

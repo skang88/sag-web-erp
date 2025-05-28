@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import "./Navbar.css";
@@ -28,7 +27,7 @@ function Navbar() {
           <Link to="/">MAT</Link>
           <ul className="submenu">
             <li><Link to="/packing">Packing List</Link></li>
-            <li><Link to="/pallet">Pallet Packing</Link></li>
+            {/* <li><Link to="/pallet">Pallet Packing</Link></li> */}
           </ul>
         </li>
       </ul>
