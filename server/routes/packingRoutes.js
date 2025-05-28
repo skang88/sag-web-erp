@@ -7,5 +7,6 @@ const packingController = require('../controllers/packingController'); // 컨트
 // GET /api/packing/asn-summary?date=YYYYMMDD&group=XX
 router.get('/', packingController.getASNItemsSummary);
 router.get('/items', packingController.getASNItems);
+router.get('/pallets', packingController.getPackingPlan);
 
 module.exports = router;
