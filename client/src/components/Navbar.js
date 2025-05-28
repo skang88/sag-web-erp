@@ -16,7 +16,7 @@ function Navbar() {
 
         {/* HR 메뉴 */}
         <li className="menu-item">
-          <Link to="#">HR</Link>
+          <Link to="/access">HR</Link>
           {/* 하위 메뉴 */}
           <ul className="submenu">
             <li><Link to="/access">Access</Link></li>
@@ -24,7 +24,7 @@ function Navbar() {
           </ul>
         </li>
         <li className='menu-item'>
-          <Link to="/">MAT</Link>
+          <Link to="/packing">MAT</Link>
           <ul className="submenu">
             <li><Link to="/packing">Packing List</Link></li>
             {/* <li><Link to="/pallet">Pallet Packing</Link></li> */}
