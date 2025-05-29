@@ -3,28 +3,29 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
 
-// 컨테이너 치수 정의 (인치)
+// Define container dimensions (inches)
 const CONTAINER_LENGTH = 635.8;
 const CONTAINER_WIDTH = 102.4;
 const CONTAINER_HEIGHT = 110.2;
 
-// API 엔드포인트 주소 (Node.js Express 서버 주소)
+// API endpoint address (Node.js Express server address)
 const API_BASE_URL = 'http://66.118.96.42:28001/api';
 
 const ContainerPackingViz = () => {
-    const mountRef = useRef(null); // Three.js 캔버스가 마운트될 DOM 요소 참조
+    // Three.js scene refs
+    const mountRef = useRef(null);
     const cameraRef = useRef(null);
     const rendererRef = useRef(null);
     const controlsRef = useRef(null);
     const animationIdRef = useRef(null);
-    const sceneRef = useRef(null); // 씬 참조를 위한 ref 추가
+    const sceneRef = useRef(null);
 
-    // packingData의 초기값을 빈 배열이 아닌 객체 형태로 설정하고, API 응답에 따라 채워짐
-    const [packingData, setPackingData] = useState({ packedPallets: [], packedCount: 0 });
+    // State for packing data and UI interactions
+    const [packingData, setPackingData] = useState({ packedPallets: [], packedCount: 0, totalWeight: 0 });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // 날짜와 Shipping Group 입력값을 위한 state
+    // State for date and shipping group inputs
     const [dateInput, setDateInput] = useState(() => {
         const today = new Date();
         const year = today.getFullYear();
@@ -34,20 +35,21 @@ const ContainerPackingViz = () => {
     });
     const [groupInput, setGroupInput] = useState('01');
 
-    // API 호출 및 적재 데이터 가져오기
+    /**
+     * Fetches packing plan data from the API.
+     */
     const fetchPackingPlan = useCallback(async () => {
         if (!dateInput || !groupInput) {
             setError("날짜와 Shipping Group을 모두 입력해주세요.");
-            setPackingData({ packedPallets: [], packedCount: 0 }); // Clear previous data
+            setPackingData({ packedPallets: [], packedCount: 0, totalWeight: 0 }); // Clear previous data
             return;
         }
 
         setLoading(true);
         setError(null);
-        setPackingData({ packedPallets: [], packedCount: 0 }); // Clear previous data when fetching new one
+        setPackingData({ packedPallets: [], packedCount: 0, totalWeight: 0 }); // Clear previous data when fetching new one
 
         try {
-            // 날짜 형식 변환: 'YYYY-MM-DD' -> 'YYYYMMDD'
             const formattedDate = dateInput.replace(/-/g, '');
             const group = groupInput;
 
@@ -56,9 +58,11 @@ const ContainerPackingViz = () => {
 
             const fetchedPallets = Array.isArray(response.data) ? response.data : response.data.packedPallets || [];
             const fetchedCount = response.data.packedCount || fetchedPallets.length;
+            // Correctly extract and set totalWeight
+            const fetchedTotalWeight = response.data.totalWeight || 0; 
 
-            setPackingData({ packedPallets: fetchedPallets, packedCount: fetchedCount });
-            console.log("[API Call] 적재 데이터 수신 성공:", { packedPallets: fetchedPallets, packedCount: fetchedCount });
+            setPackingData({ packedPallets: fetchedPallets, packedCount: fetchedCount, totalWeight: fetchedTotalWeight });
+            console.log("[API Call] 적재 데이터 수신 성공:", { packedPallets: fetchedPallets, packedCount: fetchedCount, totalWeight: fetchedTotalWeight });
         } catch (err) {
             console.error("[API Call] 적재 데이터 가져오는 중 오류 발생:", err.response?.data || err.message);
             setError(err.response?.data?.msg || err.message || "데이터를 가져오는 데 실패했습니다.");
@@ -67,7 +71,9 @@ const ContainerPackingViz = () => {
         }
     }, [dateInput, groupInput]);
 
-    // 창 크기 변경 핸들러
+    /**
+     * Handles window resize events to update Three.js renderer and camera.
+     */
     const handleResize = useCallback(() => {
         if (cameraRef.current && rendererRef.current && mountRef.current) {
             const width = mountRef.current.clientWidth;
@@ -85,54 +91,32 @@ const ContainerPackingViz = () => {
         }
     }, []);
 
-    // 리사이즈 이벤트 리스너 등록 및 해제
+    // Effect for handling window resize listener
     useEffect(() => {
         window.addEventListener('resize', handleResize);
-        handleResize(); // 초기 렌더링 후 캔버스 크기 한번 더 조정 (DOM이 완전히 로드된 후)
+        handleResize(); // Initial resize after component mounts
         return () => window.removeEventListener('resize', handleResize);
     }, [handleResize]);
 
-    // Three.js 씬 설정 및 렌더링 로직
-    useEffect(() => {
-        console.log("[useEffect-Three.js] useEffect 실행됨");
-        console.log("[useEffect-Three.js] packingData:", packingData);
-        console.log("[useEffect-Three.js] mountRef.current:", mountRef.current);
-
-        if (!mountRef.current || loading || error || !packingData.packedPallets || packingData.packedPallets.length === 0) {
-            console.log("[useEffect-Three.js] 조건 미충족 (mountRef, loading, error, or packedPallets 없음), useEffect 종료됨.");
-            if (animationIdRef.current) {
-                cancelAnimationFrame(animationIdRef.current);
-                animationIdRef.current = null;
-            }
-            if (controlsRef.current) {
-                controlsRef.current.dispose();
-                controlsRef.current = null;
-            }
-            if (rendererRef.current) {
-                if (rendererRef.current.domElement && mountRef.current.contains(rendererRef.current.domElement)) {
-                    mountRef.current.removeChild(rendererRef.current.domElement);
-                }
-                rendererRef.current.dispose();
-                rendererRef.current = null;
-            }
-            if (sceneRef.current) {
-                sceneRef.current.traverse((object) => {
-                    if (object.isMesh) {
-                        object.geometry?.dispose();
-                        if (object.material.isMaterial) {
-                            object.material.dispose();
-                        } else if (Array.isArray(object.material)) {
-                            object.material.forEach(m => m.dispose());
-                        }
-                    }
-                });
-                sceneRef.current.clear();
-                sceneRef.current = null;
-            }
-            return;
+    /**
+     * Cleans up Three.js resources (geometry, materials, scene, renderer, controls).
+     */
+    const cleanupThreeJS = useCallback(() => {
+        if (animationIdRef.current) {
+            cancelAnimationFrame(animationIdRef.current);
+            animationIdRef.current = null;
         }
-
-        // 기존 씬 제거 (컴포넌트 업데이트 시 중복 렌더링 방지 및 자원 해제)
+        if (controlsRef.current) {
+            controlsRef.current.dispose();
+            controlsRef.current = null;
+        }
+        if (rendererRef.current) {
+            if (rendererRef.current.domElement && mountRef.current?.contains(rendererRef.current.domElement)) {
+                mountRef.current.removeChild(rendererRef.current.domElement);
+            }
+            rendererRef.current.dispose();
+            rendererRef.current = null;
+        }
         if (sceneRef.current) {
             sceneRef.current.traverse((object) => {
                 if (object.isMesh) {
@@ -144,32 +128,31 @@ const ContainerPackingViz = () => {
                     }
                 }
             });
+            sceneRef.current.clear();
             sceneRef.current = null;
         }
+        cameraRef.current = null;
+    }, []);
 
-        if (rendererRef.current) {
-            if (rendererRef.current.domElement && mountRef.current.contains(rendererRef.current.domElement)) {
-                mountRef.current.removeChild(rendererRef.current.domElement);
-            }
-            rendererRef.current.dispose();
-            rendererRef.current = null;
+    // Effect for setting up and tearing down the Three.js scene
+    useEffect(() => {
+        console.log("[useEffect-Three.js] useEffect 실행됨");
+        console.log("[useEffect-Three.js] packingData:", packingData);
+        console.log("[useEffect-Three.js] mountRef.current:", mountRef.current);
+
+        if (!mountRef.current || loading || error || !packingData.packedPallets || packingData.packedPallets.length === 0) {
+            console.log("[useEffect-Three.js] 조건 미충족 (mountRef, loading, error, or packedPallets 없음), Three.js 씬 초기화 건너뜀.");
+            cleanupThreeJS();
+            return;
         }
-        if (controlsRef.current) {
-            controlsRef.current.dispose();
-            controlsRef.current = null;
-        }
-        if (animationIdRef.current) {
-            cancelAnimationFrame(animationIdRef.current);
-            animationIdRef.current = null;
-        }
+
+        // Cleanup existing Three.js scene before creating a new one
+        cleanupThreeJS(); 
 
         console.log("[useEffect-Three.js] Three.js 씬 초기화 시작.");
         const currentMount = mountRef.current;
         const width = currentMount.clientWidth;
         const height = currentMount.clientHeight;
-
-        console.log("[useEffect-Three.js] mountRef.current.clientWidth:", width);
-        console.log("[useEffect-Three.js] mountRef.current.clientHeight:", height);
 
         if (width === 0 || height === 0) {
             console.error("[useEffect-Three.js] mountRef dimensions are zero. Cannot initialize Three.js scene.");
@@ -211,6 +194,7 @@ const ContainerPackingViz = () => {
         controlsRef.current.target.set(containerCenterX, containerCenterY, containerCenterZ);
         controlsRef.current.update();
 
+        // Container wireframe
         const containerGeometry = new THREE.BoxGeometry(CONTAINER_LENGTH, CONTAINER_HEIGHT, CONTAINER_WIDTH);
         const containerMaterial = new THREE.MeshBasicMaterial({
             color: 0x000000, wireframe: true, transparent: true, opacity: 0.2
@@ -219,24 +203,19 @@ const ContainerPackingViz = () => {
         containerMesh.position.set(CONTAINER_LENGTH / 2, CONTAINER_HEIGHT / 2, CONTAINER_WIDTH / 2);
         scene.add(containerMesh);
 
-        const palletTypeA39WColor = new THREE.Color(0xFF6347);
-        const palletTypeA59WColor = new THREE.Color(0xFFA07A);
-        const palletTypeBColor = new THREE.Color(0x4682B4);
-        const lineColor = 0x333333;
+        // Pallet colors
+        const palletColors = {
+            "A_39W": new THREE.Color(0xFF6347), // Tomato
+            "A_59W": new THREE.Color(0xFFA07A), // LightSalmon
+            "B": new THREE.Color(0x4682B4),     // SteelBlue
+            "default": new THREE.Color(0x808080) // Grey
+        };
+        const lineColor = 0x333333; // Dark grey for pallet edges
 
+        // Add packed pallets to the scene
         packingData.packedPallets.forEach(p => {
             const palletGeometry = new THREE.BoxGeometry(p.length, p.height, p.width);
-            let palletMaterial;
-
-            if (p.type === "A_39W") {
-                palletMaterial = new THREE.MeshLambertMaterial({ color: palletTypeA39WColor });
-            } else if (p.type === "A_59W") {
-                palletMaterial = new THREE.MeshLambertMaterial({ color: palletTypeA59WColor });
-            } else if (p.type === "B") {
-                palletMaterial = new THREE.MeshLambertMaterial({ color: palletTypeBColor });
-            } else {
-                palletMaterial = new THREE.MeshLambertMaterial({ color: 0x808080 });
-            }
+            const palletMaterial = new THREE.MeshLambertMaterial({ color: palletColors[p.type] || palletColors.default });
 
             const palletMesh = new THREE.Mesh(palletGeometry, palletMaterial);
             palletMesh.position.set(
@@ -246,12 +225,14 @@ const ContainerPackingViz = () => {
             );
             scene.add(palletMesh);
 
+            // Add edges to pallets for better visibility
             const edges = new THREE.EdgesGeometry(palletGeometry);
             const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: lineColor, linewidth: 2 }));
             line.position.copy(palletMesh.position);
             scene.add(line);
         });
 
+        // Add lighting to the scene
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         scene.add(ambientLight);
 
@@ -262,6 +243,7 @@ const ContainerPackingViz = () => {
 
         console.log("[useEffect-Three.js] Scene children count (컨테이너, 팔레트, 조명 포함):", scene.children.length);
 
+        // Animation loop
         const animate = () => {
             animationIdRef.current = requestAnimationFrame(animate);
             controlsRef.current.update();
@@ -269,38 +251,13 @@ const ContainerPackingViz = () => {
         };
         animate();
 
-        return () => {
-            console.log("[useEffect-Three.js] 클린업 함수 실행됨.");
-            cancelAnimationFrame(animationIdRef.current);
-            if (controlsRef.current) controlsRef.current.dispose();
-            if (rendererRef.current) {
-                if (currentMount && rendererRef.current.domElement && currentMount.contains(rendererRef.current.domElement)) {
-                    currentMount.removeChild(rendererRef.current.domElement);
-                }
-                rendererRef.current.dispose();
-            }
-            if (sceneRef.current) {
-                sceneRef.current.traverse((object) => {
-                    if (!object.isMesh) return;
-                    object.geometry?.dispose();
-                    if (object.material.isMaterial) {
-                        object.material.dispose();
-                    } else if (Array.isArray(object.material)) {
-                        for (const material of object.material) material.dispose();
-                    }
-                });
-                sceneRef.current.clear();
-            }
-            sceneRef.current = null;
-            cameraRef.current = null;
-            rendererRef.current = null;
-            controlsRef.current = null;
-        };
-    }, [packingData, loading, error]);
+        // Cleanup function for useEffect
+        return cleanupThreeJS; // Use the memoized cleanup function
+    }, [packingData, loading, error, cleanupThreeJS]); // Add cleanupThreeJS to dependency array
 
     return (
         <div className="p-4">
-            {/* 이 div가 모든 입력 요소와 버튼을 포함하고, flex-row와 justify-center를 통해 가운데 정렬합니다. */}
+            {/* Input and button controls */}
             <div className="flex items-center justify-center space-x-4 mb-4">
                 <div className="flex items-center">
                     <label htmlFor="date" className="mr-3 font-semibold text-gray-700 whitespace-nowrap">날짜:</label>
@@ -332,11 +289,15 @@ const ContainerPackingViz = () => {
                 </button>
             </div>
 
+            {/* Three.js Visualization Area and Info Panel */}
             <div className="relative w-full h-full flex flex-col items-center justify-center bg-gray-100 top-4">
+                {/* Info Panel */}
                 <div id="info-panel" className="absolute top-4 left-4 bg-white bg-opacity-90 p-4 rounded-lg shadow-xl z-10 text-gray-800">
                     <h2 className="font-bold text-lg mb-2 text-blue-700">컨테이너 적재 시각화</h2>
                     <p className="text-sm mb-1">컨테이너 치수: {CONTAINER_LENGTH}" L x {CONTAINER_WIDTH}" W x {CONTAINER_HEIGHT}" H</p>
                     <p className="text-sm mb-1">총 적재된 팔레트: <span className="font-semibold">{packingData.packedCount}</span>개</p>
+                    {/* Display totalWeight here */}
+                    <p className="text-sm mb-1">총 적재된 무게: <span className="font-semibold">{packingData.totalWeight.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span> lb</p>
                     <p className="text-sm mb-1">시점 변경: 마우스 왼쪽 버튼 드래그</p>
                     <p className="text-sm">확대/축소: 마우스 휠 스크롤</p>
                     <div className="mt-3">
@@ -355,11 +316,13 @@ const ContainerPackingViz = () => {
                         </div>
                     </div>
                 </div>
+                {/* Three.js Canvas */}
                 <div
                     ref={mountRef}
                     style={{ width: '200vh', height: '80vh', background: '#111', minHeight: '300px', marginBottom: '100px' }}
                     className="flex justify-center items-center rounded-lg shadow-inner"
                 >
+                    {/* Loading, Error, and No Data Messages */}
                     {loading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-75 text-gray-700 text-lg rounded-lg">
                             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mr-4"></div>
