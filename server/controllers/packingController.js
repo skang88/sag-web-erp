@@ -54,7 +54,7 @@ async function fetchAndProcessPalletData(date, group) {
         return {
             partNumber: asnItem.partNumber,
             palletSerial: asnItem.palletSerial,
-            deliveryQty: asnItem.deliveryQty, // 이 값은 packingLogic에서 직접 사용되지는 않지만, 데이터의 무결성을 위해 포함
+            deliveryQty: asnItem.deliveryQty,
             description: asnItem.description,
             itemName: itemInfo?.itemName || '',
             itemType: itemInfo?.itemType || '',
@@ -97,23 +97,17 @@ exports.getASNItemsSummary = async (req, res) => {
                     dimensions: currentItem.dimensions
                 };
             }
-            // deliveryQty는 각 팔레트의 '총 수량'이므로, 팔레트 개별 데이터에서는 '1'로 가정하거나
-            // ASN API에서 'deliveryQty'가 의미하는 바에 따라 변경될 수 있습니다.
-            // 현재 코드는 'palletCount'를 각 palletSerial을 기준으로 1씩 더하고, 'totalDeliveryQty'는 각 품목의 실제 수량 합을 의미하는 것으로 보입니다.
-            // 여기서는 palletCount를 `itemWeightPerUnit * palletCount`로 계산하므로, palletCount는 팔레트 개수를 의미해야 합니다.
-            // 원본 API에서 deliveryQty가 개별 팔레트의 '내부 물품 수량'이라면, totalDeliveryQty는 그 합이 됩니다.
             acc[partNumber].totalDeliveryQty += currentItem.deliveryQty; 
-            acc[partNumber].palletCount += 1; // 각 partNumber에 대해 팔레트 하나씩 카운트
+            acc[partNumber].palletCount += 1;
             return acc;
         }, {});
 
         const finalSummary = Object.values(aggregatedAsn).map(summaryItem => {
-            // totalWeight 계산: (Item의 itemWeightPerUnit) * (팔레트 개수)
             const totalWeight = summaryItem.itemWeightPerUnit * summaryItem.palletCount; 
             
             return {
-                ...summaryItem, // 기존 요약 정보
-                totalWeight: totalWeight // 재계산된 totalWeight
+                ...summaryItem,
+                totalWeight: totalWeight 
             };
         });
 
@@ -172,11 +166,24 @@ exports.getPackingPlan = async (req, res) => {
             return res.status(404).json({ msg: '해당 조건에 맞는 적재할 팔레트 데이터가 없습니다.' });
         }
         
-        // 2. 적재 로직 실행 (JavaScript로 포팅된 performPacking 함수)
+        // --- CHANGES START HERE ---
+        // 2. totalWeight 계산: 모든 팔레트의 itemWeightPerUnit 합계
+        const totalWeight = palletDataForPacking.reduce((sum, item) => sum + item.itemWeightPerUnit, 0);
+        // --- CHANGES END HERE ---
+
+        // 3. 적재 로직 실행 (JavaScript로 포팅된 performPacking 함수)
         const packingResults = performPacking(palletDataForPacking);
 
-        // 3. 클라이언트에게 결과 반환
-        res.json(packingResults);
+        // --- CHANGES START HERE ---
+        // packingResults 객체에 totalWeight 속성 추가
+        const finalPackingPlan = {
+            totalWeight: totalWeight, // 여기에 totalWeight 추가
+            ...packingResults // performPacking의 기존 결과들을 포함
+        };
+        // --- CHANGES END HERE ---
+
+        // 4. 클라이언트에게 결과 반환 (totalWeight 추가)
+        res.json(finalPackingPlan);
 
     } catch (error) {
         console.error("Error in getPackingPlan:", error);
