@@ -6,7 +6,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
 } from '@tanstack/react-table';
-import DataTable from './DataTable';
+import DataTable from './DataTable'; // DataTable은 이미 Tailwind로 전환되어 있다고 가정합니다.
 
 const AccDataFetcher = () => {
   const [data, setData] = useState([]);
@@ -107,11 +107,11 @@ const AccDataFetcher = () => {
     state: {
       sorting,
       columnFilters,
-      pagination, // 여기
+      pagination,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination, // 여기 꼭 추가
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -121,42 +121,27 @@ const AccDataFetcher = () => {
   const pageIndex = pagination.pageIndex;
   const pageSize = pagination.pageSize;
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading) return <p className="text-center text-lg mt-8">Loading...</p>;
+  if (error) return <p className="text-center text-red-600 text-lg mt-8">Error: {error.message}</p>;
 
   return (
-    <div style={{ paddingBottom: '50px' }}>
-      <h2>Staffing Check In and Out</h2>
+    <div className="p-6 pb-12"> {/* paddingBottom: '50px' -> pb-12 (50px = 12 * 4px + 2px or 12 units) */}
+      <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2> {/* h2 스타일 추가 */}
 
       {/* Filter UI */}
       {table.getHeaderGroups().map(headerGroup => (
         <div
           key={headerGroup.id}
-          style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.3rem' }} // 간격 줄임
+          className="flex gap-2 mb-1.5" // display: 'flex', gap: '0.5rem' (8px) -> gap-2, marginBottom: '0.3rem' (4.8px) -> mb-1.5 (6px)
         >
           {headerGroup.headers.map(header => (
             <div
               key={header.id}
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',   // 중앙 정렬
-                justifyContent: 'flex-start',
-                padding: '0 4px',
-                minWidth: 0,            // 너비 유동적
-              }}
+              className="flex-1 flex flex-col items-center justify-start px-1 min-w-0" // flex: 1, display: flex, flexDirection: column, alignItems: center, justifyContent: flex-start, padding: 0 4px, minWidth: 0
             >
               <label
                 htmlFor={`filter-${header.id}`}
-                style={{
-                  fontWeight: '600',
-                  fontSize: '0.75rem',
-                  color: '#444',
-                  userSelect: 'none',
-                  marginBottom: '2px',
-                  whiteSpace: 'nowrap',
-                }}
+                className="font-semibold text-xs text-gray-700 select-none mb-0.5 whitespace-nowrap" // fontWeight: '600', fontSize: '0.75rem' (12px) -> text-xs, color: '#444' -> text-gray-700, userSelect: 'none', marginBottom: '2px' -> mb-0.5, whiteSpace: 'nowrap'
               >
                 {header.column.columnDef.header}
               </label>
@@ -174,56 +159,55 @@ const AccDataFetcher = () => {
                     });
                   }}
                   placeholder={`Search`}
-                  style={{
-                    width: '100%',
-                    maxWidth: '120px',   // 최대 넓이 제한
-                    padding: '4px 8px',
-                    fontSize: '0.85rem',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc',
-                    boxSizing: 'border-box',
-                    transition: 'border-color 0.2s ease',
-                  }}
-                  onFocus={e => (e.target.style.borderColor = '#4a90e2')}
-                  onBlur={e => (e.target.style.borderColor = '#ccc')}
+                  className="w-full max-w-[120px] px-2 py-1 text-sm rounded border border-gray-300 box-border transition-colors duration-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" // width: '100%', maxWidth: '120px', padding: '4px 8px' -> px-2 py-1, fontSize: '0.85rem' (13.6px) -> text-sm, borderRadius: '4px' -> rounded, border: '1px solid #ccc' -> border border-gray-300, boxSizing: 'border-box', transition: 'border-color 0.2s ease', onFocus/onBlur 대체
                 />
               ) : (
-                <div style={{ height: '26px' }} /> // 필터 없는 칸 높이 맞추기용
+                <div className="h-[26px]" /> // height: '26px' -> h-[26px] (임의 값 지정)
               )}
             </div>
           ))}
         </div>
       ))}
 
-
-
-
       <DataTable table={table} />
 
       {/* 페이지네이션 컨트롤 */}
-      <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
+      <div className="mt-4 flex items-center gap-2"> {/* marginTop: '1rem' -> mt-4, display: 'flex', alignItems: 'center', gap: '0.5rem' -> flex items-center gap-2 */}
+        <button
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+        >
           {'<<'}
         </button>
-        <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+        <button
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+        >
           {'<'}
         </button>
-        <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+        <button
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
+        >
           {'>'}
         </button>
         <button
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
+          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
         >
           {'>>'}
         </button>
-        <span>
+        <span className="ml-2"> {/* marginLeft 추가 */}
           Page{' '}
-          <strong>
+          <strong className="font-bold">
             {pageIndex + 1} of {table.getPageCount() || 1}
           </strong>{' '}
         </span>
-        <span>
+        <span className="ml-2"> {/* marginLeft 추가 */}
           | Go to page:{' '}
           <input
             type="number"
@@ -236,7 +220,7 @@ const AccDataFetcher = () => {
               else if (page >= table.getPageCount()) page = table.getPageCount() - 1;
               table.setPageIndex(page);
             }}
-            style={{ width: '50px' }}
+            className="w-12 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-blue-500" // width: '50px' -> w-12, style 추가
           />
         </span>
         <select
@@ -244,7 +228,7 @@ const AccDataFetcher = () => {
           onChange={e => {
             table.setPageSize(Number(e.target.value));
           }}
-          style={{ marginLeft: '1rem' }}
+          className="ml-4 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500" // marginLeft: '1rem' -> ml-4, style 추가
         >
           {[10, 20, 30, 40, 50].map(size => (
             <option key={size} value={size}>

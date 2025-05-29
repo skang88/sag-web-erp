@@ -5,20 +5,21 @@ import {
     getSortedRowModel,
     getFilteredRowModel,
 } from '@tanstack/react-table';
-import DataTable from './DataTable';
+import DataTable from './DataTable'; // 이 컴포넌트의 스타일도 나중에 Tailwind로 전환해야 합니다.
 
-const FilterInput = ({ filterValue, onFilterChange, id, style }) => {
+// FilterInput 컴포넌트: 인라인 스타일을 Tailwind 클래스로 변환
+const FilterInput = ({ filterValue, onFilterChange, id }) => {
     return (
         <input
             id={id}
             value={filterValue || ''}
             onChange={e => onFilterChange(e.target.value)}
             placeholder="Search..."
-            style={style}
+            // 기존 style={{ height: '28px', fontSize: '0.9rem', padding: '0 8px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box', width: '100%' }}
+            className="h-7 text-sm px-2 rounded border border-gray-300 box-border w-full focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
     );
 };
-
 
 const LastLoginFetcher = () => {
     const [data, setData] = useState([]);
@@ -34,7 +35,6 @@ const LastLoginFetcher = () => {
                 accessorKey: 'L_ID',
                 header: 'ID',
                 cell: info => info.getValue(),
-                // filterFn: 'includesString',  // 기본 필터로도 충분하면 주석처리 가능
                 enableColumnFilter: true,
             },
             {
@@ -103,29 +103,32 @@ const LastLoginFetcher = () => {
         getFilteredRowModel: getFilteredRowModel(),
     });
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error.message}</p>;
+    if (loading) return <p className="text-center text-lg mt-8">Loading...</p>;
+    if (error) return <p className="text-center text-red-600 text-lg mt-8">Error: {error.message}</p>;
 
     return (
-        <div>
-            <h2>Most recent fingerprint access log</h2>
-            <p>Latest login activity (previous day)</p>
-            <p>Total number of registered individuals: {data.length}</p>
+        <div className="p-6"> {/* 전체 컨테이너 패딩 */}
+            <h2 className="text-2xl font-bold mb-2">Most recent fingerprint access log</h2>
+            <p className="text-gray-600 mb-1">Latest login activity (previous day)</p>
+            <p className="text-gray-700 mb-6">Total number of registered individuals: <span className="font-semibold">{data.length}</span></p>
 
             {/* Filter UI */}
             {table.getHeaderGroups().map(headerGroup => (
                 <div
                     key={headerGroup.id}
-                    style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}
+                    // 기존 style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', alignItems: 'center' }}
+                    className="flex gap-2 mb-3 items-center"
                 >
                     {headerGroup.headers.map(header => (
                         <div
                             key={header.id}
-                            style={{ flex: 1, minWidth: '100px', display: 'flex', flexDirection: 'column' }}
+                            // 기존 style={{ flex: 1, minWidth: '100px', display: 'flex', flexDirection: 'column' }}
+                            className="flex-1 min-w-[100px] flex flex-col"
                         >
                             <label
                                 htmlFor={`filter-${header.id}`}
-                                style={{ fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.2rem' }}
+                                // 기존 style={{ fontWeight: '600', fontSize: '0.85rem', marginBottom: '0.2rem' }}
+                                className="font-semibold text-sm mb-0.5"
                             >
                                 {header.column.columnDef.header}
                             </label>
@@ -141,15 +144,6 @@ const LastLoginFetcher = () => {
                                         });
                                     }}
                                     id={`filter-${header.id}`}
-                                    style={{
-                                        height: '28px',
-                                        fontSize: '0.9rem',
-                                        padding: '0 8px',
-                                        borderRadius: '4px',
-                                        border: '1px solid #ccc',
-                                        boxSizing: 'border-box',
-                                        width: '100%',
-                                    }}
                                 />
                             ) : null}
                         </div>
@@ -157,8 +151,7 @@ const LastLoginFetcher = () => {
                 </div>
             ))}
 
-
-            <DataTable table={table} />
+            <DataTable table={table} /> {/* DataTable 컴포넌트의 스타일도 Tailwind로 전환 필요 */}
         </div>
     );
 };
