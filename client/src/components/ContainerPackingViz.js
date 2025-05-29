@@ -304,11 +304,11 @@ const ContainerPackingViz = () => {
                         <h3 className="font-semibold text-md mb-1">팔레트 유형:</h3>
                         <div className="flex items-center text-sm mb-1">
                             <div className="w-4 h-4 rounded-sm mr-2" style={{ backgroundColor: '#FF6347' }}></div>
-                            <span>유형 A1 (59"x39"x50", 39"W)</span>
+                            <span>유형 A1 (39"x59"x50", 39"W)</span>
                         </div>
                         <div className="flex items-center text-sm mb-1">
                             <div className="w-4 h-4 rounded-sm mr-2" style={{ backgroundColor: '#FFA07A' }}></div>
-                            <span>유형 A2 (39"x59"x50", 59"W)</span>
+                            <span>유형 A2 (59"x39"x50", 59"W)</span>
                         </div>
                         <div className="flex items-center text-sm">
                             <div className="w-4 h-4 rounded-sm mr-2" style={{ backgroundColor: '#4682B4' }}></div>
