@@ -3,6 +3,15 @@ import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://172.16.220.32:8001';
 
+// Helper function to get today's date in YYYY-MM-DD format
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 function PackingItemsFetcher() {
   const [items, setItems] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -13,8 +22,11 @@ function PackingItemsFetcher() {
 
   const navigate = useNavigate();
 
-  const [date, setDate] = useState('');
-  const [group, setGroup] = useState('');
+  // --- CHANGES START HERE ---
+  // Set default date to today and default group to '01'
+  const [date, setDate] = useState(getTodayDate());
+  const [group, setGroup] = useState('01');
+  // --- CHANGES END HERE ---
 
   const fetchItems = useCallback(async () => {
     if (!date || !group) {
@@ -93,12 +105,12 @@ function PackingItemsFetcher() {
 
   return (
     <div className="p-5">
-      <h1 className="text-3xl font-bold mb-6 text-center">트레일러 적재 예정 아이템 조회</h1> {/* h1도 중앙 정렬 */}
+      <h1 className="text-3xl font-bold mb-6 text-center">트레일러 적재 예정 아이템 조회</h1>
 
       {/* Parameter input UI - centered */}
-      <div className="mb-5 border border-gray-200 p-4 rounded-lg bg-gray-50 mx-auto max-w-xl"> {/* mx-auto and max-w-xl added */}
+      <div className="mb-5 border border-gray-200 p-4 rounded-lg bg-gray-50 mx-auto max-w-xl">
         {/* Date and Shipping Group inputs on one line */}
-        <div className="flex items-center gap-4 mb-4 justify-center"> {/* justify-center maintained */}
+        <div className="flex items-center gap-4 mb-4 justify-center">
           {/* Date input */}
           <div className="flex items-center">
             <label htmlFor="date" className="mr-2 font-bold text-gray-700 whitespace-nowrap">날짜:</label>
@@ -126,7 +138,7 @@ function PackingItemsFetcher() {
         </div>
 
         {/* Item search button */}
-        <div className="flex justify-center"> {/* Button also centered */}
+        <div className="flex justify-center">
           <button
             onClick={fetchItems}
             className="px-5 py-2.5 bg-blue-600 text-white rounded-md cursor-pointer text-base hover:bg-blue-700 transition duration-200"
@@ -149,36 +161,40 @@ function PackingItemsFetcher() {
             <strong className="font-bold text-gray-800">총 중량:</strong> <span className="font-semibold">{totalWeight.toLocaleString()}lb</span>
           </div>
 
-          <table className="w-full border-collapse mt-5">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-3 border border-gray-300 text-left font-bold">#</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Part Number</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Item Name</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Type</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Pallet Serial</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Delivery Qty</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">Unit Weight</th>
-                <th className="p-3 border border-gray-300 text-left font-bold">규격 (W x D x H)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td className="p-2 border border-gray-300 text-left">{index + 1}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.partNumber}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.itemName}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.itemType}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.palletSerial}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.deliveryQty}</td>
-                  <td className="p-2 border border-gray-300 text-left">{item.itemWeightPerUnit.toLocaleString()}</td>
-                  <td className="p-2 border border-gray-300 text-left">
-                    {`${item.dimensions.width} x ${item.dimensions.depth} x ${item.dimensions.height}`}
-                  </td>
+          {/* Add a div here to make the table scrollable */}
+          <div className="max-h-[500px] overflow-y-auto relative border border-gray-300 rounded-lg">
+            <table className="w-full border-collapse">
+              <thead>
+                {/* Make table header sticky */}
+                <tr className="bg-gray-200 sticky top-0 z-10">
+                  <th className="p-3 border border-gray-300 text-left font-bold">#</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Part Number</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Item Name</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Type</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Pallet Serial</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Delivery Qty</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">Unit Weight</th>
+                  <th className="p-3 border border-gray-300 text-left font-bold">규격 (W x D x H)</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map((item, index) => (
+                  <tr key={index} className="border-b border-gray-200">
+                    <td className="p-2 border border-gray-300 text-left">{index + 1}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.partNumber}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.itemName}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.itemType}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.palletSerial}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.deliveryQty}</td>
+                    <td className="p-2 border border-gray-300 text-left">{item.itemWeightPerUnit.toLocaleString()}</td>
+                    <td className="p-2 border border-gray-300 text-left">
+                      {`${item.dimensions.width} x ${item.dimensions.depth} x ${item.dimensions.height}`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

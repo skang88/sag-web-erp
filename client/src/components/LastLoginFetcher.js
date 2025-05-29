@@ -107,7 +107,7 @@ const LastLoginFetcher = () => {
     if (error) return <p className="text-center text-red-600 text-lg mt-8">Error: {error.message}</p>;
 
     return (
-        <div className="p-6"> {/* 전체 컨테이너 패딩 */}
+        <div className="p-6 max-h-screen overflow-y-auto mb-10"> {/* 전체 컨테이너 패딩 */}
             <h2 className="text-2xl font-bold mb-2">Most recent fingerprint access log</h2>
             <p className="text-gray-600 mb-1">Latest login activity (previous day)</p>
             <p className="text-gray-700 mb-6">Total number of registered individuals: <span className="font-semibold">{data.length}</span></p>
@@ -148,10 +148,11 @@ const LastLoginFetcher = () => {
                             ) : null}
                         </div>
                     ))}
-                </div>
+                </div> 
             ))}
 
             <DataTable table={table} /> {/* DataTable 컴포넌트의 스타일도 Tailwind로 전환 필요 */}
+            <p className='mb-20'> </p>
         </div>
     );
 };

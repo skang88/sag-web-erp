@@ -125,8 +125,8 @@ const AccDataFetcher = () => {
   if (error) return <p className="text-center text-red-600 text-lg mt-8">Error: {error.message}</p>;
 
   return (
-    <div className="p-6 pb-12"> {/* paddingBottom: '50px' -> pb-12 (50px = 12 * 4px + 2px or 12 units) */}
-      <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2> {/* h2 스타일 추가 */}
+    <div className="p-6 pb-12 max-h-screen overflow-y-auto mb-4"> {/* This is the main container */}
+  <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2>
 
       {/* Filter UI */}
       {table.getHeaderGroups().map(headerGroup => (
@@ -172,7 +172,7 @@ const AccDataFetcher = () => {
       <DataTable table={table} />
 
       {/* 페이지네이션 컨트롤 */}
-      <div className="mt-4 flex items-center gap-2"> {/* marginTop: '1rem' -> mt-4, display: 'flex', alignItems: 'center', gap: '0.5rem' -> flex items-center gap-2 */}
+      <div className="mt-4 flex items-center gap-2 mb-10"> {/* marginTop: '1rem' -> mt-4, display: 'flex', alignItems: 'center', gap: '0.5rem' -> flex items-center gap-2 */}
         <button
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
