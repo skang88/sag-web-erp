@@ -227,7 +227,7 @@ function AsnPage() {
               {overallTotalWeight !== null && (
                 <p>
                   <strong className="font-bold text-gray-800">팔렛 수: </strong> 
-                  <span className="font-semibold text-blue-600">{totalCount.toLocaleString()}건, </span>
+                  <span className="font-semibold text-blue-600">{totalCount.toLocaleString()}개, </span>
                   <strong className="font-bold text-gray-800">전체 중량: </strong>
                   <span className="font-semibold text-blue-600">{overallTotalWeight.toLocaleString()}lb</span>
                 </p>
