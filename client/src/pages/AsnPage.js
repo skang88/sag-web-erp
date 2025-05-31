@@ -15,6 +15,7 @@ const getTodayDate = () => {
 function AsnPage() {
   const [items, setItems] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [overallTotalWeight, setOverallTotalWeight] = useState(null); // For total weight from packing API
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -35,6 +36,7 @@ function AsnPage() {
       setError(null);
       setItems([]); // 조회 시작 시 기존 아이템 초기화
       setTotalCount(0); // 조회 시작 시 기존 카운트 초기화
+      setOverallTotalWeight(null); // Reset overall total weight
 
       const formattedDate = date.replace(/-/g, '');
       const queryParams = new URLSearchParams({
@@ -42,10 +44,11 @@ function AsnPage() {
         group: group,
       }).toString();
 
-      const apiUrl = `${API_BASE_URL}/api/asn?${queryParams}`;
-      console.log('API 호출 URL:', apiUrl);
+      // 1. Fetch ASN Data
+      const asnApiUrl = `${API_BASE_URL}/api/asn?${queryParams}`;
+      console.log('API 호출 URL:', asnApiUrl);
 
-      const response = await fetch(apiUrl, {
+      const response = await fetch(asnApiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
@@ -55,9 +58,40 @@ function AsnPage() {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      setItems(data.data || []);
-      setTotalCount(data.count || 0);
+      const asnData = await response.json();
+      setItems(asnData.data || []);
+      setTotalCount(asnData.count || 0);
+
+      // 2. Packing API에서 전체 중량 조회
+      // ASN 데이터 조회가 성공했을 때만 실행
+
+      if (asnData.data && asnData.data.length > 0) { // ASN 데이터가 있을 때만 중량 조회 시도
+        try {
+          const packingApiUrl = `${API_BASE_URL}/api/packing/items?${queryParams}`;
+          console.log('Packing API 호출 URL:', packingApiUrl);
+          const packingResponse = await fetch(packingApiUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (packingResponse.ok) {
+            const packingApiResponse = await packingResponse.json();
+            if (packingApiResponse.totalWeight !== undefined) {
+              setOverallTotalWeight(packingApiResponse.totalWeight); // 전체 중량 상태 업데이트
+            } else {
+              console.warn("Packing API 응답에 totalWeight 필드가 없습니다.");
+            }
+          } else {
+            const packingErrorData = await packingResponse.json().catch(() => ({ message: "Packing 에러 응답 파싱 실패" }));
+            console.warn("Packing 데이터 조회 실패:", packingErrorData.message || `Packing API HTTP 에러! 상태: ${packingResponse.status}`);
+            // Packing API 실패 시 overallTotalWeight는 null로 유지됨
+          }
+        } catch (packErr) {
+          console.warn("Packing 데이터 처리 중 예외 발생:", packErr);
+          // 예외 발생 시 overallTotalWeight는 null로 유지됨
+        }
+      }
+
     } catch (err) {
       console.error("ASN 데이터 조회 실패:", err);
       setError(err);
@@ -73,7 +107,7 @@ function AsnPage() {
       return;
     }
 
-    const excelData = items.map((item, index) => ({
+    const excelData = items.map((item) => ({
       'Pallet/Rack Serial': item.palletSerial,
       'Part Number': item.partNumber,
       'Description (Optional)': item.description,
@@ -101,10 +135,8 @@ function AsnPage() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Upload Format');
 
-    // 파일명 생성 (조회한 날짜와 그룹 기준, .xls 확장자)
+    // 파일명 생성
     const excelFileName = `SAG${date.replace(/-/g, '')}${group}_HU.xls`; // --- CHANGED: .xlsx to .xls
-
-    // Excel 파일 다운로드 (bookType: 'biff8' 추가하여 XLS 형식으로 지정)
     XLSX.writeFile(workbook, excelFileName, { bookType: 'biff8' }); // --- CHANGED: Added { bookType: 'biff8' }
   };
 
@@ -191,7 +223,15 @@ function AsnPage() {
       {items.length > 0 && !loading && !error && (
         <div>
           <div className="mb-5 text-lg text-center">
-            <strong className="font-bold text-gray-800">총 항목 수:</strong> <span className="font-semibold">{totalCount}건</span>
+            {/* 전체 중량 표시 */}
+              {overallTotalWeight !== null && (
+                <p>
+                  <strong className="font-bold text-gray-800">팔렛 수: </strong> 
+                  <span className="font-semibold text-blue-600">{totalCount.toLocaleString()}건, </span>
+                  <strong className="font-bold text-gray-800">전체 중량: </strong>
+                  <span className="font-semibold text-blue-600">{overallTotalWeight.toLocaleString()}lb</span>
+                </p>
+              )}
           </div>
 
           <div className="max-h-[500px] overflow-y-auto relative border border-gray-300 rounded-lg">
