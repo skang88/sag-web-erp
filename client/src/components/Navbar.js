@@ -31,6 +31,9 @@ function Navbar() {
           <Link to="/packing" className="text-white no-underline font-bold text-lg hover:no-underline">MAT</Link>
           <ul className="hidden group-hover:block absolute top-full left-0 bg-[#2a73d3] p-3 rounded-md list-none w-60"> {/* submenu */}
             <li className="py-1">
+              <Link to="/asn" className="block text-white no-underline px-2 py-1 hover:bg-gray-200 hover:text-black hover:no-underline rounded-sm">ASN</Link>
+            </li>
+            <li className="py-1">
               <Link to="/packing" className="block text-white no-underline px-2 py-1 hover:bg-gray-200 hover:text-black hover:no-underline rounded-sm">Packing Summary</Link>
             </li>
             <li className="py-1">
