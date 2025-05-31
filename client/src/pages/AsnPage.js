@@ -148,7 +148,7 @@ function AsnPage() {
 
     const doc = new jsPDF();
     doc.text("ASN List", 14, 15);
-    doc.text(`Date: ${date}, Group: ${group}`, 14, 22);
+    doc.text(`Date: ${date}, Group: ${group}, Total Weight: ${overallTotalWeight.toLocaleString()}lb`, 14, 22);
 
     const head = [[
       '#', 'Pallet Serial', 'Part Number', 'Description',
