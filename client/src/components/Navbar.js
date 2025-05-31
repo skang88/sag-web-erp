@@ -16,7 +16,8 @@ function Navbar() {
         <li className="relative mx-4 group"> {/* menu-item */}
           <Link to="/access" className="text-white no-underline font-bold text-lg hover:no-underline">HR</Link>
           {/* 하위 메뉴 */}
-          <ul className="hidden group-hover:block absolute top-full left-0 bg-[#2a73d3] p-3 rounded-md list-none w-52"> {/* submenu */}
+          {/* 'left-0'을 'left-[-0.5rem]'으로 수정하여 왼쪽으로 0.5rem 이동 */}
+          <ul className="hidden group-hover:block absolute top-full left-[-0.5rem] bg-[#2a73d3] p-3 rounded-md list-none w-52"> {/* submenu */}
             <li className="py-1">
               <Link to="/access" className="block text-white no-underline px-2 py-1 hover:bg-gray-200 hover:text-black hover:no-underline rounded-sm">Access</Link>
             </li>
@@ -28,8 +29,10 @@ function Navbar() {
 
         {/* MAT 메뉴 */}
         <li className="relative mx-4 group"> {/* menu-item */}
-          <Link to="/packing" className="text-white no-underline font-bold text-lg hover:no-underline">MAT</Link>
-          <ul className="hidden group-hover:block absolute top-full left-0 bg-[#2a73d3] p-3 rounded-md list-none w-60"> {/* submenu */}
+          <Link to="/asn" className="text-white no-underline font-bold text-lg hover:no-underline">MAT</Link>
+          {/* 하위 메뉴 */}
+          {/* 'left-0'을 'left-[-0.5rem]'으로 수정하여 왼쪽으로 0.5rem 이동 */}
+          <ul className="hidden group-hover:block absolute top-full left-[-0.5rem] bg-[#2a73d3] p-3 rounded-md list-none w-60"> {/* submenu */}
             <li className="py-1">
               <Link to="/asn" className="block text-white no-underline px-2 py-1 hover:bg-gray-200 hover:text-black hover:no-underline rounded-sm">ASN</Link>
             </li>
