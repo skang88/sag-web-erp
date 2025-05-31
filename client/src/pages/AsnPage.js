@@ -25,7 +25,6 @@ function AsnPage() {
   const [group, setGroup] = useState('01');
 
   const fetchItems = useCallback(async () => {
-    // ... (기존 fetchItems 함수 내용은 동일하게 유지)
     if (!date || !group) {
       alert('날짜와 Shipping Group을 모두 입력해주세요.');
       return;
@@ -62,22 +61,18 @@ function AsnPage() {
     } catch (err) {
       console.error("ASN 데이터 조회 실패:", err);
       setError(err);
-      // setItems([]); // 이미 위에서 초기화하므로 중복 제거 가능
-      // setTotalCount(0);
     } finally {
       setLoading(false);
     }
   }, [date, group]);
 
-  // Excel 다운로드 핸들러 함수
+  // Excel 다운로드 핸들러 함수 (XLS 형식으로 수정)
   const handleExcelDownload = () => {
     if (items.length === 0) {
       alert('다운로드할 데이터가 없습니다.');
       return;
     }
 
-    // Excel 시트에 표시될 데이터 준비
-    // 테이블에 표시되는 순서와 내용에 맞춰 준비 + 각 항목의 날짜와 그룹 정보 추가
     const excelData = items.map((item, index) => ({
       'Pallet/Rack Serial': item.palletSerial,
       'Part Number': item.partNumber,
@@ -89,11 +84,8 @@ function AsnPage() {
       'Packaging': item.packaging,
     }));
 
-    // 워크시트 생성 (json_to_sheet 사용)
     const worksheet = XLSX.utils.json_to_sheet(excelData);
 
-    // 컬럼 너비 설정 (선택 사항)
-    // 각 문자의 대략적인 너비(wch)를 기준으로 설정합니다.
     const columnWidths = [
       { wch: 20 }, // Pallet Serial
       { wch: 20 }, // Part Number
@@ -106,15 +98,14 @@ function AsnPage() {
     ];
     worksheet['!cols'] = columnWidths;
 
-    // 워크북 생성 및 워크시트 추가
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Upload Format'); // 시트 이름
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Upload Format');
 
-    // 파일명 생성 (조회한 날짜와 그룹 기준)
-    const excelFileName = `SAG${date.replace(/-/g, '')}${group}_HU.xlsx`;
+    // 파일명 생성 (조회한 날짜와 그룹 기준, .xls 확장자)
+    const excelFileName = `SAG${date.replace(/-/g, '')}${group}_HU.xls`; // --- CHANGED: .xlsx to .xls
 
-    // Excel 파일 다운로드
-    XLSX.writeFile(workbook, excelFileName);
+    // Excel 파일 다운로드 (bookType: 'biff8' 추가하여 XLS 형식으로 지정)
+    XLSX.writeFile(workbook, excelFileName, { bookType: 'biff8' }); // --- CHANGED: Added { bookType: 'biff8' }
   };
 
 
@@ -174,17 +165,16 @@ function AsnPage() {
             />
           </div>
         </div>
-        <div className="flex justify-center gap-3"> {/* 버튼들을 flex로 묶고 간격 추가 */}
+        <div className="flex justify-center gap-3">
           <button
             onClick={fetchItems}
             className="px-5 py-2.5 bg-blue-600 text-white rounded-md cursor-pointer text-base hover:bg-blue-700 transition duration-200"
           >
             ASN 조회
           </button>
-          {/* Excel 다운로드 버튼 추가 */}
           <button
             onClick={handleExcelDownload}
-            disabled={items.length === 0 || loading} // 데이터가 없거나 로딩 중일 때 비활성화
+            disabled={items.length === 0 || loading}
             className="px-5 py-2.5 bg-green-600 text-white rounded-md cursor-pointer text-base hover:bg-green-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Excel 다운로드
@@ -217,7 +207,6 @@ function AsnPage() {
                   <th className="p-3 border border-gray-300 text-left font-semibold text-sm">PO Number</th>
                   <th className="p-3 border border-gray-300 text-left font-semibold text-sm">PO Item</th>
                   <th className="p-3 border border-gray-300 text-left font-semibold text-sm">Packaging</th>
-                  {/* Item Date와 Item Shipping Group은 Excel에는 포함되지만, 테이블에는 현재 없음. 필요시 테이블에도 추가 가능 */}
                 </tr>
               </thead>
               <tbody>
