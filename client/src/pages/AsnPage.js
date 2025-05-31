@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx'; // xlsx 라이브러리 import
+import jsPDF from 'jspdf'; // 📄 jsPDF import
+import autoTable from 'jspdf-autotable'; // Changed import for jspdf-autotable
 
 const API_BASE_URL = 'http://172.16.220.32:8001';
 
@@ -20,8 +21,6 @@ function AsnPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate();
-
   const [date, setDate] = useState(getTodayDate());
   const [group, setGroup] = useState('01');
 
@@ -31,13 +30,14 @@ function AsnPage() {
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      setItems([]); // 조회 시작 시 기존 아이템 초기화
-      setTotalCount(0); // 조회 시작 시 기존 카운트 초기화
-      setOverallTotalWeight(null); // Reset overall total weight
+    // 중요: 조회 시작 시 이전 에러 상태 초기화하여, 재조회 시 에러 화면이 남아있지 않도록 함
+    setError(null);
+    setLoading(true);
+    setItems([]);
+    setTotalCount(0);
+    setOverallTotalWeight(null);
 
+    try {
       const formattedDate = date.replace(/-/g, '');
       const queryParams = new URLSearchParams({
         date: formattedDate,
@@ -106,7 +106,6 @@ function AsnPage() {
       alert('다운로드할 데이터가 없습니다.');
       return;
     }
-
     const excelData = items.map((item) => ({
       'Pallet/Rack Serial': item.palletSerial,
       'Part Number': item.partNumber,
@@ -140,6 +139,54 @@ function AsnPage() {
     XLSX.writeFile(workbook, excelFileName, { bookType: 'biff8' }); // --- CHANGED: Added { bookType: 'biff8' }
   };
 
+  // 📄 PDF 다운로드 핸들러 함수
+  const handlePdfDownload = () => {
+    if (items.length === 0) {
+      alert('다운로드할 PDF 데이터가 없습니다.');
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.text("ASN List", 14, 15);
+    doc.text(`Date: ${date}, Group: ${group}`, 14, 22);
+
+    const head = [[
+      '#', 'Pallet Serial', 'Part Number', 'Description',
+      'Delivery Qty', 'PO Item'
+    ]];
+    const body = items.map((item, index) => [
+      index + 1,
+      item.palletSerial || '', item.partNumber || '', item.description || '',
+      item.deliveryQty || '', item.poItem
+    ]);
+
+    // Use the imported autoTable function directly
+    autoTable(doc, { // Changed this line
+      startY: 30,
+      head: head,
+      body: body,
+      styles: { font: "helvetica", fontSize: 10, cellPadding: 2, textColor: 0 },
+      headStyles: {
+        fillColor: [22, 160, 133], // 헤더 배경색
+        textColor: 255,            // 헤더 텍스트 색상 (흰색)
+        fontSize: 11,              // 📄 헤더 폰트 크기 (예: 11)
+        fontStyle: 'bold',         // 헤더 폰트 스타일
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      // 📄 컬럼별 스타일 지정 (가운데 정렬 추가)
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 10 }, // '#' 컬럼 (첫 번째 컬럼)
+        // 1: { halign: 'left' }, // Pallet Serial (기본값인 왼쪽 정렬 유지)
+        // 2: { halign: 'left' }, // Part Number
+        // 3: { halign: 'left' }, // Description
+        4: { halign: 'center' }, // Delivery Qty 컬럼 (다섯 번째 컬럼)
+        5: { halign: 'center' }, // PO Item 컬럼 (여섯 번째 컬럼)
+      }
+    });
+
+    const pdfFileName = `ASN_List_${date.replace(/-/g, '')}_${group}.pdf`;
+    doc.save(pdfFileName);
+  };
 
   if (loading) {
     return (
@@ -151,26 +198,24 @@ function AsnPage() {
   }
 
   if (error) {
-    const handleGoBack = () => {
-      navigate('/home');
-    };
-
     return (
-      <div className="p-5 text-red-600 text-center">
-        <h2 className="text-2xl font-bold mb-3">데이터를 불러오는 중 오류가 발생했습니다.</h2>
-        <p className="mb-4">{error.message || '알 수 없는 오류'}</p>
-        <button
-          onClick={handleGoBack}
-          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-200"
-        >
-          뒤로 가기
-        </button>
+      <div className="p-5 text-red-600 text-center min-h-screen flex flex-col justify-center items-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-xl">
+          <h2 className="text-2xl font-bold mb-3 text-red-700">데이터를 불러오는 중 오류가 발생했습니다.</h2>
+          <p className="mb-4 text-gray-700">{error.message || '알 수 없는 오류'}</p>
+          <p className="text-sm text-gray-500">입력 값을 확인하시거나 잠시 후 다시 시도해 주세요.</p>
+          {/* 만약 사용자가 현재 페이지에서 바로 재시도할 수 있게 하려면,
+              setError(null)을 호출하는 버튼을 추가하고, 이 if(error) 블록을
+              메인 return문 안으로 옮겨 조건부 렌더링해야 합니다.
+              현재 구조에서는 재조회 버튼을 두기가 어색합니다.
+            */}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-5">
+    <div className="p-5 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">ASN 조회</h1>
 
       <div className="mb-5 border border-gray-200 p-4 rounded-lg bg-gray-50 mx-auto max-w-xl">
@@ -200,16 +245,24 @@ function AsnPage() {
         <div className="flex justify-center gap-3">
           <button
             onClick={fetchItems}
-            className="px-5 py-2.5 bg-blue-600 text-white rounded-md cursor-pointer text-base hover:bg-blue-700 transition duration-200"
-          >
+            className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:transform-none w-full sm:w-auto" /* 스타일 일관성 */
+            >
             ASN 조회
           </button>
           <button
             onClick={handleExcelDownload}
             disabled={items.length === 0 || loading}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-md cursor-pointer text-base hover:bg-green-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+            className="px-5 py-2.5 bg-slate-600 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none w-full sm:w-auto" /* 스타일 일관성 */
+            >
             Excel 다운로드
+          </button>
+          {/* 📄 PDF 다운로드 버튼 추가 */}
+          <button
+            onClick={handlePdfDownload}
+            disabled={items.length === 0 || loading}
+            className="px-5 py-2.5 bg-orange-500 text-white font-semibold rounded-lg shadow-md hover:bg-orange-600 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none w-full sm:w-auto" /* 스타일 일관성 */
+          >
+            PDF 다운로드
           </button>
         </div>
       </div>
@@ -224,14 +277,14 @@ function AsnPage() {
         <div>
           <div className="mb-5 text-lg text-center">
             {/* 전체 중량 표시 */}
-              {overallTotalWeight !== null && (
-                <p>
-                  <strong className="font-bold text-gray-800">팔렛 수: </strong> 
-                  <span className="font-semibold text-blue-600">{totalCount.toLocaleString()}개, </span>
-                  <strong className="font-bold text-gray-800">전체 중량: </strong>
-                  <span className="font-semibold text-blue-600">{overallTotalWeight.toLocaleString()}lb</span>
-                </p>
-              )}
+            {overallTotalWeight !== null && (
+              <p>
+                <strong className="font-bold text-gray-800">팔렛 수: </strong>
+                <span className="font-semibold text-blue-600">{totalCount.toLocaleString()}개, </span>
+                <strong className="font-bold text-gray-800">전체 중량: </strong>
+                <span className="font-semibold text-blue-600">{overallTotalWeight.toLocaleString()}lb</span>
+              </p>
+            )}
           </div>
 
           <div className="max-h-[500px] overflow-y-auto relative border border-gray-300 rounded-lg">
