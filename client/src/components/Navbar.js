@@ -50,29 +50,26 @@ const navLinks = [
     ],
     submenuWidth: 'w-60',
   },
+    {
+    label: 'Support',
+    isRouterLink: false,
+    submenu: [
+      {
+        label: 'Manuals',
+        url: 'https://efficacious-sand-116.notion.site/1bd471a31f6180c485d5fc4941b6ba49?v=1bd471a31f61800c9317000cd622af8d&source=copy_link',
+        // popupName: 'InventoryPlanPopup', // 새 탭으로 열 경우 popupName은 필수는 아님
+        isPopup: true, // 이 플래그를 사용하여 새 탭으로 열지 결정
+      },
+      {
+        label: 'Slack',
+        url: 'https://seohanautogeorgia.slack.com/',
+        // popupName: 'LotInStatusPopup',
+        isPopup: true,
+      },
+    ],
+    submenuWidth: 'w-60',
+  },
 ];
-
-// openPopup 함수는 더 이상 대시보드 링크에 의해 직접 사용되지 않지만,
-// 다른 종류의 팝업을 위해 남겨둘 수 있습니다.
-// 만약 모든 'isPopup'이 새 탭을 의미한다면 이 함수는 필요 없을 수 있습니다.
-// const openPopup = (event, url, popupName) => {
-//   event.preventDefault();
-//   const fullscreenWidth = window.screen.availWidth;
-//   const fullscreenHeight = window.screen.availHeight;
-//   const windowFeatures = `
-//     width=${fullscreenWidth},
-//     height=${fullscreenHeight},
-//     left=0,
-//     top=0,
-//     menubar=no,
-//     toolbar=no,
-//     location=no,
-//     resizable=yes,
-//     scrollbars=yes,
-//     status=yes
-//   `.replace(/\s/g, '');
-//   window.open(url, popupName, windowFeatures);
-// };
 
 function Navbar() {
   return (
