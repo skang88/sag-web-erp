@@ -38,7 +38,12 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // JWT 생성 시 email 정보 추가
+    const token = jwt.sign(
+      { userId: user._id, email: user.email }, // <--- 여기에 email: user.email 추가
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
     res.status(200).json({ token });
   } catch (error) {

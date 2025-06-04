@@ -10,6 +10,9 @@ import PackingItems from './pages/PackingItems';
 import ContainerPackingViz from './components/ContainerPackingViz'; // 위에서 만든 컴포넌트 임포트
 import TestPage from './pages/TestPage'
 import AsnPage from './pages/AsnPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import EmailVerificationPage from './pages/EmailVerificationPage';
 
 function App() {
   return (
@@ -28,6 +31,9 @@ function App() {
               <Route path="/packing/pallets" element={<ContainerPackingViz />} />
               <Route path="/asn" element={<AsnPage />} />
               <Route path="/test" element={<TestPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/verify-email" element={<EmailVerificationPage />} />
             </Routes>
           </main>
         </header>
