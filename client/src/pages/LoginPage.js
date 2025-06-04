@@ -50,16 +50,16 @@ const LoginPage = () => {
   return (
     <div>
       <LoginForm onSubmit={handleLoginSubmit} />
-      {isLoading && <p className="text-center mt-3 text-blue-600">로그인 중...</p>}
+      {isLoading && <p className="text-center mt-3 text-blue-600">Logging in...</p>}
       {error && <p className="text-center mt-3 text-red-600">{error}</p>}
       <div className="text-center mt-4">
         <p className="text-gray-700">
-          계정이 없으신가요?{' '}
+          Don't have an account?{' '}
           <button
             onClick={() => navigate('/register')} // 회원가입 페이지 경로가 맞는지 확인
             className="font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer focus:outline-none"
           >
-            가입하기
+            Sign up
           </button>
         </p>
       </div>
