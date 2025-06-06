@@ -35,6 +35,22 @@ const turnOffRelay = async (req, res) => {
   }
 };
 
+const toggleRelay = async (req, res) => {
+  try {
+    const result = await axios.post(RPC_URL, {
+      id: 3,
+      method: "Switch.Toggle",
+      params: { id: 0 }
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    res.json({ status: 'toggled', result: result.data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const getStatus = async (req, res) => {
   try {
     const result = await axios.post(RPC_URL, {
@@ -54,5 +70,6 @@ const getStatus = async (req, res) => {
 module.exports = {
   turnOnRelay,
   turnOffRelay,
+  toggleRelay,
   getStatus
 };
