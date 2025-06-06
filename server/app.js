@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const asnRoutes = require('./routes/asnRoutes');
 const packingRoutes = require ('./routes/packingRoutes');
 const itemRoutes = require('./routes/itemRoutes');
+const shellyRouters = require('./routes/shellyRouters');
 
 require('dotenv').config(); // .env 파일 로드
 
@@ -33,6 +34,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/asn', asnRoutes);
 app.use('/api/packing', packingRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/shelly', shellyRouters)
 
 app.get('/', (req, res) => {
   res.send('This is the backend server');
