@@ -19,12 +19,20 @@ function ShellyPage() {
     try {
       const res = await fetch(`${API_BASE_URL}/shelly/status`);
       const data = await res.json();
-      const isOn = data.status.output ? 'ON' : 'OFF';
-      setStatus(`현재 상태: ${isOn}`);
-    } catch (err) {
-      setStatus(`오류: ${err.message}`);
-    }
-  };
+
+    // Shelly에서 받은 상태 객체
+    const statusObj = data.status;
+
+    // output, 온도 추출 (null 체크 포함)
+    const output = statusObj?.result?.output ?? statusObj?.output;
+    const tempC = statusObj?.result?.temperature?.tC ?? statusObj?.temperature?.tC;
+    const tempF = statusObj?.result?.temperature?.tF ?? statusObj?.temperature?.tF;
+
+    setStatus(`출력: ${output ? 'ON' : 'OFF'}, 온도: ${tempC ?? 'N/A'} °C, 온도: ${tempF ?? 'N/A'} °F`);
+  } catch (err) {
+    setStatus(`오류: ${err.message}`);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4">
