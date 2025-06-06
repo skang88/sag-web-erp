@@ -11,6 +11,7 @@ import ContainerPackingViz from './components/ContainerPackingViz'; // 위에서
 import AsnPage from './pages/AsnPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ShellyPage from './pages/ShellyPage';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Route path="/asn" element={<AsnPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/shelly" element={<ShellyPage />} />
             </Routes>
           </main>
         </header>

@@ -28,6 +28,15 @@ const navLinks = [
     submenuWidth: 'w-60',
   },
   {
+    label: 'Visitor',
+    path: '/shelly',
+    isRouterLink: true,
+    submenu: [
+      { label: 'Bargate', path: '/shelly', isRouterLink: true },
+    ],
+    submenuWidth: 'w-60',
+  },
+  {
     label: 'Dashboard',
     isRouterLink: false,
     submenu: [
