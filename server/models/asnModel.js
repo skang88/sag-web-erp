@@ -13,7 +13,10 @@ const getASN = async (date, ship_group) => {
         LEFT(A.LOCAT, 8) AS date, 
         RIGHT(A.LOCAT, 2) AS shippingGroup,
         B.SPEC_TX AS palletSerial,
-        A.ITMNO AS partNumber, 
+        CASE 
+          WHEN RIGHT(A.ITMNO, 1) = 'K' THEN LEFT(A.ITMNO, LEN(A.ITMNO) - 1)
+          ELSE A.ITMNO
+        END AS partNumber, -- <- K 제거
         mapping.SHORT_NAME AS description,
         A.QTY AS deliveryQty, 
         'EA' AS unit, 
