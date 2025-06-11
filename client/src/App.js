@@ -12,6 +12,7 @@ import AsnPage from './pages/AsnPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ShellyPage from './pages/ShellyPage';
+import PlatePage from './pages/PlatePage';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />
+              <Route path="/plate" element={<PlatePage />} />
             </Routes>
           </main>
         </header>
