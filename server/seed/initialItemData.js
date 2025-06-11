@@ -306,6 +306,24 @@ module.exports = [
     "is_palletized": true
   },
   {
+    "itemNo": "52700-TD000K",
+    "carType": "MVa/MEa",
+    "itemType": "MEa RRT",
+    "itemName": "MEa Axle & Brake Complete RR, LH",
+    "dimensions": {
+      "width": 59,
+      "depth": 39,
+      "height": 50
+    },
+    "weight": 1521,
+    "stackable": true,
+    "max_stack_count": 2, // 변경됨
+    "rotation_allowed": ["z"],
+    "handling_notes": "",
+    "incompatible_with": [],
+    "is_palletized": true
+  },
+  {
     "itemNo": "52701-PI000",
     "carType": "NEa PE",
     "itemType": "NEa RRT",
@@ -325,6 +343,24 @@ module.exports = [
   },
   {
     "itemNo": "52701-TD000",
+    "carType": "MVa/MEa",
+    "itemType": "MEa RRT",
+    "itemName": "MEa Axle & Brake Complete RR, RH",
+    "dimensions": {
+      "width": 59,
+      "depth": 39,
+      "height": 50
+    },
+    "weight": 1521,
+    "stackable": true,
+    "max_stack_count": 2, // 변경됨
+    "rotation_allowed": ["z"],
+    "handling_notes": "",
+    "incompatible_with": [],
+    "is_palletized": true
+  },
+  {
+    "itemNo": "52701-TD000K",
     "carType": "MVa/MEa",
     "itemType": "MEa RRT",
     "itemName": "MEa Axle & Brake Complete RR, RH",

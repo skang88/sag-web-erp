@@ -106,16 +106,24 @@ function AsnPage() {
       alert('다운로드할 데이터가 없습니다.');
       return;
     }
-    const excelData = items.map((item) => ({
-      'Pallet/Rack Serial': item.palletSerial,
-      'Part Number': item.partNumber,
-      'Description (Optional)': item.description,
-      'Delivery Qty.': item.deliveryQty,
-      'Base Unit': item.unit,
-      'PO/SA Number (Max. 10)': item.poNumber,
-      'PO/SA Item (Max. 5)': item.poItem,
-      'Packaging': item.packaging,
-    }));
+    const excelData = items.map((item) => {
+
+      let partNumber = item.partNumber;
+      if (partNumber.endsWith('K')) {
+        partNumber = partNumber.slice(0, -1); // 마지막 문자 'K' 제거
+      }
+
+      return {
+        'Pallet/Rack Serial': item.palletSerial,
+        'Part Number': partNumber,
+        'Description (Optional)': item.description,
+        'Delivery Qty.': item.deliveryQty,
+        'Base Unit': item.unit,
+        'PO/SA Number (Max. 10)': item.poNumber,
+        'PO/SA Item (Max. 5)': item.poItem,
+        'Packaging': item.packaging,
+      };
+    });
 
     const worksheet = XLSX.utils.json_to_sheet(excelData);
 
@@ -246,14 +254,14 @@ function AsnPage() {
           <button
             onClick={fetchItems}
             className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:transform-none w-full sm:w-auto" /* 스타일 일관성 */
-            >
+          >
             ASN 조회
           </button>
           <button
             onClick={handleExcelDownload}
             disabled={items.length === 0 || loading}
             className="px-5 py-2.5 bg-slate-600 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 transition-all duration-200 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none w-full sm:w-auto" /* 스타일 일관성 */
-            >
+          >
             Excel 다운로드
           </button>
           {/* 📄 PDF 다운로드 버튼 추가 */}
