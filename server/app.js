@@ -11,6 +11,7 @@ const asnRoutes = require('./routes/asnRoutes');
 const packingRoutes = require ('./routes/packingRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const shellyRouters = require('./routes/shellyRouters');
+const plateRouters = require('./routes/plateRoutes');
 
 require('dotenv').config(); // .env 파일 로드
 
@@ -35,6 +36,9 @@ app.use('/api/asn', asnRoutes);
 app.use('/api/packing', packingRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/shelly', shellyRouters)
+
+// Webhook 설정
+app.use('/api/plate', plateRouters)
 
 app.get('/', (req, res) => {
   res.send('This is the backend server');
