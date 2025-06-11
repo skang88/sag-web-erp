@@ -5,39 +5,40 @@ const getASN = async (date, ship_group) => {
   try {
     const pool = await getPool();
     const request = pool.request();
-    request.input('date', sql.VarChar, date); // '20250512' 형식 기대
-    request.input('group', sql.VarChar, ship_group); // '03' 형식 기대
+    request.input('date', sql.VarChar, date);       // 예: '20250609'
+    request.input('group', sql.VarChar, ship_group); // 예: '01'
 
     const sqlQuery = `
       SELECT 
-        LEFT(LOCAT, 8) AS date, 
-        RIGHT(LOCAT, 2) AS shippingGroup, 
-        SUBSTRING(BIGO01, 10, 16) AS palletSerial,
-        matl.ITMNO AS partNumber, 
+        LEFT(A.LOCAT, 8) AS date, 
+        RIGHT(A.LOCAT, 2) AS shippingGroup,
+        B.SPEC_TX AS palletSerial,
+        A.ITMNO AS partNumber, 
         mapping.SHORT_NAME AS description,
-        matl.QTY AS deliveryQty,
-        'EA' AS unit,
+        A.QTY AS deliveryQty, 
+        'EA' AS unit, 
         '5500003006' AS poNumber,
         mapping.ORD AS poItem,
         'RETURNABLE' AS packaging
-      FROM MAT_LOCA_ALM matl
-      INNER JOIN dbo.MAT_ITMMAPPING mapping 
-        ON matl.ITMNO = mapping.ITMNO
-      WHERE LEFT(LOCAT, 8) = @date 
-        AND RIGHT(LOCAT, 2) = @group
-        AND STS <> 'D'
-      ORDER BY partNumber, palletSerial;
+      FROM MAT_LOCA_ALM A
+      INNER JOIN MAT_BARCODE_HIS B ON A.BIGO01 = B.QR_NO
+      INNER JOIN dbo.MAT_ITMMAPPING mapping ON A.ITMNO = mapping.ITMNO
+      WHERE A.GUBN = 'B' 
+        AND LEFT(A.LOCAT, 8) = @date
+        AND RIGHT(A.LOCAT, 2) = @group
+        AND A.STS <> 'D'
+      ORDER BY A.ITMNO, A.BIGO02;
     `;
 
     const result = await request.query(sqlQuery);
-    
+
     return {
       count: result.recordset.length,
       data: result.recordset
     };
 
   } catch (err) {
-    console.error('Database query failed in getASN with mapping:', err);
+    console.error('Database query failed in getASN with mapping and SPEC_TX:', err);
     throw new Error('Database query failed');
   }
 };
