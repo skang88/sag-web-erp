@@ -32,7 +32,7 @@ function ShellyPage() {
   useEffect(() => {
     getStatus(); // 컴포넌트 마운트 시 즉시 상태 호출
 
-    const intervalId = setInterval(getStatus, 5000); // 5초마다 getStatus 호출
+    const intervalId = setInterval(getStatus, 200); // 0.2초마다 getStatus 호출
 
     // 컴포넌트 언마운트 시 인터벌 정리 (메모리 누수 방지)
     return () => clearInterval(intervalId);
