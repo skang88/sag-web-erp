@@ -70,58 +70,61 @@ exports.verifyEmail = async (req, res) => {
       throw new Error('Verification token was not provided.');
     }
 
-    // C. (중요) 토큰 생성 시 { userId }를 사용했으므로, 해석할 때도 decoded.userId를 사용합니다.
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // D. 해석된 userId로 사용자를 찾습니다.
     const user = await User.findById(decoded.userId);
 
     if (!user) {
       throw new Error('User not found.');
     }
-    if (user.isVerified) {
-      throw new Error('This account has already been verified.');
-    }
 
-    user.isVerified = true;
-    await user.save();
-    
-    // --- 인증 성공 HTML ---
-    const successHtml = `
+    // ★★★ 이 부분이 추가/수정되었습니다 ★★★
+    if (user.isVerified) {
+      const alreadyVerifiedHtml = `
       <!DOCTYPE html>
       <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Email Verification Complete</title>
+          <title>Already Verified</title>
           <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f7f7; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f8ff; }
               .container { text-align: center; padding: 40px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-              h1 { color: #28a745; }
+              h1 { color: #1e90ff; }
               p { color: #333; font-size: 1.1em; }
           </style>
       </head>
       <body>
           <div class="container">
-              <h1>✅</h1>
-              <h1>Email Verified Successfully!</h1>
-              <p>Your account is now active. You may now close this window.</p>
+              <h1>ℹ️</h1>
+              <h1>This Email is Already Verified</h1>
+              <p>This account has already been activated. You can now log in or close this window.</p>
           </div>
       </body>
       </html>
     `;
+      // HTML 응답을 보내고 함수를 즉시 종료합니다.
+      return res.status(200).send(alreadyVerifiedHtml);
+    }
+
+    // 처음 인증하는 사용자의 경우, 상태를 변경하고 저장합니다.
+    user.isVerified = true;
+    await user.save();
+    
+    // --- 인증 성공 HTML ---
+    const successHtml = `...`; // 이전 답변의 성공 HTML 내용
     res.status(200).send(successHtml);
 
   } catch (error) {
     // --- 인증 실패 HTML ---
     let errorMessage = 'The token is invalid or has expired.';
+    // '이미 인증된 계정' 에러는 위에서 처리했으므로 여기서는 삭제합니다.
     if (error.name === 'TokenExpiredError') {
       errorMessage = 'The verification link has expired. Please request a new one.';
-    } else if (error.message) {
+    } else if (error.message && error.message !== 'This account has already been verified.') {
       errorMessage = error.message;
     }
     
-    const errorHtml = `...`; // 이전 답변의 실패 HTML 내용
+    const errorHtml = `...`; // 이전 답변의 실패 HTML 내용 (errorMessage 변수 사용)
     res.status(400).send(errorHtml);
   }
 };
