@@ -60,11 +60,11 @@ exports.verifyEmail = async (req, res) => {
     // 1. 토큰 유효성 검사 및 사용자 활성화 로직
     // ... (토큰을 디코딩하고 DB에서 사용자를 찾아 상태를 '활성'으로 변경)
     // 이 로직이 성공적으로 완료되었다고 가정합니다.
-    // const user = await User.findOne({ verificationToken: token });
-    // if (!user) throw new Error('Invalid token');
-    // user.isVerified = true;
-    // user.verificationToken = undefined;
-    // await user.save();
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) throw new Error('Invalid token');
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
 
 
     // 2. 인증 성공 시 보여줄 HTML 페이지
