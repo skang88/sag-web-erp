@@ -51,42 +51,62 @@ exports.login = async (req, res) => {
   }
 };
 
-// 예시: /api/auth/verify-email 라우트의 컨트롤러 함수
+// Example: Controller function for the /api/auth/verify-email route
 
 exports.verifyEmail = async (req, res) => {
   try {
+    // 1. User verification logic
+    // This is an example. You need to modify it to fit your project's User model and fields.
+
+    // Get the token from the query string
     const { token } = req.query;
 
-    // 1. 토큰 유효성 검사 및 사용자 활성화 로직
-    // ... (토큰을 디코딩하고 DB에서 사용자를 찾아 상태를 '활성'으로 변경)
-    // 이 로직이 성공적으로 완료되었다고 가정합니다.
+    if (!token) {
+      throw new Error('Verification token was not provided.');
+    }
+
+    // Find the user with the corresponding verification token in the DB
     const user = await User.findOne({ verificationToken: token });
-    if (!user) throw new Error('Invalid token');
+
+    // If no user is found, the token is invalid
+    if (!user) {
+      throw new Error('Invalid verification token.');
+    }
+
+    // If the user is already verified
+    if (user.isVerified) {
+      throw new Error('This account has already been verified.');
+    }
+
+    // Update the user's status to 'verified'
     user.isVerified = true;
-    user.verificationToken = undefined;
+    // For security, it's best to remove or nullify the token after use
+    user.verificationToken = undefined; 
+
+    // Save the updated user information to the DB
     await user.save();
 
 
-    // 2. 인증 성공 시 보여줄 HTML 페이지
+    // 2. HTML page to display on verification success
     const successHtml = `
       <!DOCTYPE html>
-      <html lang="ko">
+      <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>이메일 인증 완료</title>
+          <title>Email Verification Complete</title>
           <style>
-              body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f7f7; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f7f7; }
               .container { text-align: center; padding: 40px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
               h1 { color: #28a745; }
-              p { color: #333; }
+              p { color: #333; font-size: 1.1em; }
           </style>
       </head>
       <body>
           <div class="container">
               <h1>✅</h1>
-              <h1>이메일 인증이 완료되었습니다.</h1>
-              <p>이제 계정을 정상적으로 사용하실 수 있습니다. 이 창을 닫으셔도 좋습니다.</p>
+              <h1>Email Verified Successfully!</h1>
+              <p>Your account is now active. You may now close this window.</p>
           </div>
       </body>
       </html>
@@ -95,26 +115,26 @@ exports.verifyEmail = async (req, res) => {
     res.status(200).send(successHtml);
 
   } catch (error) {
-    // 3. 인증 실패 또는 오류 발생 시 보여줄 HTML 페이지
+    // 3. HTML page to display on verification failure or error
     const errorHtml = `
       <!DOCTYPE html>
-      <html lang="ko">
+      <html lang="en">
       <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>이메일 인증 실패</title>
+          <title>Email Verification Failed</title>
           <style>
-              body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f7f7; }
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f7f7f7; }
               .container { text-align: center; padding: 40px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
               h1 { color: #dc3545; }
-              p { color: #333; }
+              p { color: #333; font-size: 1.1em; }
           </style>
       </head>
       <body>
           <div class="container">
               <h1>❌</h1>
-              <h1>인증에 실패하였습니다.</h1>
-              <p>${error.message || '유효하지 않은 토큰이거나, 이미 인증이 완료되었습니다.'}</p>
+              <h1>Verification Failed</h1>
+              <p>${error.message || 'The token is invalid or has already been used.'}</p>
           </div>
       </body>
       </html>
