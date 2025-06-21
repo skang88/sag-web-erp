@@ -3,6 +3,7 @@
 const Plate = require('../models/plateModel');
 const User = require('../models/userModel'); // User 모델 임포트
 const { _turnOn, _turnOff } = require('./shellyController');
+const { sendTelegramMessage } = require('../utils/telegramUtils'); // 텔레그램 유틸리티 임포트!
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -26,6 +27,7 @@ exports.createPlate = async (req, res) => {
     }
 
     let overallShellyOperated = false; // 이번 요청에서 Shelly가 한 번이라도 작동했는지 여부
+    const telegramMessages = [];
 
     const createdPlateDocs = []; // 생성된 문서들을 저장할 배열
 
@@ -33,6 +35,8 @@ exports.createPlate = async (req, res) => {
     for (const item of dataArray) {
       const vehicle = item.vehicle || {};
       const detectedPlateNumber = item.best_plate_number ? item.best_plate_number.toUpperCase().trim() : null;
+
+      const detectionTime = new Date(item.epoch_start).toLocaleString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
       let currentRegistrationStatus = 'NO_PLATE'; // 현재 번호판의 등록 상태 초기화
       let currentShellyOperated = false;       // 현재 번호판 처리로 Shelly가 작동했는지 여부
@@ -96,10 +100,52 @@ exports.createPlate = async (req, res) => {
       // 데이터베이스에 저장하고 생성된 문서 배열에 추가
       const createdDoc = await Plate.create(documentToCreate);
       createdPlateDocs.push(createdDoc);
+
+      // --- 텔레그램 메시지 생성 ---
+    let telegramMessage = `🚗 *차량 번호판 인식 알림* 🚗\n`;
+    telegramMessage += `*시간:* ${detectionTime}\n`;
+    telegramMessage += `*번호판:* \`${detectedPlateNumber}\`\n`;
+    telegramMessage += `*등록 여부:* \`${currentRegistrationStatus}\`\n`;
+
+    if (currentRegistrationStatus === 'REGISTERED') {
+        telegramMessage += `*등록자:* ${userEmailInfo}\n`;
+        telegramMessage += `*게이트 작동:* ${currentShellyOperated ? '✅ 열림' : '❌ 작동 안 함 (오류)'}\n`;
+    } else if (currentRegistrationStatus === 'UNREGISTERED') {
+        telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
+    } else { // NO_PLATE
+        telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
+    }
+
+    // ⭐⭐⭐ 이 부분을 수정합니다 ⭐⭐⭐
+    const confidenceValue = item.best_confidence ? item.best_confidence.toFixed(2) : 'N/A';
+    // 신뢰도 값에 . 이 포함될 수 있으므로, . 를 직접 \\. 로 이스케이프하거나,
+    // 정규식을 사용하여 모든 예약된 문자를 이스케이프하는 함수를 만드는 것이 좋습니다.
+
+    // 모든 MarkdownV2 예약 문자를 이스케이프하는 헬퍼 함수
+    const escapeMarkdownV2 = (text) => {
+        // 예약 문자는 다음 목록에 있습니다: _ * [ ] ( ) ~ ` > # + - = | { } . !
+        // 하지만 모든 문자를 이스케이프할 필요는 없으며, 실제 문제가 되는 문자만 처리해도 됩니다.
+        // 여기서는 . 만 처리하거나, 일반적인 텍스트에서 문제될 수 있는 몇 가지만 처리합니다.
+        return text.replace(/([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
+    };
+
+    telegramMessage += `_신뢰도: ${escapeMarkdownV2(confidenceValue)}%_`; // 함수를 사용하여 이스케이프
+
+    telegramMessages.push(telegramMessage);
+
     } // for 루프 종료
 
     console.log(`데이터베이스에 ${createdPlateDocs.length}개의 번호판 정보 저장 완료.`);
     console.log(`전체 요청에서 Shelly는 ${overallShellyOperated ? '작동했습니다.' : '작동하지 않았습니다.'}`);
+
+    // --- 모든 텔레그램 메시지 전송 (한 번의 웹훅에 여러 번호판이 있을 경우) ---
+    for (const msg of telegramMessages) {
+        await sendTelegramMessage(msg);
+    }
+    // 또는 모든 메시지를 하나의 메시지로 합쳐서 보내려면:
+    // if (telegramMessages.length > 0) {
+    //     await sendTelegramMessage(telegramMessages.join('\n\n---\n\n'));
+    // }
 
     res.status(201).json({
       message: 'Plate data successfully processed and saved.',
@@ -128,6 +174,7 @@ exports.createPlate = async (req, res) => {
     }
 
     console.error('Error processing Plate data:', error);
+    await sendTelegramMessage(`❌ Server Error Processing Plate: ${error.message}`); // 텔레그램 알림
     res.status(500).json({ message: 'An unexpected server error occurred', error: error.message });
   }
 };
