@@ -15,6 +15,7 @@ import PlatePage from './pages/PlatePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage';   // 추가
 import ProfilePage from './pages/ProfilePage'; // ⭐ 새로 추가: 프로필 페이지 임포트 ⭐
+import PlateLogPage from './pages/PlateLogPage';
 
 
 function App() {
@@ -37,6 +38,8 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />
               <Route path="/plate" element={<PlatePage />} />
+              <Route path="/plate-log" element={<PlateLogPage />} />
+
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} /> 
               <Route path="/profile" element={<ProfilePage />} />
