@@ -39,13 +39,6 @@ const PlateLogPage = () => {
         setMessage('');
         const token = localStorage.getItem('token');
 
-        if (!token) {
-            setError('로그인이 필요합니다.');
-            setIsLoading(false);
-            navigate('/login');
-            return;
-        }
-
         // 쿼리 파라미터 생성
         const queryParams = new URLSearchParams();
         if (startDate) queryParams.append('startDate', startDate);
