@@ -16,6 +16,13 @@ const generateEmailVerificationToken = (userId) => {
 exports.register = async (req, res) => {
   const { email, password } = req.body;
 
+  // --- ⭐ Added Email Domain Validation (Server-side) ⭐ ---
+    const allowedDomain = '@seohan.com';
+    if (!email.endsWith(allowedDomain)) {
+        return res.status(400).json({ message: `You must use an email from the '${allowedDomain}' domain to register.` });
+    }
+    // --- ⭐ Validation Complete ⭐ ---
+
   try {
     const existingUser = await User.findOne({ email });
 

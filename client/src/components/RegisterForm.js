@@ -26,7 +26,7 @@ const RegisterForm = ({ onSubmit }) => {
       <h2 className="text-3xl text-gray-800 mb-5 font-semibold">Register</h2>
       <form onSubmit={handleSubmit} className="w-full">
         <div className="mb-6">
-          <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+          <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email: use @seohan.com</label>
           <input
             type="email" // type="email" 사용
             id="email"
