@@ -37,7 +37,7 @@ exports.sendPasswordResetEmail = async (email, resetToken) => {
     const mailOptions = {
         from: process.env.GMAIL_USER,
         to: email,
-        subject: 'Password Reset Request - Revised',
+        subject: 'Password Reset Request',
         html: `
             <p>You are receiving this email because you (or someone else) has requested the reset of a password for your account.</p>
             <p>Please click on the following link to reset your password. This link is valid for **one hour**.</p>
