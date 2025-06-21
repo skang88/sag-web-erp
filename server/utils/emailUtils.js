@@ -32,7 +32,7 @@ exports.sendPasswordResetEmail = async (email, resetToken) => {
     // ★★★ 중요: 이 URL은 사용자가 비밀번호를 재설정할 프론트엔드의 페이지 주소입니다. ★★★
     // 로컬 개발 환경이라면 http://localhost:3000/reset-password?token=${resetToken} 형태가 될 것입니다.
     // 실제 프론트엔드 환경에 맞게 `process.env.FRONTEND_BASE_URL` 또는 고정 IP를 사용하세요.
-    const resetUrl = `http://172.16.220.32:8001/reset-password?token=${resetToken}`; // 예시: 프론트엔드 URL
+    const resetUrl = `http://172.16.220.32:8000/reset-password?token=${resetToken}`; // 예시: 프론트엔드 URL
 
     const mailOptions = {
         from: process.env.GMAIL_USER,
