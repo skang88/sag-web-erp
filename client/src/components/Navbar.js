@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode'; // jwt-decode 라이브러리 가져오기
+import { jwtDecode } from 'jwt-decode';
 import Logo from './Logo';
 
 // navLinks 정의는 이전과 동일하게 유지됩니다...
@@ -90,17 +90,13 @@ function Navbar() {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const decodedToken = jwtDecode(token); // 토큰 디코딩
-          // 백엔드에서 토큰 생성 시 { userId: user._id } 형태로 저장했으므로
-          // decodedToken.userId 로 접근 가능합니다.
-          // 만약 토큰에 이메일도 포함시켰다면 decodedToken.email 등으로 접근할 수 있습니다.
-          setUserIdToDisplay(decodedToken.email); // 예시: userId 표시 (MongoDB ObjectId)
-          // 만약 이메일 표시를 원하고, 토큰에 이메일이 있다면:
-          // setUserIdToDisplay(decodedToken.email || decodedToken.userId);
+          const decodedToken = jwtDecode(token);
+          setUserIdToDisplay(decodedToken.email); // 토큰에 email이 있다면 표시
+          // 만약 토큰에 email이 없고 userId만 있다면:
+          // setUserIdToDisplay(decodedToken.userId); // userId로 표시
           setIsLoggedIn(true);
         } catch (error) {
           console.error("Invalid token:", error);
-          // 잘못된 토큰 처리: 토큰 삭제 및 로그아웃 상태로 변경
           localStorage.removeItem('token');
           setIsLoggedIn(false);
           setUserIdToDisplay('');
@@ -128,7 +124,7 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
-    setUserIdToDisplay(''); // 로그아웃 시 사용자 ID 초기화
+    setUserIdToDisplay('');
     alert('로그아웃 되었습니다.');
     navigate('/login');
   };
@@ -137,7 +133,6 @@ function Navbar() {
     <nav className="bg-[#0B4DA3] flex justify-between items-center p-2 w-full fixed top-0 left-0 z-[1000]">
       {/* 왼쪽 메뉴 (로고 및 기존 메뉴) */}
       <ul className="flex items-center m-0 p-0 list-none">
-        {/* ... (기존 로고 및 navLinks 매핑 부분은 동일) ... */}
         <li className="mr-4">
           <Link to="/home" className="no-underline">
             <Logo />
@@ -189,10 +184,18 @@ function Navbar() {
       <div className="flex items-center space-x-4 mr-4">
         {isLoggedIn ? (
           <>
-            {/* 사용자 ID 표시 */}
+            {/* 사용자 ID (이메일) 표시 */}
             <span className="text-white text-sm font-medium">
-              {userIdToDisplay} {/* 여기에 사용자 ID (또는 이메일) 표시 */}
+              {userIdToDisplay}
             </span>
+            {/* ⭐ 여기에 Edit Profile Link 추가 ⭐ */}
+            <Link
+              to="/profile" // 프로필 페이지 경로
+              className="text-white text-sm font-medium hover:text-yellow-300 underline transition duration-150 ease-in-out"
+              style={{ whiteSpace: 'nowrap' }} // 텍스트가 줄바꿈되지 않도록
+            >
+              Edit Profile
+            </Link>
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-3 rounded text-sm transition duration-150 ease-in-out"

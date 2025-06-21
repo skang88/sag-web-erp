@@ -14,6 +14,8 @@ import ShellyPage from './pages/ShellyPage';
 import PlatePage from './pages/PlatePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage';   // 추가
+import ProfilePage from './pages/ProfilePage'; // ⭐ 새로 추가: 프로필 페이지 임포트 ⭐
+
 
 function App() {
   return (
@@ -36,8 +38,8 @@ function App() {
               <Route path="/shelly" element={<ShellyPage />} />
               <Route path="/plate" element={<PlatePage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              {/* ⭐⭐⭐ 이 라우트 부분을 수정합니다 ⭐⭐⭐ */}
               <Route path="/reset-password" element={<ResetPasswordPage />} /> 
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </main>
         </header>
