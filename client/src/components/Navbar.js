@@ -136,7 +136,7 @@ function Navbar() {
       {/* 왼쪽 메뉴 (로고 및 기존 메뉴) */}
       <ul className="flex items-center m-0 p-0 list-none">
         <li className="mr-4">
-          <Link to="/home" className="no-underline">
+          <Link to="/" className="no-underline">
             <Logo />
           </Link>
         </li>

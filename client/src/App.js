@@ -1,6 +1,6 @@
 // src/App.js
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar';
 // import Home from './pages/HomePage'; // ⭐ 제거: HomePage는 더 이상 독립적인 페이지가 아님 ⭐
