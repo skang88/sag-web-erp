@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
 import Home from './pages/HomePage';
-import Login from './pages/LoginPage';
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
 import PackingSummary from './pages/PackingSummaryPage';
@@ -13,6 +12,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ShellyPage from './pages/ShellyPage';
 import PlatePage from './pages/PlatePage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage';   // 추가
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
           <Navbar /> {/* Navbar 추가 */}
           <main>
             <Routes>
-              <Route path="/" element={<Login />} />
+              <Route path="/" element={<LoginPage />} />
               <Route path="/home" element={<Home />} />
               <Route path="/access" element={<AccessData />} />
               <Route path="/lastlogin" element={<LastLogin />} />
@@ -34,6 +35,9 @@ function App() {
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />
               <Route path="/plate" element={<PlatePage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              {/* ⭐⭐⭐ 이 라우트 부분을 수정합니다 ⭐⭐⭐ */}
+              <Route path="/reset-password" element={<ResetPasswordPage />} /> 
             </Routes>
           </main>
         </header>
