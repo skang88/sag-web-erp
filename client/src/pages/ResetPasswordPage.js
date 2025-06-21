@@ -73,7 +73,7 @@ const ResetPasswordPage = () => {
       }
 
       setMessage(data.message || '비밀번호가 성공적으로 재설정되었습니다!');
-      setTimeout(() => navigate('/login'), 3000);
+      setTimeout(() => navigate('/login'), 1000);
 
     } catch (err) {
       setIsLoading(false);
