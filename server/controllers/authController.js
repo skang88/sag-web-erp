@@ -1,24 +1,31 @@
+// controllers/authController.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
-const { sendVerificationEmail } = require('../utils/emailUtils');
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emailUtils'); // sendPasswordResetEmail import
+const crypto = require('crypto'); // crypto 모듈 import (모델에서도 사용)
+
 
 // --- Helper Function ---
-// A. 토큰 생성 함수를 컨트롤러 파일 상단에 일반 함수로 정의합니다.
-//    이제 이 함수는 이 파일 내에서만 사용됩니다.
 const generateEmailVerificationToken = (userId) => {
-  // 토큰 생성 시 payload에 { userId } 객체를 넣습니다.
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
 
-// 회원가입
+// 회원가입 (기존 코드 그대로)
 exports.register = async (req, res) => {
   const { email, password } = req.body;
 
+  // --- ⭐ Added Email Domain Validation (Server-side) ⭐ ---
+    const allowedDomain = '@seohan.com';
+    if (!email.endsWith(allowedDomain)) {
+        return res.status(400).json({ message: `You must use an email from the '${allowedDomain}' domain to register.` });
+    }
+    // --- ⭐ Validation Complete ⭐ ---
+
   try {
     const existingUser = await User.findOne({ email });
-  
+
     if (existingUser) {
       return res.status(400).json({ message: 'Email already in use' });
     }
@@ -38,7 +45,7 @@ exports.register = async (req, res) => {
   }
 };
 
-// 로그인
+// 로그인 (기존 코드 그대로)
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -49,9 +56,8 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // JWT 생성 시 email 정보 추가
     const token = jwt.sign(
-      { userId: user._id, email: user.email }, // <--- 여기에 email: user.email 추가
+      { userId: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
@@ -62,7 +68,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// 2. 이메일 인증 컨트롤러
+// 이메일 인증 컨트롤러 (기존 코드에서 성공 HTML만 간단히 수정)
 exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.query;
@@ -77,7 +83,6 @@ exports.verifyEmail = async (req, res) => {
       throw new Error('User not found.');
     }
 
-    // ★★★ 이 부분이 추가/수정되었습니다 ★★★
     if (user.isVerified) {
       const alreadyVerifiedHtml = `
       <!DOCTYPE html>
@@ -102,29 +107,154 @@ exports.verifyEmail = async (req, res) => {
       </body>
       </html>
     `;
-      // HTML 응답을 보내고 함수를 즉시 종료합니다.
       return res.status(200).send(alreadyVerifiedHtml);
     }
 
-    // 처음 인증하는 사용자의 경우, 상태를 변경하고 저장합니다.
     user.isVerified = true;
     await user.save();
-    
-    // --- 인증 성공 HTML ---
-    const successHtml = `...`; // 이전 답변의 성공 HTML 내용
+
+    // --- 인증 성공 HTML (간단화) ---
+    const successHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Verified!</title>
+          <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #e6ffe6; }
+              .container { text-align: center; padding: 40px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+              h1 { color: #28a745; }
+              p { color: #333; font-size: 1.1em; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>✅</h1>
+              <h1>Email Successfully Verified!</h1>
+              <p>Your email address has been successfully verified. You can now close this window and log in to your account.</p>
+          </div>
+      </body>
+      </html>
+    `;
     res.status(200).send(successHtml);
 
   } catch (error) {
-    // --- 인증 실패 HTML ---
+    // --- 인증 실패 HTML (간단화) ---
     let errorMessage = 'The token is invalid or has expired.';
-    // '이미 인증된 계정' 에러는 위에서 처리했으므로 여기서는 삭제합니다.
     if (error.name === 'TokenExpiredError') {
       errorMessage = 'The verification link has expired. Please request a new one.';
     } else if (error.message && error.message !== 'This account has already been verified.') {
       errorMessage = error.message;
     }
-    
-    const errorHtml = `...`; // 이전 답변의 실패 HTML 내용 (errorMessage 변수 사용)
+
+    const errorHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verification Failed!</title>
+          <style>
+              body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #ffe6e6; }
+              .container { text-align: center; padding: 40px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+              h1 { color: #dc3545; }
+              p { color: #333; font-size: 1.1em; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>❌</h1>
+              <h1>Email Verification Failed!</h1>
+              <p>${errorMessage}</p>
+              <p>Please try again or contact support.</p>
+          </div>
+      </body>
+      </html>
+    `;
     res.status(400).send(errorHtml);
   }
+};
+
+
+// --- 새로 추가되는 부분: 비밀번호 재설정 요청 ---
+exports.forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            // 보안을 위해 사용자가 존재하지 않아도 성공 메시지를 보낼 수 있습니다.
+            // 하지만 여기서는 사용자에게 정확한 피드백을 주기 위해 404를 반환합니다.
+            return res.status(404).json({ message: 'User with that email does not exist.' });
+        }
+
+        // User 모델 인스턴스의 메서드를 호출하여 토큰 생성
+        const resetToken = user.createPasswordResetToken();
+        // ★ 중요: isVerified가 false인 사용자의 비밀번호를 재설정할 경우,
+        // user.save() 시 isVerified에 대한 스키마 검증이 실패할 수 있습니다.
+        // { validateBeforeSave: false } 옵션을 사용하면 이를 무시합니다.
+        // 또는, 이미 verifyEmail 함수가 user.isVerified를 true로 바꾸고 있으므로,
+        // 여기서는 큰 문제가 없을 수도 있습니다.
+        await user.save({ validateBeforeSave: false });
+
+        // 비밀번호 재설정 이메일 전송
+        await sendPasswordResetEmail(user.email, resetToken);
+
+        res.status(200).json({ message: 'Password reset link sent to your email.' });
+
+    } catch (error) {
+        console.error('Forgot Password Error:', error);
+        // 오류 발생 시 DB에 저장된 토큰 정보 초기화 (보안 및 재시도 가능성)
+        if (user) { // user가 정의되어 있는 경우에만 초기화 시도
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+        }
+        res.status(500).json({ message: 'There was an error sending the password reset email. Please try again later.' });
+    }
+};
+
+// --- 새로 추가되는 부분: 비밀번호 재설정 ---
+exports.resetPassword = async (req, res) => {
+    // URL 파라미터로 받은 토큰
+    const { token } = req.params;
+    // 요청 본문(body)에서 새 비밀번호 받음
+    const { password } = req.body;
+
+    // 1. URL로 받은 원본 토큰을 해싱하여 DB에 저장된 해시된 토큰과 비교
+    const hashedToken = crypto
+        .createHash('sha256')
+        .update(token)
+        .digest('hex');
+
+    try {
+        // 2. 해시된 토큰과 만료되지 않은 토큰을 가진 사용자 찾기
+        const user = await User.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() } // 토큰 만료 시간 (현재 시간보다 미래여야 함)
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Token is invalid or has expired.' });
+        }
+
+        // 3. 새 비밀번호 해싱 및 저장
+        user.password = await bcrypt.hash(password, 10);
+        user.passwordResetToken = undefined; // 사용된 토큰 초기화 (보안)
+        user.passwordResetExpires = undefined; // 만료 시간 초기화
+
+        // 선택 사항: 비밀번호를 재설정했으니 이메일도 인증된 것으로 간주할 수 있습니다.
+        // 이는 서비스 정책에 따라 다릅니다.
+        user.isVerified = true;
+
+        await user.save(); // 변경사항 저장
+
+        // 4. 성공 응답
+        res.status(200).json({ message: 'Password has been reset successfully.' });
+
+    } catch (error) {
+        console.error('Reset Password Error:', error);
+        res.status(500).json({ message: 'There was an error resetting your password. Please try again.' });
+    }
 };

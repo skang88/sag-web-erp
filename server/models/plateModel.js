@@ -1,17 +1,18 @@
+// models/plateModel.js
 const mongoose = require('mongoose');
 
-// 새로운 데이터 구조에 맞게 재정의된 스키마
 const plateSchema = new mongoose.Schema(
   {
-    dataType: { type: String }, // 예: "alpr_group"
-    startTime: { type: Date }, // epoch_start 값을 변환
-    endTime: { type: Date }, // epoch_end 값을 변환
+    dataType: { type: String },
+    startTime: { type: Date },
+    endTime: { type: Date },
     bestUuid: {
-      type: String, 
-      required: true
+      type: String,
+      required: true,
+      unique: true // bestUuid는 각 웹훅 이벤트의 고유 식별자이므로 unique로 설정하는 것이 좋습니다.
     },
     companyId: {
-      type: String, // UUID 형식이므로 String으로 변경
+      type: String,
       index: true,
     },
     agentUid: { type: String },
@@ -21,13 +22,27 @@ const plateSchema = new mongoose.Schema(
       index: true,
     },
     bestConfidence: { type: Number },
-    // vehicle 객체 안의 배열에서 가장 신뢰도 높은 첫 번째 값만 추출
     vehicle: {
       color: { type: String },
       make: { type: String },
       makeModel: { type: String },
       bodyType: { type: String },
-    }
+    },
+    // --- 새로 추가되는 필드 ---
+    registrationStatus: { // 번호판 등록 여부 (REGISTERED, UNREGISTERED, NO_PLATE 등)
+      type: String,
+      enum: ['REGISTERED', 'UNREGISTERED', 'NO_PLATE'], // 가능한 값 제한
+      default: 'NO_PLATE',
+      required: true,
+    },
+    shellyOperated: { // Shelly 바 게이트 작동 여부
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+  },
+  {
+    timestamps: true // createdAt, updatedAt 자동 추가 (권장)
   }
 );
 

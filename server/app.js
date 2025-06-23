@@ -10,8 +10,9 @@ const authRoutes = require('./routes/authRoutes');
 const asnRoutes = require('./routes/asnRoutes');
 const packingRoutes = require ('./routes/packingRoutes');
 const itemRoutes = require('./routes/itemRoutes');
-const shellyRouters = require('./routes/shellyRouters');
-const plateRouters = require('./routes/plateRoutes');
+const shellyRoutes = require('./routes/shellyRouters');
+const plateRoutes = require('./routes/plateRoutes');
+const userRoutes = require('./routes/userRoutes')
 
 require('dotenv').config(); // .env 파일 로드
 
@@ -29,16 +30,21 @@ mongoose.connect(process.env.MONGO_URI)
 app.use(cors());
 app.use(bodyParser.json());
 
-// API 라우트 설정
-app.use('/api/accs', accRoutes);
+// 로그인, 사용자 관련 라우트
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+
+// HR관련 라우트
+app.use('/api/accs', accRoutes);
+
+// 자재관련 라우트
 app.use('/api/asn', asnRoutes);
 app.use('/api/packing', packingRoutes);
 app.use('/api/items', itemRoutes);
-app.use('/api/shelly', shellyRouters)
 
-// Webhook 설정
-app.use('/api/plate', plateRouters)
+// 바게이트 관련 라우트
+app.use('/api/shelly', shellyRoutes)
+app.use('/api/plate', plateRoutes)
 
 app.get('/', (req, res) => {
   res.send('This is the backend server');
