@@ -3,14 +3,18 @@ import './App.css';
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
 import Home from './pages/HomePage';
 import Login from './pages/LoginPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
+
 import PackingSummary from './pages/PackingSummaryPage';
 import PackingItems from './pages/PackingItems';
 import ContainerPackingViz from './components/ContainerPackingViz'; // 위에서 만든 컴포넌트 임포트
 import AsnPage from './pages/AsnPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import StocktakingPage from './pages/StocktakingPage'
+
 import ShellyPage from './pages/ShellyPage';
 import PlatePage from './pages/PlatePage';
 
@@ -30,6 +34,8 @@ function App() {
               <Route path="/packing/items" element={<PackingItems />} />
               <Route path="/packing/pallets" element={<ContainerPackingViz />} />
               <Route path="/asn" element={<AsnPage />} />
+              <Route path="/stocktaking" element={<StocktakingPage />} />
+
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />

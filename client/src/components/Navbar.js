@@ -24,6 +24,7 @@ const navLinks = [
       { label: 'Packing Summary', path: '/packing', isRouterLink: true },
       { label: 'Packing items', path: '/packing/items', isRouterLink: true },
       { label: 'Packing Plans', path: '/packing/pallets', isRouterLink: true },
+      { label: 'Stocktaking', path: '/stocktaking', isRouterLink: true },
     ],
     submenuWidth: 'w-60',
   },
