@@ -38,7 +38,7 @@ function App() {
               <Route path="/packing/items" element={<PackingItems />} />
               <Route path="/packing/pallets" element={<ContainerPackingViz />} />
               <Route path="/asn" element={<AsnPage />} />
-              <Route path="/stocktaking" element={<StocktakingPage />} />
+              <Route path="/barcode-tester" element={<StocktakingPage />} />
               
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />
