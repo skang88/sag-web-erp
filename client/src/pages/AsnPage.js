@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx'; // xlsx 라이브러리 import
 import jsPDF from 'jspdf'; // 📄 jsPDF import
 import autoTable from 'jspdf-autotable'; // Changed import for jspdf-autotable
 
-const API_BASE_URL = 'http://172.16.220.32:8001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const getTodayDate = () => {
   const today = new Date();
@@ -46,7 +46,6 @@ function AsnPage() {
 
       // 1. Fetch ASN Data
       const asnApiUrl = `${API_BASE_URL}/api/asn?${queryParams}`;
-      console.log('API 호출 URL:', asnApiUrl);
 
       const response = await fetch(asnApiUrl, {
         method: 'GET',
@@ -68,7 +67,6 @@ function AsnPage() {
       if (asnData.data && asnData.data.length > 0) { // ASN 데이터가 있을 때만 중량 조회 시도
         try {
           const packingApiUrl = `${API_BASE_URL}/api/packing/items?${queryParams}`;
-          console.log('Packing API 호출 URL:', packingApiUrl);
           const packingResponse = await fetch(packingApiUrl, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },

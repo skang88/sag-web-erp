@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // 개발 환경에서 사용할 백엔드 URL
-const API_BASE_URL = 'http://172.16.220.32:8001/api'; 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
 
 function ShellyPage() {
   // 1. 상태 분리: 장치 상태와 액션 메시지를 별도로 관리
@@ -12,7 +12,7 @@ function ShellyPage() {
   // 상태를 가져오는 함수
   const getStatus = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/shelly/status`);
+      const res = await fetch(`${API_BASE_URL}/api/shelly/status`);
       const data = await res.json();
       const statusObj = data.status;
 

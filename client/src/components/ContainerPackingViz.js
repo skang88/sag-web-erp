@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import axios from 'axios';
@@ -9,7 +9,7 @@ const CONTAINER_WIDTH = 102.4;
 const CONTAINER_HEIGHT = 110.2;
 
 // API endpoint address (Node.js Express server address)
-const API_BASE_URL = 'http://66.118.96.42:28001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const ContainerPackingViz = () => {
     // Three.js scene refs
@@ -53,7 +53,6 @@ const ContainerPackingViz = () => {
             const formattedDate = dateInput.replace(/-/g, '');
             const group = groupInput;
 
-            console.log(`[API Call] API 호출 시작: ${API_BASE_URL}/packing/pallets?date=${formattedDate}&group=${group}`);
             const response = await axios.get(`${API_BASE_URL}/packing/pallets?date=${formattedDate}&group=${group}`);
 
             const fetchedPallets = Array.isArray(response.data) ? response.data : response.data.packedPallets || [];

@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // 실제 API의 기본 URL을 여기에 설정합니다.
-const API_BASE_URL = 'http://172.16.220.32:8001'; // 개발 환경에서 사용할 백엔드 URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Helper function to get today's date in YYYY-MM-DD format
 const getTodayDate = () => {
@@ -44,7 +44,6 @@ function PackingItemsFetcher() {
       }).toString();
 
       const apiUrl = `${API_BASE_URL}/api/packing?${queryParams}`; // 엔드포인트 변경 확인
-      console.log('API 호출 URL:', apiUrl);
 
       const response = await fetch(apiUrl, {
         method: 'GET',

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = 'http://172.16.220.32:8001';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Helper function to get today's date in YYYY-MM-DD format
 const getTodayDate = () => {
@@ -47,7 +47,6 @@ function PackingItemsFetcher() {
 
       // Updated API endpoint
       const apiUrl = `${API_BASE_URL}/api/packing/items?${queryParams}`;
-      console.log('API 호출 URL:', apiUrl);
 
       const response = await fetch(apiUrl, {
         method: 'GET',

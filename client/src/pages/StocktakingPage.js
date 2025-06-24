@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function App() {
     const [scannedData, setScannedData] = useState([]); // 스캔된 데이터 저장
