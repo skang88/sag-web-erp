@@ -9,7 +9,7 @@ import PackingSummary from './pages/PackingSummaryPage';
 import PackingItems from './pages/PackingItems';
 import ContainerPackingViz from './components/ContainerPackingViz';
 import AsnPage from './pages/AsnPage';
-
+import StocktakingPage from './pages/StocktakingPage';
 
 import RegisterPage from './pages/RegisterPage';
 import ShellyPage from './pages/ShellyPage';
@@ -38,6 +38,7 @@ function App() {
               <Route path="/packing/items" element={<PackingItems />} />
               <Route path="/packing/pallets" element={<ContainerPackingViz />} />
               <Route path="/asn" element={<AsnPage />} />
+              <Route path="/stocktaking" element={<StocktakingPage />} />
               
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/shelly" element={<ShellyPage />} />
