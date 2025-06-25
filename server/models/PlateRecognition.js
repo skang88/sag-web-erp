@@ -1,4 +1,4 @@
-// models/PlateRecognition.js
+// models/PlateRecognition.js (업데이트: bestUuid 중복 허용)
 
 const mongoose = require('mongoose');
 
@@ -9,30 +9,24 @@ const PlateRecognitionSchema = new mongoose.Schema({
         default: "alpr_group"
     },
     epochStart: {
-        type: Number, // 밀리초 단위의 에포크 시간
+        type: Number,
         required: true
     },
-    bestPlateNumber: {
+    startTime: {
+        type: Date,
+        required: true,
+        index: true
+    },
+    epochEnd: {
+        type: Number
+    },
+    endTime: {
+        type: Date
+    },
+    bestUuid: { // <-- 이 부분을 수정합니다.
         type: String,
         required: true
     },
-    bestConfidence: {
-        type: Number, // 인식 정확도
-        required: true
-    },
-    plateCropJpeg: {
-        type: String, // Base64 인코딩된 JPEG 이미지 데이터
-        required: false // 이미지는 선택 사항일 수 있습니다.
-    },
-    vehicleCropJpeg: {
-        type: String, // Base64 인코딩된 JPEG 이미지 데이터
-        required: false // 이미지는 선택 사항일 수 있습니다.
-    },
-    // Rekor Scout에서 받은 다른 유용한 필드들을 추가할 수 있습니다.
-    version: { type: Number },
-    epochEnd: { type: Number },
-    frameStart: { type: Number },
-    frameEnd: { type: Number },
     companyId: { type: String },
     agentUid: { type: String },
     agentVersion: { type: String },
@@ -41,23 +35,49 @@ const PlateRecognitionSchema = new mongoose.Schema({
     gpsLatitude: { type: Number },
     gpsLongitude: { type: Number },
     country: { type: String },
-    stripIdentifyingInformation: { type: Boolean },
-    uuids: { type: [String] },
-    vehiclePath: { type: [Object] }, // 또는 더 구체적인 스키마 정의
-    plateIndexes: { type: [Number] },
-    candidates: { type: [Object] }, // 또는 더 구체적인 스키마 정의
-    bestPlate: { type: Object },     // 또는 더 구체적인 스키마 정의
-    bestUuid: { type: String },
-    bestUuidEpochMs: { type: Number },
-    bestImageWidth: { type: Number },
-    bestImageHeight: { type: Number },
-    travelDirection: { type: Number },
-    isParked: { type: Boolean },
-    isPreview: { type: Boolean },
-    vehicleSignature: { type: String },
+    bestPlateNumber: {
+        type: String,
+        required: true,
+        index: true
+    },
+    bestConfidence: {
+        type: Number,
+        required: true
+    },
+    plateCropJpeg: {
+        type: String,
+        required: false
+    },
+    vehicleCropJpeg: {
+        type: String,
+        required: false
+    },
+    vehicle: {
+        color: { type: String, default: 'N/A' },
+        make: { type: String, default: 'N/A' },
+        makeModel: { type: String, default: 'N/A' },
+        bodyType: { type: String, default: 'N/A' },
+    },
     
+    registrationStatus: {
+        type: String,
+        enum: ['REGISTERED', 'UNREGISTERED', 'NO_PLATE'],
+        default: 'NO_PLATE',
+        required: true,
+        index: true
+    },
+    shellyOperated: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
+    userEmail: {
+        type: String,
+        required: false
+    }
+
 }, {
-    timestamps: true // 생성 및 업데이트 타임스탬프 자동 추가
+    timestamps: true
 });
 
 module.exports = mongoose.model('PlateRecognition', PlateRecognitionSchema);

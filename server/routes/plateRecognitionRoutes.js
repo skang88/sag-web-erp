@@ -10,6 +10,7 @@ router.post('/', plateRecognitionController.createPlateRecognition);
 
 // (선택 사항) 저장된 번호판 데이터를 조회할 GET 엔드포인트
 // 예시: GET /api/plate-recognitions
-router.get('/', plateRecognitionController.getAllPlateRecognitions);
+router.get('/', plateRecognitionController.getPlateRecognitions); // 이전: getAllPlateRecognitions -> 변경: getPlateRecognitions
+
 
 module.exports = router;
