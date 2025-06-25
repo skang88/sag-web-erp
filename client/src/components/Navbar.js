@@ -1,7 +1,8 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { Link, useNavigate } from 'react-router-dom'; // useLocation은 더 이상 필요 없으므로 제거
+// useState, useEffect, jwtDecode는 이제 필요 없으므로 제거합니다.
 import Logo from './Logo';
+import { useAuth } from '../contexts/AuthContext'; // AuthContext의 useAuth 훅 임포트
+
 
 // navLinks 정의는 이전과 동일하게 유지됩니다...
 const navLinks = [
@@ -35,7 +36,6 @@ const navLinks = [
     submenu: [
       { label: 'Shelly', path: '/shelly', isRouterLink: true },
       { label: 'License Plate', path: '/plate', isRouterLink: true },
-      // ⭐ 여기에 추가 ⭐
       { label: 'Plate Log', path: '/plate-log', isRouterLink: true },
     ],
     submenuWidth: 'w-60',
@@ -83,54 +83,26 @@ const navLinks = [
 
 
 function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userIdToDisplay, setUserIdToDisplay] = useState(''); // 사용자 ID를 저장할 상태
+  // AuthContext에서 전역 로그인 상태, 사용자 정보, 로그아웃 함수를 가져옵니다.
+  const { isLoggedIn, user, logout } = useAuth(); 
   const navigate = useNavigate();
-  const location = useLocation();
+  // ⭐ 제거할 코드: 아래 세 줄은 더 이상 필요 없습니다. ⭐
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [userIdToDisplay, setUserIdToDisplay] = useState(''); 
+  // const location = useLocation();
 
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const decodedToken = jwtDecode(token);
-          setUserIdToDisplay(decodedToken.email); // 토큰에 email이 있다면 표시
-          // 만약 토큰에 email이 없고 userId만 있다면:
-          // setUserIdToDisplay(decodedToken.userId); // userId로 표시
-          setIsLoggedIn(true);
-        } catch (error) {
-          console.error("Invalid token:", error);
-          localStorage.removeItem('token');
-          setIsLoggedIn(false);
-          setUserIdToDisplay('');
-        }
-      } else {
-        setIsLoggedIn(false);
-        setUserIdToDisplay('');
-      }
-    };
-
-    checkAuthStatus();
-
-    const handleStorageChange = (event) => {
-      if (event.key === 'token') {
-        checkAuthStatus();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, [location]);
+  // ⭐ 제거할 코드: useEffect 및 handleStorageChange 관련 로직도 더 이상 필요 없습니다. ⭐
+  // useEffect(() => { ... }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    setUserIdToDisplay('');
+    logout(); // AuthContext의 logout 함수를 호출하여 전역 상태를 업데이트합니다.
     alert('로그아웃 되었습니다.');
-    navigate('/');
+    navigate('/'); // 로그아웃 후 홈으로 이동
   };
+
+  // user 객체에서 이메일을 가져와 표시합니다.
+  // user가 null이거나 email 속성이 없으면 빈 문자열이 됩니다.
+  const userIdToDisplay = user ? user.email : ''; 
 
   return (
     <nav className="bg-[#0B4DA3] flex justify-between items-center p-2 w-full fixed top-0 left-0 z-[1000]">
@@ -187,11 +159,11 @@ function Navbar() {
       <div className="flex items-center space-x-4 mr-4">
         {isLoggedIn ? (
           <>
-            {/* 사용자 ID (이메일) 표시 */}
+            {/* 사용자 ID (이메일) 표시: 이제 AuthContext의 user 객체에서 가져옵니다. */}
             <span className="text-white text-sm font-medium">
               {userIdToDisplay}
             </span>
-            {/* ⭐ 여기에 Edit Profile Link 추가 ⭐ */}
+            {/* Edit Profile Link */}
             <Link
               to="/profile" // 프로필 페이지 경로
               className="text-white text-sm font-medium hover:text-yellow-300 underline transition duration-150 ease-in-out"

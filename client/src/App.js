@@ -2,6 +2,8 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
+import { AuthProvider } from './contexts/AuthContext'; // AuthProvider 임포트
+
 import Navbar from './components/Navbar'; // Navbar 컴포넌트 추가
 import AccessData from './pages/AccessDataPage';
 import LastLogin from './pages/LastLoginPage';
@@ -23,38 +25,40 @@ import AuthPage from './pages/AuthPage'; // ⭐ 새로 추가: AuthPage 임포�
 function App() {
   return (
     <Router>
-      <div className="App">
-        <header className="App-header">
-          <Navbar />
-          <main>
-            <Routes>
-              {/* ⭐ 수정: 기본 경로와 로그인 경로를 AuthPage로 연결 ⭐ */}
-              <Route path="/" element={<AuthPage />} />
-              <Route path="/login" element={<AuthPage />} /> {/* /login 경로도 AuthPage로 연결 */}
-              
-              <Route path="/access" element={<AccessData />} />
-              <Route path="/lastlogin" element={<LastLogin />} />
-              <Route path="/packing" element={<PackingSummary />} />
-              <Route path="/packing/items" element={<PackingItems />} />
-              <Route path="/packing/pallets" element={<ContainerPackingViz />} />
-              <Route path="/asn" element={<AsnPage />} />
-              <Route path="/barcode-tester" element={<StocktakingPage />} />
-              
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/shelly" element={<ShellyPage />} />
-              <Route path="/plate" element={<PlatePage />} />
+      <AuthProvider>
+        <div className="App">
+          <header className="App-header">
+            <Navbar />
+            <main>
+              <Routes>
+                {/* ⭐ 수정: 기본 경로와 로그인 경로를 AuthPage로 연결 ⭐ */}
+                <Route path="/" element={<AuthPage />} />
+                <Route path="/login" element={<AuthPage />} /> {/* /login 경로도 AuthPage로 연결 */}
 
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/plate-log" element={<PlateLogPage />} />
+                <Route path="/access" element={<AccessData />} />
+                <Route path="/lastlogin" element={<LastLogin />} />
+                <Route path="/packing" element={<PackingSummary />} />
+                <Route path="/packing/items" element={<PackingItems />} />
+                <Route path="/packing/pallets" element={<ContainerPackingViz />} />
+                <Route path="/asn" element={<AsnPage />} />
+                <Route path="/barcode-tester" element={<StocktakingPage />} />
 
-              {/* 만약 로그인되지 않은 상태에서 보호된 페이지로 접근 시 /login으로 리디렉트하는 로직이 필요하다면 */}
-              {/* <Route path="*" element={localStorage.getItem('token') ? null : <Navigate to="/login" />} /> */}
-            </Routes>
-          </main>
-        </header>
-      </div>
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/shelly" element={<ShellyPage />} />
+                <Route path="/plate" element={<PlatePage />} />
+
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/plate-log" element={<PlateLogPage />} />
+
+                {/* 만약 로그인되지 않은 상태에서 보호된 페이지로 접근 시 /login으로 리디렉트하는 로직이 필요하다면 */}
+                {/* <Route path="*" element={localStorage.getItem('token') ? null : <Navigate to="/login" />} /> */}
+              </Routes>
+            </main>
+          </header>
+        </div>
+      </AuthProvider>
     </Router>
   );
 }
