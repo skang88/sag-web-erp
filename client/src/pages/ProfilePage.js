@@ -16,7 +16,7 @@ const ProfilePage = () => {
     const [newPlate, setNewPlate] = useState(''); // 새로 추가할 번호판 입력 필드
 
     const [message, setMessage] = useState(''); // 성공 메시지
-    const [error, setError] = useState('');     // 오류 메시지
+    const [error, setError] = useState('');    // 오류 메시지
     const [isLoading, setIsLoading] = useState(false); // 로딩 상태
 
     const navigate = useNavigate(); // 라우팅을 위한 useNavigate 훅
@@ -166,6 +166,12 @@ const ProfilePage = () => {
         setLicensePlates(licensePlates.filter(plate => plate !== plateToRemove));
     };
 
+    // 취소 버튼 핸들러
+    const handleCancel = () => {
+        navigate(-1); // 이전 페이지로 돌아가기
+        // 또는 navigate('/'); // 메인 페이지로 이동하고 싶다면 이 주석을 해제
+    };
+
     return (
         <div className="flex flex-col items-center justify-center w-full max-w-lg mx-auto p-5 bg-white rounded-lg shadow-lg mt-10 mb-10">
             <h2 className="text-3xl text-gray-800 mb-5 font-semibold">User Profile</h2>
@@ -276,14 +282,21 @@ const ProfilePage = () => {
                         </ul>
                     </div>
 
-                    {/* 업데이트 버튼 */}
-                    <div className="flex items-center justify-center">
+                    {/* 업데이트 및 취소 버튼 */}
+                    <div className="flex items-center justify-center space-x-4"> {/* Added space-x-4 for spacing */}
                         <button
                             type="submit"
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline text-lg transition duration-300 ease-in-out"
                             disabled={isLoading}
                         >
                             {isLoading ? 'Updating...' : 'Update Profile'}
+                        </button>
+                        <button
+                            type="button" // Important: set to type="button" to prevent form submission
+                            onClick={handleCancel}
+                            className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded focus:outline-none focus:shadow-outline text-lg transition duration-300 ease-in-out"
+                        >
+                            Cancel
                         </button>
                     </div>
                 </form>
