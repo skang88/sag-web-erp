@@ -1,9 +1,9 @@
 // controllers/plateRecognitionController.js
 
 const PlateRecognition = require('../models/PlateRecognition');
-const User = require('../models/userModel'); // User 모델 임포트! (생성 필요)
-const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트! (생성 필요)
-const { sendTelegramMessage } = require('../utils/telegramUtils'); // 텔레그램 유틸리티 임포트! (생성 필요)
+const User = require('../models/userModel'); // User 모델 임포트!
+const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트!
+const { sendTelegramMessage } = require('../utils/telegramUtils'); // 텔레그램 유틸리티 임포트!
 
 // 릴레이 작동 지연 함수 (비동기)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -155,10 +155,6 @@ exports.createPlateRecognition = async (req, res) => {
 
         const createdDoc = await PlateRecognition.create(documentToCreate);
         // 생성된 문서를 응답을 위해 배열에 추가 (현재는 한 요청당 한 번호판이므로 createdPlateDocs는 1개 요소)
-        // 만약 Rekor Scout가 배열 형태로 여러 번호판을 한 요청에 보낸다면, 이 로직은 `for` 루프 안에 있어야 합니다.
-        // 현재는 단일 객체 요청을 가정하고 있으므로, `dataArray` 처리는 생략했습니다.
-        // 필요 시, 이전 `createPlate`의 `dataArray` 처리 로직을 복원하여 for 루프 안에 넣으세요.
-        // 현재는 단일 인식 데이터만 받아 처리하는 것으로 간소화합니다.
         const createdPlateDocs = [createdDoc];
 
 
@@ -287,8 +283,9 @@ exports.getPlateRecognitions = async (req, res) => {
         }
 
         // MongoDB 쿼리 실행
+        // IMPORTANT: Add plateCropJpeg, vehicleCropJpeg, and vehicle to the select statement
         const plates = await PlateRecognition.find(query) // 구성된 쿼리 적용
-            .select('startTime bestPlateNumber bestConfidence registrationStatus shellyOperated userEmail createdAt -_id') // 조회할 필드 선택
+            .select('startTime bestPlateNumber bestConfidence registrationStatus shellyOperated userEmail createdAt plateCropJpeg vehicleCropJpeg vehicle -_id') // 조회할 필드 선택
             .sort({ startTime: -1 }); // 최신순 (startTime 내림차순) 정렬
 
         res.status(200).json({
