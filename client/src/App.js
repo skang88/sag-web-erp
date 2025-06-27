@@ -45,12 +45,11 @@ function App() {
 
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/shelly" element={<ShellyPage />} />
-                <Route path="/plate" element={<PlatePage />} />
+                <Route path="/plate-log" element={<PlateLogPage />} />
 
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/plate-log" element={<PlateLogPage />} />
 
                 {/* 만약 로그인되지 않은 상태에서 보호된 페이지로 접근 시 /login으로 리디렉트하는 로직이 필요하다면 */}
                 {/* <Route path="*" element={localStorage.getItem('token') ? null : <Navigate to="/login" />} /> */}
