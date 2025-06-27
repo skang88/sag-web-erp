@@ -67,6 +67,25 @@ exports.createPlateRecognition = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields (epoch_start, best_plate_number, best_confidence, best_uuid) for alpr_group data.' });
         }
 
+        // 동일 번호판에 대한 중복 인식을 1분 이내에 방지
+        const detectedPlateNumberForCheck = best_plate_number.toUpperCase().trim();
+        if (detectedPlateNumberForCheck) {
+            const oneMinuteAgo = new Date(new Date(epoch_start).getTime() - 60000);
+            const recentRecognition = await PlateRecognition.findOne({
+                bestPlateNumber: detectedPlateNumberForCheck,
+                startTime: { $gte: oneMinuteAgo }
+            }).sort({ startTime: -1 });
+
+            if (recentRecognition) {
+                const timeSinceLast = (new Date(epoch_start) - recentRecognition.startTime) / 1000;
+                console.log(`[${new Date().toISOString()}] [${detectedPlateNumberForCheck}] ${timeSinceLast.toFixed(1)}초 전 동일한 번호판이 인식되어 중복 처리를 방지합니다. (ID: ${recentRecognition._id})`);
+                return res.status(200).json({
+                    message: `Duplicate plate recognized within a minute. Last seen ${timeSinceLast.toFixed(1)}s ago. Ignoring.`,
+                    plateNumber: detectedPlateNumberForCheck,
+                });
+            }
+        }
+
         let overallShellyOperated = false;
         const telegramMessages = [];
 
