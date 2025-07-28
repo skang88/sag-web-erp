@@ -15,7 +15,6 @@ import StocktakingPage from './pages/StocktakingPage';
 
 import RegisterPage from './pages/RegisterPage';
 import ShellyPage from './pages/ShellyPage';
-import PlatePage from './pages/PlatePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProfilePage from './pages/ProfilePage';

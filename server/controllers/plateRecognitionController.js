@@ -2,6 +2,7 @@
 
 const PlateRecognition = require('../models/PlateRecognition');
 const User = require('../models/userModel'); // User 모델 임포트! (실제 앱에서는 필요)
+const Camera = require('../models/cameraModel'); // Camera 모델 임포트!
 const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트! (실제 앱에서는 필요)
 const { sendTelegramMessage } = require('../utils/telegramUtils'); // 텔레그램 유틸리티 임포트! (실제 앱에서는 필요)
 
@@ -96,6 +97,8 @@ exports.createPlateRecognition = async (req, res) => {
         let currentShellyOperated = false;
         let userEmailInfo = '';
 
+        let cameraConfig = null; // 카메라 설정을 저장할 변수
+
         if (detectedPlateNumber && detectedPlateNumber.length > 0) {
             // User 모델을 사용하여 등록된 사용자 확인
             const registeredUser = await User.findOne({
@@ -107,19 +110,27 @@ exports.createPlateRecognition = async (req, res) => {
                 userEmailInfo = registeredUser.email || '등록자 이메일 없음';
                 console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 차량입니다. 사용자: ${userEmailInfo}`);
 
-                if (!overallShellyOperated) {
-                    try {
-                        console.log(`[${new Date().toISOString()}] 등록된 차량 감지! Shelly 릴레이 시퀀스를 시작합니다.`);
-                        await _turnOn();
-                        await delay(1000);
-                        await _turnOff();
-                        console.log(`[${new Date().toISOString()}] Shelly 릴레이 시퀀스 완료.`);
-                        currentShellyOperated = true;
-                        overallShellyOperated = true;
-                    } catch (shellyError) {
-                        console.error(`[${new Date().toISOString()}] Shelly 릴레이 제어 중 오류 발생:`, shellyError.message);
-                        await sendTelegramMessage(escapeMarkdownV2(`🚨 Shelly Control Error: ${shellyError.message}`));
+                // camera_id를 기반으로 카메라 설정 조회
+                cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
+
+                if (cameraConfig && cameraConfig.shellyId) {
+                    if (!overallShellyOperated) {
+                        try {
+                            console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 등록된 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                            await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
+                            await delay(1000);
+                            await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
+                            console.log(`[${new Date().toISOString()}] Shelly ${cameraConfig.shellyId} 릴레이 시퀀스 완료.`);
+                            currentShellyOperated = true;
+                            overallShellyOperated = true;
+                        } catch (shellyError) {
+                            console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
+                            await sendTelegramMessage(escapeMarkdownV2(`🚨 Shelly Control Error (${cameraConfig.name} / Shelly ${cameraConfig.shellyId}): ${shellyError.message}`));
+                        }
                     }
+                } else {
+                    console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
+                    await sendTelegramMessage(escapeMarkdownV2(`⚠️ Unknown Camera ID: ${camera_id}. Gate was not operated.`));
                 }
             } else {
                 currentRegistrationStatus = 'UNREGISTERED';
@@ -138,7 +149,7 @@ exports.createPlateRecognition = async (req, res) => {
             bestUuid: best_uuid,
             companyId: company_id,
             agentUid: agent_uid,
-            cameraId: camera_id,
+            cameraId: String(camera_id), // (수정) 항상 문자열로 저장되도록 타입 변환
             bestPlateNumber: detectedPlateNumber,
             bestConfidence: best_confidence,
             plateCropJpeg: plate_crop_jpeg,
@@ -157,16 +168,21 @@ exports.createPlateRecognition = async (req, res) => {
         const createdDoc = await PlateRecognition.create(documentToCreate);
         const createdPlateDocs = [createdDoc];
 
+        const cameraNameForMessage = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
+
         let telegramMessage = `🚗 *차량 번호판 인식 알림* 🚗\n`;
+        telegramMessage += `*카메라:* ${escapeMarkdownV2(cameraNameForMessage)}\n`;
         telegramMessage += `*시간:* ${escapeMarkdownV2(detectionTime)}\n`;
         telegramMessage += `*번호판:* \`${escapeMarkdownV2(detectedPlateNumber || 'N/A')}\`\n`;
         telegramMessage += `*등록 여부:* \`${escapeMarkdownV2(currentRegistrationStatus)}\`\n`;
 
         if (currentRegistrationStatus === 'REGISTERED') {
             telegramMessage += `*등록자:* ${escapeMarkdownV2(userEmailInfo)}\n`;
-            telegramMessage += `*게이트 작동:* ${currentShellyOperated ? '✅ 열림' : '❌ 작동 안 함 (오류)'}\n`;
-        } else if (currentRegistrationStatus === 'UNREGISTERED') {
-            telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
+            if (cameraConfig && cameraConfig.shellyId) {
+                telegramMessage += `*게이트 작동:* ${currentShellyOperated ? `✅ 열림 (Shelly ${cameraConfig.shellyId})` : '❌ 작동 안 함 (오류)'}\n`;
+            } else {
+                telegramMessage += `*게이트 작동:* ❌ 작동 안 함 (카메라 설정 없음)\n`;
+            }
         } else {
             telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
         }
@@ -236,7 +252,7 @@ exports.createPlateRecognition = async (req, res) => {
  */
 exports.getPlateRecognitions = async (req, res) => {
     try {
-        const { startDate, endDate, plateNumber, registrationStatus, page = 1, limit = 10 } = req.query; // page, limit 기본값 설정
+        const { startDate, endDate, plateNumber, registrationStatus, cameraId, page = 1, limit = 10 } = req.query; // cameraId 추가, page, limit 기본값 설정
 
         let query = {}; // MongoDB 쿼리 객체 초기화
 
@@ -270,22 +286,63 @@ exports.getPlateRecognitions = async (req, res) => {
             }
         }
 
+        // 4. 카메라 ID 필터링 (cameraId 필드 사용)
+        if (cameraId) {
+            query.cameraId = cameraId;
+        }
+
         // 페이지네이션 계산
         const pageNum = parseInt(page);
         const limitNum = parseInt(limit);
         const skip = (pageNum - 1) * limitNum;
 
-        // 전체 문서 수 조회 (페이지네이션을 위해 필요)
-        const totalItems = await PlateRecognition.countDocuments(query);
-        const totalPages = Math.ceil(totalItems / limitNum);
+        // Aggregation Pipeline을 사용하여 카메라 정보와 조인
+        const aggregationPipeline = [];
 
-        // MongoDB 쿼리 실행
-        // 불필요한 vehicle 필드 (color, make, makeModel, bodyType)를 select에서 제외
-        const plates = await PlateRecognition.find(query)
-            .select('startTime bestPlateNumber bestConfidence registrationStatus shellyOperated userEmail createdAt plateCropJpeg vehicleCropJpeg bestUuid') // vehicle.color 등은 제외
-            .sort({ startTime: -1 }) // 최신순 (startTime 내림차순) 정렬
-            .skip(skip)   // 건너뛸 문서 수
-            .limit(limitNum); // 가져올 문서 수
+        // 1. 필터링 ($match)
+        if (Object.keys(query).length > 0) {
+            aggregationPipeline.push({ $match: query });
+        }
+
+        // 2. 카메라 정보 조인 ($lookup)
+        aggregationPipeline.push({
+            $lookup: {
+                from: 'cameras', // 'cameras' 컬렉션 (모델 이름의 복수형)
+                localField: 'cameraId',
+                foreignField: 'cameraId',
+                as: 'cameraInfo'
+            }
+        });
+
+        // 3. 조인된 정보 필드 추가 및 형식 정리 ($addFields)
+        aggregationPipeline.push({
+            $addFields: {
+                cameraName: { $ifNull: [{ $arrayElemAt: ['$cameraInfo.name', 0] }, 'Unknown'] }
+            }
+        });
+
+        // 4. 최종적으로 보여줄 필드 선택 ($project)
+        aggregationPipeline.push({
+            $project: {
+                cameraInfo: 0, // 조인에 사용된 임시 필드 제외
+                cameraIdString: 0, // 조인에 사용된 임시 필드 제외
+                'vehicle.color': 0, 'vehicle.make': 0, 'vehicle.makeModel': 0, 'vehicle.bodyType': 0 // 불필요한 vehicle 필드 제외
+            }
+        });
+
+        // 페이지네이션을 위한 전체 카운트와 데이터 조회를 별도로 실행
+        const countPipeline = [...aggregationPipeline, { $count: 'totalItems' }];
+        const dataPipeline = [
+            ...aggregationPipeline,
+            { $sort: { startTime: -1 } }, // 최신순 (startTime 내림차순) 정렬
+            { $skip: skip },   // 건너뛸 문서 수
+            { $limit: limitNum } // 가져올 문서 수
+        ];
+
+        const totalItemsResult = await PlateRecognition.aggregate(countPipeline);
+        const totalItems = totalItemsResult.length > 0 ? totalItemsResult[0].totalItems : 0;
+        const totalPages = Math.ceil(totalItems / limitNum);
+        const plates = await PlateRecognition.aggregate(dataPipeline);
 
         res.status(200).json({
             message: 'Plate recognition data successfully retrieved.',
@@ -298,5 +355,21 @@ exports.getPlateRecognitions = async (req, res) => {
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Error retrieving Plate recognition data:`, error);
         res.status(500).json({ message: 'Error retrieving Plate recognition data', error: error.message });
+    }
+};
+
+/**
+ * DB에 저장된 모든 카메라의 목록을 조회합니다.
+ * 프론트엔드에서 필터 드롭다운 등을 만드는 데 사용됩니다.
+ * GET /api/plate-recognitions/cameras
+ */
+exports.getAvailableCameras = async (req, res) => {
+    try {
+        // 이름과 ID만 선택하여 반환합니다.
+        const cameras = await Camera.find({}).select('name cameraId shellyId').lean();
+        res.status(200).json(cameras);
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] Error retrieving cameras:`, error);
+        res.status(500).json({ message: 'Error retrieving camera list', error: error.message });
     }
 };

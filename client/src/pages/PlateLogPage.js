@@ -18,6 +18,8 @@ const PlateLogPage = () => {
     const [endDate, setEndDate] = useState(getTodayDate());     // Initialize with today's date
     const [plateNumber, setPlateNumber] = useState('');
     const [registrationStatus, setRegistrationStatus] = useState('');
+    const [cameras, setCameras] = useState([]); // 카메라 목록 상태
+    const [cameraFilter, setCameraFilter] = useState(''); // 선택된 카메라 필터 상태
 
     const [message, setMessage] = useState(''); // 'message' state is used in JSX now
     const [error, setError] = useState('');
@@ -45,6 +47,24 @@ const PlateLogPage = () => {
         }
     };
 
+    // 컴포넌트 마운트 시 카메라 목록을 불러옵니다.
+    useEffect(() => {
+        const fetchCameras = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/plate-recognitions/cameras`);
+                if (!response.ok) {
+                    throw new Error('카메라 목록을 불러오는데 실패했습니다.');
+                }
+                const data = await response.json();
+                setCameras(data || []);
+            } catch (err) {
+                console.error('Fetch Cameras Error:', err);
+                // 카메라 목록 로딩 에러는 별도로 처리하거나, 사용자에게 알릴 수 있습니다.
+            }
+        };
+        fetchCameras();
+    }, []); // 빈 의존성 배열로 마운트 시 한 번만 실행
+
     // Memoized fetch function to prevent unnecessary re-renders of useEffect
     const fetchPlateLogs = useCallback(async () => {
         setIsLoading(true);
@@ -58,6 +78,7 @@ const PlateLogPage = () => {
         if (endDate) queryParams.append('endDate', endDate);
         if (plateNumber) queryParams.append('plateNumber', plateNumber);
         if (registrationStatus) queryParams.append('registrationStatus', registrationStatus);
+        if (cameraFilter) queryParams.append('cameraId', cameraFilter); // 카메라 필터 추가
         
         // Add pagination parameters
         queryParams.append('page', currentPage);
@@ -98,7 +119,7 @@ const PlateLogPage = () => {
             setTotalPages(1);
             setTotalItems(0);
         }
-    }, [startDate, endDate, plateNumber, registrationStatus, currentPage, itemsPerPage]); // Dependencies for useCallback
+    }, [startDate, endDate, plateNumber, registrationStatus, cameraFilter, currentPage, itemsPerPage]); // cameraFilter 의존성 추가
 
     // Initial load and whenever pagination or filter states change
     useEffect(() => {
@@ -114,7 +135,7 @@ const PlateLogPage = () => {
 
     // Table headers definition (Vehicle Color, Make, Model, Body Type removed)
     const tableHeaders = [
-        '시간', '번호판', '신뢰도', '상태', '쉘리 작동', '사용자 이메일', '번호판 이미지', '차량 이미지'
+        '카메라', '시간', '번호판', '신뢰도', '상태', '쉘리 작동', '사용자 이메일', '번호판 이미지', '차량 이미지'
     ];
 
     return (
@@ -127,7 +148,7 @@ const PlateLogPage = () => {
                 {/* 필터 섹션 */}
                 <form onSubmit={(e) => { e.preventDefault(); setCurrentPage(1); fetchPlateLogs(); }} 
                       className="bg-blue-50 p-6 rounded-lg shadow-inner mb-8 border border-blue-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-6">
                         <div>
                             <label htmlFor="startDate" className="block text-blue-800 text-sm font-bold mb-2">시작 날짜:</label>
                             <input
@@ -173,6 +194,22 @@ const PlateLogPage = () => {
                                 <option value="NO_PLATE">번호판 미인식</option>
                             </select>
                         </div>
+                        <div>
+                            <label htmlFor="cameraFilter" className="block text-blue-800 text-sm font-bold mb-2">카메라:</label>
+                            <select
+                                id="cameraFilter"
+                                value={cameraFilter}
+                                onChange={(e) => setCameraFilter(e.target.value)}
+                                className="shadow-sm border border-blue-300 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition duration-150 ease-in-out"
+                            >
+                                <option value="">모든 카메라</option>
+                                {cameras.map(camera => (
+                                    <option key={camera.cameraId} value={camera.cameraId}>
+                                        {camera.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                     {/* 검색 버튼 */}
                     <button
@@ -214,6 +251,9 @@ const PlateLogPage = () => {
                             <tbody className="bg-white divide-y divide-gray-100">
                                 {plates.map((plate) => (
                                     <tr key={plate.bestUuid || plate.id} className="hover:bg-gray-50 transition duration-100 ease-in-out">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {plate.cameraName || 'N/A'}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {formatDateTime(plate.startTime)}
                                         </td>

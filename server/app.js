@@ -11,7 +11,6 @@ const asnRoutes = require('./routes/asnRoutes');
 const packingRoutes = require ('./routes/packingRoutes');
 const itemRoutes = require('./routes/itemRoutes');
 const shellyRoutes = require('./routes/shellyRouters');
-const plateRoutes = require('./routes/plateRoutes');
 const userRoutes = require('./routes/userRoutes');
 const plateRecognitionRoutes = require('./routes/plateRecognitionRoutes');
 
@@ -45,7 +44,6 @@ app.use('/api/items', itemRoutes);
 
 // 바게이트 관련 라우트
 app.use('/api/shelly', shellyRoutes)
-app.use('/api/plate', plateRoutes)
 app.use('/api/plate-recognitions', plateRecognitionRoutes); // /api/plate-recognitions 경로로 라우트
 
 app.get('/', (req, res) => {
