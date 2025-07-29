@@ -31,7 +31,7 @@ const PlateRecognitionSchema = new mongoose.Schema({
     agentUid: { type: String },
     agentVersion: { type: String },
     agentType: { type: String },
-    cameraId: { type: Number },
+    cameraId: { type: String },
     gpsLatitude: { type: Number },
     gpsLongitude: { type: Number },
     country: { type: String },

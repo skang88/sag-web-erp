@@ -150,7 +150,7 @@ exports.createPlateRecognition = async (req, res) => {
             agentUid: agent_uid,
             cameraId: String(camera_id), // (수정) 항상 문자열로 저장되도록 타입 변환
             bestPlateNumber: detectedPlateNumber,
-            bestConfidence: best_confidence,
+            bestConfidence: best_confidence, 
             plateCropJpeg: plate_crop_jpeg,
             vehicleCropJpeg: vehicle_crop_jpeg,
             vehicle: {

@@ -1,5 +1,5 @@
 // server.js
-const app = require('./app.js'); // app.js에서 애플리케이션 가져오기
+const app = require('./app.js');
 const port = process.env.PORT || 8001; // .env 파일의 포트 또는 기본값 사용
 
 // 예시: server.js 또는 app.js
