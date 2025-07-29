@@ -9,6 +9,7 @@ pipeline {
         BACKEND_CONTAINER = 'sag-web-erp-backend'
         FRONTEND_CONTAINER = 'sag-web-erp-front'
         BACKEND_PORT = '8001:3000'
+        RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정
         FRONTEND_PORT = '8000:3000'
     }
     stages {
@@ -48,7 +49,7 @@ pipeline {
 
                         stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
+                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
                             }
                         }
 
