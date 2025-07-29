@@ -3,9 +3,9 @@
 const Stream = require('node-rtsp-stream');
 
 // .env 파일에서 설정값을 가져오거나 기본값을 사용합니다.
-const RTSP_STREAM_URL = process.env.RTSP_STREAM_URL || 'rtsp://admin:1q2w3e4r@172.16.224.61:554';
+const RTSP_STREAM_URL = process.env.RTSP_STREAM_URL;
 // 프론트엔드에서 접속할 WebSocket 포트입니다.
-const RTSP_STREAM_PORT = process.env.RTSP_STREAM_PORT || 9999;
+const RTSP_STREAM_PORT = process.env.RTSP_STREAM_PORT;
 
 const startRTSPStream = () => {
   console.log('Attempting to start RTSP stream with the following settings:');
