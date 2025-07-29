@@ -22,17 +22,14 @@ const startRTSPStream = () => {
     // FFmpeg 옵션: 직접 테스트하여 성공한 옵션과 안정성을 위한 옵션을 조합합니다.
     ffmpegOptions: {
       // 입력 옵션
-      '-rtsp_transport': 'tcp', // 네트워크 안정성을 위해 TCP 사용
-      '-fflags': 'nobuffer',    // 입력 버퍼링을 비활성화하여 지연 시간 감소
+      '-rtsp_transport': 'tcp', // 네트워크 안정성을 위해 TCP 사용 (컨테이너 환경 필수)
 
       // 출력 옵션 (JSMpeg 호환성을 위해 명시적으로 지정)
       '-f': 'mpegts',           // 출력 포맷: MPEG Transport Stream
       '-codec:v': 'mpeg1video', // 비디오 코덱: mpeg1video
       '-an': '',                // 오디오 비활성화
       '-r': '30',               // 프레임레이트 고정 (테스트 성공 옵션)
-      '-b:v': '800k',           // 비트레이트 고정 (테스트 성공 옵션)
-      '-bf': '0',               // B-Frame을 비활성화하여 스트리밍 지연 감소
-      '-pix_fmt': 'yuv420p'     // 픽셀 포맷을 명시하여 호환성 문제 방지
+      '-b:v': '800k'            // 비트레이트 고정 (테스트 성공 옵션)
     }
   });
 
