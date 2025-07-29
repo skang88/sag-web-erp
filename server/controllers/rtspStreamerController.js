@@ -19,11 +19,13 @@ const startRTSPStream = () => {
     // WebSocket 서버가 모든 네트워크 인터페이스에서 수신하도록 명시적으로 설정합니다.
     // 이렇게 하면 'localhost'와 IP 주소 모두로 접속할 수 있습니다.
     wsOptions: {},
-    // FFmpeg 옵션: 요청에 따라 -codec:v copy 옵션을 사용합니다.
+    // FFmpeg 옵션: 컨테이너에서 수동으로 성공한 인코딩 옵션으로 되돌립니다.
+    // JSMpeg 호환성을 위해 mpeg1video 코덱으로 재인코딩해야 합니다.
     ffmpegOptions: {
       '-rtsp_transport': 'tcp', // 네트워크 안정성을 위해 TCP 사용 (컨테이너 환경 필수)
-      '-codec:v': 'copy',       // 원본 비디오 스트림을 재인코딩 없이 복사 (매우 효율적)
-      '-an': ''                 // 오디오 비활성화
+      '-r': '30',               // 프레임레이트 고정
+      '-b:v': '800k',           // 비트레이트 고정
+      '-an': ''                 // 오디오 비활성화 (JSMpeg은 오디오를 별도 처리)
     }
     // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554" -an -b:v 800k -r 30 test.ts
     // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554" -codec:v copy -an test.ts
@@ -31,6 +33,12 @@ const startRTSPStream = () => {
     // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554"
     // 
 
+  });
+
+  // FFMPEG 프로세스의 에러 출력을 직접 로깅하여 디버깅합니다.
+  // FFmpeg는 진행 상황 정보(프레임, fps 등)를 stderr로 출력하므로, 이 로그를 확인하는 것이 매우 중요합니다.
+  stream.on('ffmpegError', (error) => {
+    console.error('[FFMPEG_LOG]:', error);
   });
 
   console.log('RTSP stream process has been initiated.');
