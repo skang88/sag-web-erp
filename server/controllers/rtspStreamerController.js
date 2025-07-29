@@ -19,13 +19,18 @@ const startRTSPStream = () => {
     // WebSocket 서버가 모든 네트워크 인터페이스에서 수신하도록 명시적으로 설정합니다.
     // 이렇게 하면 'localhost'와 IP 주소 모두로 접속할 수 있습니다.
     wsOptions: {},
-    // FFmpeg 옵션: 라이브러리와의 충돌을 피하기 위해, 성공이 확인된 최소한의 옵션만 남깁니다.
+    // FFmpeg 옵션: 요청에 따라 -codec:v copy 옵션을 사용합니다.
     ffmpegOptions: {
       '-rtsp_transport': 'tcp', // 네트워크 안정성을 위해 TCP 사용 (컨테이너 환경 필수)
-      '-an': '',                // 오디오 비활성화
-      '-r': '30',               // 프레임레이트 고정 (테스트 성공 옵션)
-      '-b:v': '800k'            // 비트레이트 고정 (테스트 성공 옵션)
+      '-codec:v': 'copy',       // 원본 비디오 스트림을 재인코딩 없이 복사 (매우 효율적)
+      '-an': ''                 // 오디오 비활성화
     }
+    // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554" -an -b:v 800k -r 30 test.ts
+    // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554" -codec:v copy -an test.ts
+    // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554" -f mpegts -codec:v mpeg1video -an test.ts
+    // ffmpeg -rtsp_transport tcp -i "rtsp://admin:1q2w3e4r@172.16.224.61:554"
+    // 
+
   });
 
   console.log('RTSP stream process has been initiated.');
