@@ -22,7 +22,7 @@ const startRTSPStream = () => {
     // FFmpeg 옵션: 직접 테스트하여 성공한 옵션과 안정성을 위한 옵션을 조합합니다.
     ffmpegOptions: {
       // 입력 옵션
-      '-rtsp_transport': 'tcp', // 네트워크 안정성을 위해 TCP 사용 (컨테이너 환경 필수)
+      '-rtsp_transport': 'udp', // 네트워크 안정성을 위해 TCP 사용 (컨테이너 환경 필수)
 
       // 출력 옵션 (JSMpeg 호환성을 위해 명시적으로 지정)
       '-f': 'mpegts',           // 출력 포맷: MPEG Transport Stream
