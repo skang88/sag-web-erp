@@ -36,6 +36,7 @@ const navLinks = [
     submenu: [
       { label: 'Shelly', path: '/shelly', isRouterLink: true },
       { label: 'Plate Log', path: '/plate-log', isRouterLink: true },
+      { label: 'Plate Monitoring', path: '/plate-monitoring', isRouterLink: true },
     ],
     submenuWidth: 'w-60',
   },

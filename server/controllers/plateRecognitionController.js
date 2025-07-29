@@ -3,8 +3,9 @@
 const PlateRecognition = require('../models/PlateRecognition');
 const User = require('../models/userModel'); // User 모델 임포트! (실제 앱에서는 필요)
 const Camera = require('../models/cameraModel'); // Camera 모델 임포트!
-const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트! (실제 앱에서는 필요)
-const { sendTelegramMessage } = require('../utils/telegramUtils'); // 텔레그램 유틸리티 임포트! (실제 앱에서는 필요)
+const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트!
+const { broadcast } = require('./websocketController'); // WebSocket 컨트롤러에서 broadcast 함수 임포트
+
 
 // 릴레이 작동 지연 함수 (비동기)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -32,7 +33,6 @@ exports.createPlateRecognition = async (req, res) => {
 
         if (requestBody && requestBody.error) {
             console.warn(`[${new Date().toISOString()}] 번호판 인식기(소스)로부터 에러를 수신했습니다:`, requestBody.error);
-            await sendTelegramMessage(escapeMarkdownV2(`🚨 Rekor Scout Source Error: ${requestBody.error}`));
             return res.status(400).json({
                 message: 'Webhook source reported an error. Processing stopped.',
                 sourceError: requestBody.error,
@@ -125,7 +125,6 @@ exports.createPlateRecognition = async (req, res) => {
                             overallShellyOperated = true;
                         } catch (shellyError) {
                             console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
-                            await sendTelegramMessage(escapeMarkdownV2(`🚨 Shelly Control Error (${cameraConfig.name} / Shelly ${cameraConfig.shellyId}): ${shellyError.message}`));
                         }
                     }
                 } else {
@@ -166,6 +165,21 @@ exports.createPlateRecognition = async (req, res) => {
         };
 
         const createdDoc = await PlateRecognition.create(documentToCreate);
+
+        // 실시간 모니터링을 위해 WebSocket 클라이언트에게 데이터 전송
+        const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
+        const broadcastData = {
+            bestUuid: createdDoc.bestUuid,
+            cameraName: cameraNameForBroadcast,
+            startTime: createdDoc.startTime,
+            bestPlateNumber: createdDoc.bestPlateNumber,
+            registrationStatus: createdDoc.registrationStatus,
+            userEmail: createdDoc.userEmail,
+            plateCropJpeg: createdDoc.plateCropJpeg,
+            vehicleCropJpeg: createdDoc.vehicleCropJpeg,
+        };
+        broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
+
         const createdPlateDocs = [createdDoc];
 
         const cameraNameForMessage = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
@@ -186,11 +200,6 @@ exports.createPlateRecognition = async (req, res) => {
         } else {
             telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
         }
-
-        const confidenceValue = best_confidence ? best_confidence.toFixed(2) : 'N/A';
-        telegramMessage += `_신뢰도: ${escapeMarkdownV2(confidenceValue)}%_`;
-
-        telegramMessages.push(telegramMessage);
 
         console.log(`[${new Date().toISOString()}] 데이터베이스에 ${createdPlateDocs.length}개의 번호판 정보 저장 완료.`);
         console.log(`[${new Date().toISOString()}] 전체 요청에서 Shelly는 ${overallShellyOperated ? '작동했습니다.' : '작동하지 않았습니다.'}`);
@@ -222,7 +231,6 @@ exports.createPlateRecognition = async (req, res) => {
         console.error(`[${new Date().toISOString()}] Error processing Plate data:`, error);
         if (error.name === 'ValidationError') {
             console.error(`[${new Date().toISOString()}] 데이터베이스 저장 실패 (Mongoose Validation Error):`, error.message);
-            await sendTelegramMessage(escapeMarkdownV2(`🚨 DB Validation Error: ${error.message}`));
             return res.status(422).json({
                 message: 'Plate validation failed before saving to database.',
                 error: error.message,
@@ -231,7 +239,6 @@ exports.createPlateRecognition = async (req, res) => {
         }
         if (error.code === 11000) {
             console.warn(`[${new Date().toISOString()}] 중복된 bestUuid로 번호판 데이터 저장 시도:`, error.message);
-            await sendTelegramMessage(escapeMarkdownV2(`⚠️ Duplicate Plate Data: ${error.message}`));
             return res.status(409).json({
                 message: 'Duplicate plate data received (bestUuid already exists).',
                 error: error.message,
@@ -239,7 +246,6 @@ exports.createPlateRecognition = async (req, res) => {
         }
 
         await sendTelegramMessage(escapeMarkdownV2(`❌ Server Error Processing Plate: ${error.message}`));
-        res.status(500).json({ message: 'An unexpected server error occurred', error: error.message });
     }
 };
 

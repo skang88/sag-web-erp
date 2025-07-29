@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const accRoutes = require('./routes/accRoutes');
+const accRoutes = require('./routes/accRoutes');  // Ensure this path is correct
 const authRoutes = require('./routes/authRoutes');
 const asnRoutes = require('./routes/asnRoutes');
 const packingRoutes = require ('./routes/packingRoutes');
@@ -49,5 +49,6 @@ app.use('/api/plate-recognitions', plateRecognitionRoutes); // /api/plate-recogn
 app.get('/', (req, res) => {
   res.send('This is the backend server');
 });
+
 
 module.exports = app;

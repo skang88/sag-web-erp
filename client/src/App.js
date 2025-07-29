@@ -19,6 +19,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import PlateLogPage from './pages/PlateLogPage';
+import PlateRealTimeMonitoringPage from './pages/PlateRealTimeMonitoringPage'; // ⭐ 새로 추가: 실시간 모니터링 페이지 임포트 ⭐
 import AuthPage from './pages/AuthPage'; // ⭐ 새로 추가: AuthPage 임포트 ⭐
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/shelly" element={<ShellyPage />} />
                 <Route path="/plate-log" element={<PlateLogPage />} />
+                <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} /> {/* ⭐ 새로 추가: 실시간 모니터링 페이지 라우트 ⭐ */}
 
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password" element={<ResetPasswordPage />} />

@@ -22,7 +22,9 @@
     "mssql": "^11.0.1",
     "mysql2": "^3.11.4",
     "node-fetch": "^2.7.0",
-    "nodemailer": "^6.9.16"
+    "node-rtsp-stream": "^0.0.9",
+    "nodemailer": "^6.9.16",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
