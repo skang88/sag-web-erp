@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import JSMpeg from '@cycjimmy/jsmpeg-player'; // 안정적인 최신 라이브러리로 교체
 
-const WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:3000';
+const WS_URL = process.env.REACT_APP_WS_URL
 // RTSP 비디오 스트림을 위한 WebSocket URL
-const RTSP_WS_URL = process.env.REACT_APP_RTSP_WS_URL || 'ws://localhost:9999';
+const RTSP_WS_URL = process.env.REACT_APP_RTSP_WS_URL
 
 // Helper function to format ISO date strings
 const formatDateTime = (isoString) => {
