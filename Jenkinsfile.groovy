@@ -11,7 +11,6 @@ pipeline {
         BACKEND_PORT = '8001:3000' 
         RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정 
         FRONTEND_PORT = '8000:3000'
-        TEAMS_WEBHOOK_URL = 'https://seohanautoga.webhook.office.com/webhookb2/b0442ade-58d3-43eb-98bc-94a59401254d@c34b2a10-25f3-4edc-a86a-49ea5fd0689e/IncomingWebhook/cf0589d6c81b4fe5a734084cb0a6f03d/253f4011-2c14-41b0-970c-bbac1ed89646/V2jW_HkMV__xZQxzrqPCFo5d0p3dDhUiAVRcJvQFJq1Pg1'
     }
     stages {
         stage('Notify Build Start') { // 빌드 시작 알림
