@@ -11,6 +11,7 @@ pipeline {
         BACKEND_PORT = '8001:3000' 
         RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정 
         FRONTEND_PORT = '8000:3000'
+        TEAMS_WEBHOOK_URL = 'https://seohanautoga.webhook.office.com/webhookb2/b0442ade-58d3-43eb-98bc-94a59401254d@c34b2a10-25f3-4edc-a86a-49ea5fd0689e/IncomingWebhook/cf0589d6c81b4fe5a734084cb0a6f03d/253f4011-2c14-41b0-970c-bbac1ed89646/V2jW_HkMV__xZQxzrqPCFo5d0p3dDhUiAVRcJvQFJq1Pg1'
     }
     stages {
         stage('Notify Build Start') { // 빌드 시작 알림
@@ -160,8 +161,6 @@ def sendTeamsNotification(message, color) {
         }]
     }
     """
-    // withCredentials 블록을 사용하여 Jenkins에 저장된 Secret text를 안전하게 불러옵니다.
-    withCredentials([string(credentialsId: 'teams-webhook-url', variable: 'TEAMS_WEBHOOK_URL')]) {
-        sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' \"${TEAMS_WEBHOOK_URL}\"")
-    }
+    // 웹훅 URL에 특수문자가 포함될 수 있으므로 작은따옴표로 감싸줍니다.
+    sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' '${TEAMS_WEBHOOK_URL}'")
 }
