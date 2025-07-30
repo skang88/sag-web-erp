@@ -161,6 +161,13 @@ def sendTeamsNotification(message, color) {
         }]
     }
     """
+<<<<<<< HEAD
     // 웹훅 URL에 특수문자가 포함될 수 있으므로 작은따옴표로 감싸줍니다.
     sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' '${TEAMS_WEBHOOK_URL}'")
+=======
+    // withCredentials 블록을 사용하여 Jenkins에 저장된 Secret text를 안전하게 불러옵니다. << New
+    withCredentials([string(credentialsId: 'teams-webhook-url', variable: 'TEAMS_WEBHOOK_URL')]) {
+        sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' \"${TEAMS_WEBHOOK_URL}\"")
+    }
+>>>>>>> new-feature
 }
