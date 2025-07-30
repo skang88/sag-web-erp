@@ -1,15 +1,12 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import JSMpeg from '@cycjimmy/jsmpeg-player'; // 안정적인 최신 라이브러리로 교체
+import { useState, useEffect, useCallback } from 'react';
 
 const WS_URL = process.env.REACT_APP_WS_URL
-// RTSP 비디오 스트림을 위한 WebSocket URL
-const RTSP_WS_URL = process.env.REACT_APP_RTSP_WS_URL
 
 // Helper function to format ISO date strings
 const formatDateTime = (isoString) => {
     if (!isoString) return 'N/A';
     try {
-        return new Date(isoString).toLocaleString('ko-KR', {
+        return new Date(isoString).toLocaleString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
@@ -21,13 +18,26 @@ const formatDateTime = (isoString) => {
 };
 
 const PlateEventCard = ({ event, onExpire }) => {
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            onExpire(event.bestUuid);
-        }, 60000); // 1분
+    const [countdown, setCountdown] = useState(60);
 
-        return () => clearTimeout(timer);
-    }, [event.bestUuid, onExpire]);
+    useEffect(() => {
+        // 1초마다 카운트다운을 업데이트하는 인터벌
+        const interval = setInterval(() => {
+            setCountdown(prev => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
+
+        // 60초 후 카드를 만료시키는 타이머
+        const expireTimer = setTimeout(() => {
+            onExpire(event.bestUuid);
+        }, 60000);
+
+        // 컴포넌트가 언마운트될 때 타이머와 인터벌을 정리합니다.
+        return () => {
+            clearInterval(interval);
+            clearTimeout(expireTimer);
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const statusStyles = {
         REGISTERED: 'bg-green-100 text-green-800',
@@ -36,91 +46,88 @@ const PlateEventCard = ({ event, onExpire }) => {
     };
 
     const statusText = {
-        REGISTERED: '등록 차량',
-        UNREGISTERED: '미등록 차량',
-        NO_PLATE: '번호판 미인식',
+        REGISTERED: 'Registered Vehicle',
+        UNREGISTERED: 'Unregistered Vehicle',
+        NO_PLATE: 'No Plate Recognized',
     };
+
+    const isUnregistered = event.registrationStatus === 'UNREGISTERED';
+
+    // Sample QR code URL for unregistered vehicles (replace with actual registration page link later)
+    const registrationUrl = `https://your-erp-system.com/register-vehicle?plate=${event.bestPlateNumber || ''}`; // Include plate number in URL
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registrationUrl)}`;
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden transform animate-fade-in border-l-8 border-blue-500">
-            <div className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <p className="text-sm text-gray-500">{event.cameraName}</p>
-                        <p className="text-2xl font-bold text-gray-800 font-mono">{event.bestPlateNumber || '---'}</p>
+            <div className={`p-5 ${isUnregistered ? 'flex gap-4' : ''}`}>
+                {/* Left: Display QR code for unregistered vehicles */}
+                {isUnregistered && (
+                    <div className="flex-shrink-0 flex flex-col items-center justify-center text-center w-56 p-4 bg-gray-50 rounded-lg">
+                        <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-48 h-48 mb-3" />
+                        <p className="text-lg font-bold text-gray-800">Register Vehicle</p>
+                        <p className="text-sm text-gray-600 mt-1">Scan the QR code<br />to register the vehicle.</p>
                     </div>
-                    <div className={`px-3 py-1 text-sm font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
-                        {statusText[event.registrationStatus] || '알 수 없음'}
+                )}
+
+                {/* Right: Vehicle recognition information */}
+                <div className={`${isUnregistered ? 'flex-grow' : ''} flex flex-col`}>
+                    {/* Top: Plate number, status, countdown */}
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <p className="text-5xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
+                        </div>
+                        <div className="text-right">
+                            <div className={`px-3 py-1 text-base font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
+                                {statusText[event.registrationStatus] || 'Unknown'}
+                            </div>
+                            <div className="mt-2">
+                                <p className="text-sm font-semibold text-gray-500">Next scan in</p>
+                                <p className="text-3xl font-bold text-gray-700">{countdown}s</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div className="flex items-center space-x-4 mb-4">
-                    {event.plateCropJpeg && (
-                         <img 
-                            src={`data:image/jpeg;base64,${event.plateCropJpeg}`} 
-                            alt="번호판" 
-                            className="w-40 h-auto rounded-md border" 
-                        />
-                    )}
-                    {event.vehicleCropJpeg && (
-                         <img 
-                            src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} 
-                            alt="차량" 
-                            className="w-48 h-auto rounded-md border" 
-                        />
-                    )}
-                </div>
+                    {/* Middle: License plate and vehicle images */}
+                    <div className={`flex items-center space-x-4 mb-4 ${!isUnregistered ? 'justify-center' : ''}`}>
+                        {event.plateCropJpeg && (
+                            <img 
+                                src={`data:image/jpeg;base64,${event.plateCropJpeg}`} 
+                                alt="License Plate" 
+                                className="w-56 h-auto rounded-md border" 
+                            />
+                        )}
+                        {event.vehicleCropJpeg && (
+                            <img 
+                                src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} 
+                                alt="Vehicle" 
+                                className="w-72 h-auto rounded-md border" 
+                            />
+                        )}
+                    </div>
 
-                <div className="text-sm text-gray-600">
-                    <p><strong>인식 시간:</strong> {formatDateTime(event.startTime)}</p>
-                    {event.registrationStatus === 'REGISTERED' && (
-                        <p><strong>등록자:</strong> {event.userEmail}</p>
-                    )}
+                    {/* Bottom: Additional information */}
+                    <div className="text-base text-gray-600 mt-auto pt-2">
+                        <p><strong>Recognition Time:</strong> {formatDateTime(event.startTime)}</p>
+                        {event.registrationStatus === 'REGISTERED' && (
+                            <p><strong>Registered By:</strong> {event.userEmail}</p>
+                        )}
+                    </div>
                 </div>
             </div>
-             <div className="w-full bg-gray-200 h-1">
-                <div className="bg-blue-500 h-1 animate-progress"></div>
+             {/* Countdown progress bar */}
+             <div className="w-full bg-gray-200 h-1.5">
+                <div 
+                    className="bg-blue-500 h-1.5"
+                    style={{ width: `${(countdown / 60) * 100}%`, transition: 'width 1s linear' }}
+                ></div>
             </div>
         </div>
     );
 };
 
-// JSMpeg 플레이어를 위한 래퍼(Wrapper) 컴포넌트
-const JsmpegPlayer = ({ videoUrl, wrapperClassName, options }) => {
-    const videoWrapperRef = useRef(null);
-    const playerInstance = useRef(null); // 플레이어 인스턴스를 저장할 ref
-
-    useEffect(() => {
-        // videoWrapperRef.current가 없거나, 플레이어가 이미 생성되었다면 아무것도 하지 않음
-        if (!videoWrapperRef.current || playerInstance.current) {
-            return;
-        }
-
-        // JSMpeg.VideoElement를 사용하여 플레이어 인스턴스 생성
-        playerInstance.current = new JSMpeg.VideoElement(videoWrapperRef.current, videoUrl, options);
-
-        // 컴포넌트 언마운트 시 플레이어 정리
-        return () => {
-            if (playerInstance.current) {
-                try {
-                    playerInstance.current.destroy();
-                } catch (e) {
-                    console.warn("JSMpeg player destroy error:", e);
-                }
-                playerInstance.current = null; // 인스턴스 참조 정리
-            }
-        };
-    }, [videoUrl, options]);
-
-    return <div ref={videoWrapperRef} className={wrapperClassName} />;
-};
-
 const PlateRealTimeMonitoringPage = () => {
     const [events, setEvents] = useState([]);
     const [wsStatus, setWsStatus] = useState('Connecting...');
-    
-    // JSMpegPlayer의 options 객체가 매번 새로 생성되어 useEffect를 불필요하게 실행하는 것을 방지합니다.
-    const playerOptions = useMemo(() => ({ autoplay: true }), []);
 
     useEffect(() => {
         let ws;
@@ -175,15 +182,15 @@ const PlateRealTimeMonitoringPage = () => {
         };
     }, []); // Empty dependency array ensures this runs only once on mount
 
-    const handleExpire = (uuid) => {
+    const handleExpire = useCallback((uuid) => {
         setEvents(prevEvents => prevEvents.filter(event => event.bestUuid !== uuid));
-    };
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
             <div className="w-full max-w-7xl mx-auto mt-20 p-6">
                 <header className="flex justify-between items-center mb-8 border-b-2 pb-4 border-gray-300">
-                    <h1 className="text-4xl font-extrabold text-gray-900">실시간 차량 인식 모니터링 (Entrance)</h1>
+                    <h1 className="text-4xl font-extrabold text-gray-900">Real-Time Vehicle Recognition</h1>
                     <div className="flex items-center space-x-2">
                          <div className={`w-3 h-3 rounded-full ${wsStatus === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
                         <span className="text-gray-500">{wsStatus}</span>
@@ -191,22 +198,14 @@ const PlateRealTimeMonitoringPage = () => {
                 </header>
 
                 <main>
-                    <div className="bg-black border-2 border-gray-300 rounded-lg mb-8 h-96 overflow-hidden flex items-center justify-center">
-                        <JsmpegPlayer
-                            wrapperClassName="w-full h-full"
-                            videoUrl={RTSP_WS_URL}
-                            options={playerOptions}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 gap-8">
                         {events.length > 0 ? (
                             events.map(event => (
                                 <PlateEventCard key={event.bestUuid} event={event} onExpire={handleExpire} />
                             ))
                         ) : (
                             <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md">
-                                <p className="text-gray-500 text-2xl">차량 진입 대기 중...</p>
+                                <p className="text-gray-500 text-2xl">Waiting for vehicle entry...</p>
                             </div>
                         )}
                     </div>

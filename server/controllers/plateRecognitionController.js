@@ -68,7 +68,6 @@ exports.createPlateRecognition = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields (epoch_start, best_plate_number, best_confidence, best_uuid) for alpr_group data.' });
         }
 
-        // 동일 번호판에 대한 중복 인식을 1분 이내에 방지
         const detectedPlateNumberForCheck = best_plate_number.toUpperCase().trim();
         if (detectedPlateNumberForCheck) {
             const oneMinuteAgo = new Date(new Date(epoch_start).getTime() - 60000);
