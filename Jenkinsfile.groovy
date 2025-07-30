@@ -57,7 +57,9 @@ pipeline {
 
                         stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
+                                withCredentials([file(credentialsId: 'backend-env-file', variable: 'BACKEND_ENV_FILE')]) {
+                                    sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} --env-file ${BACKEND_ENV_FILE} --restart always ${BACKEND_IMAGE}"
+                                }
                             }
                         }
 
@@ -89,7 +91,9 @@ pipeline {
 
                         stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
                             steps {
-                                sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
+                                withCredentials([file(credentialsId: 'frontend-env-file', variable: 'FRONTEND_ENV_FILE')]) {
+                                    sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} --env-file ${FRONTEND_ENV_FILE} --restart always ${FRONTEND_IMAGE}"
+                                }
                             }
                         }
 
