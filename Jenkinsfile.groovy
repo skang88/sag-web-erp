@@ -59,8 +59,8 @@ pipeline {
                         stage('Run Back-end Container') { // 새 백엔드 컨테이너 실행
                             steps {
                                 withCredentials([file(credentialsId: 'backend-env-file', variable: 'BACKEND_ENV_FILE')]) {
-                                    // --env-file 대신 -v 옵션을 사용하여 파일을 직접 마운트합니다.
-                                    sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} -v ${BACKEND_ENV_FILE}:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
+                                    // -v 대신 --mount 옵션을 사용하여 파일임을 명시적으로 지정합니다.
+                                    sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} --mount type=bind,source=${BACKEND_ENV_FILE},target=/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
                                 }
                             }
                         }
@@ -96,8 +96,8 @@ pipeline {
                         stage('Run Front-end Container') { // 새 프론트엔드 컨테이너 실행
                             steps {
                                 withCredentials([file(credentialsId: 'frontend-env-file', variable: 'FRONTEND_ENV_FILE')]) {
-                                    // --env-file 대신 -v 옵션을 사용하여 파일을 직접 마운트합니다.
-                                    sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v ${FRONTEND_ENV_FILE}:/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
+                                    // -v 대신 --mount 옵션을 사용하여 파일임을 명시적으로 지정합니다.
+                                    sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} --mount type=bind,source=${FRONTEND_ENV_FILE},target=/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
                                 }
                             }
                         }
