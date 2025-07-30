@@ -60,7 +60,7 @@ pipeline {
                             steps {
                                 withCredentials([file(credentialsId: 'backend-env-file', variable: 'BACKEND_ENV_FILE')]) {
                                     // -v 대신 --mount 옵션을 사용하여 파일임을 명시적으로 지정합니다.
-                                    sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} --mount type=bind,source=${BACKEND_ENV_FILE},target=/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
+                                    sh "docker run -d --name ${BACKEND_CONTAINER} -p ${BACKEND_PORT} -p ${RTSP_PORT} -v c:/env/sag-web-erp/back-end/.env:/usr/src/app/.env --restart always ${BACKEND_IMAGE}"
                                 }
                             }
                         }
@@ -97,7 +97,7 @@ pipeline {
                             steps {
                                 withCredentials([file(credentialsId: 'frontend-env-file', variable: 'FRONTEND_ENV_FILE')]) {
                                     // -v 대신 --mount 옵션을 사용하여 파일임을 명시적으로 지정합니다.
-                                    sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} --mount type=bind,source=${FRONTEND_ENV_FILE},target=/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
+                                    sh "docker run -d --name ${FRONTEND_CONTAINER} -p ${FRONTEND_PORT} -v c:/env/sag-web-erp/front-end/.env:/usr/src/app/.env --restart always ${FRONTEND_IMAGE}"
                                 }
                             }
                         }
