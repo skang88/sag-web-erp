@@ -67,6 +67,8 @@ pipeline {
                         stage('Verify Back-end Deployment') { // 백엔드 컨테이너 상태 확인
                             steps {
                                 dockerInspect(BACKEND_CONTAINER, '/usr/src/app/app.js')
+                                echo '--- Verifying backend .env file content ---'
+                                sh "docker exec ${BACKEND_CONTAINER} cat /usr/src/app/.env"
                             }
                         }
                     }
@@ -102,6 +104,8 @@ pipeline {
                         stage('Verify Front-end Deployment') { // 프론트엔드 컨테이너 상태 확인
                             steps {
                                 dockerInspect(FRONTEND_CONTAINER, '/usr/src/app/src/App.js')
+                                echo '--- Verifying frontend .env file content ---'
+                                sh "docker exec ${FRONTEND_CONTAINER} cat /usr/src/app/.env"
                             }
                         }
                     }
