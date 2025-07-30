@@ -8,11 +8,20 @@ pipeline {
         FRONTEND_IMAGE = 'sag-web-erp-front'
         BACKEND_CONTAINER = 'sag-web-erp-backend'
         FRONTEND_CONTAINER = 'sag-web-erp-front'
-        BACKEND_PORT = '8001:3000'
-        RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정
+        BACKEND_PORT = '8001:3000' 
+        RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정 
         FRONTEND_PORT = '8000:3000'
+        TEAMS_WEBHOOK_URL = 'https://seohanautoga.webhook.office.com/webhookb2/b0442ade-58d3-43eb-98bc-94a59401254d@c34b2a10-25f3-4edc-a86a-49ea5fd0689e/IncomingWebhook/cf0589d6c81b4fe5a734084cb0a6f03d/253f4011-2c14-41b0-970c-bbac1ed89646/V2jW_HkMV__xZQxzrqPCFo5d0p3dDhUiAVRcJvQFJq1Pg1'
     }
     stages {
+        stage('Notify Build Start') { // 빌드 시작 알림
+            steps {
+                script {
+                    sendTeamsNotification("빌드를 시작합니다.", "0078D7") // Blue
+                }
+            }
+        }
+
         stage('Checkout') { // 코드 체크아웃 단계
             steps {
                 git branch: 'main', url: 'https://github.com/skang88/sag-web-erp.git'
@@ -95,6 +104,21 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            script {
+                sendTeamsNotification("빌드가 성공적으로 완료되었습니다.", "28A745") // Green
+            }
+        }
+        failure {
+            script {
+                sendTeamsNotification("빌드에 실패했습니다.", "DC3545") // Red
+            }
+        }
+        always {
+            cleanWs() // 작업 공간 정리
+        }
+    }
 }
 
 def dockerStopRemove(containerName) {
@@ -106,4 +130,27 @@ def dockerInspect(containerName, filePath) {
     sh 'docker ps -a' // 현재 실행 중인 모든 도커 컨테이너 확인
     sh "docker exec ${containerName} ls -al /usr/src/app" // 내부 파일 목록 확인
     sh "docker exec ${containerName} cat ${filePath}" // 주요 파일 내용 출력
+}
+
+def sendTeamsNotification(message, color) {
+    def status = currentBuild.currentResult ?: 'In Progress'
+    def payload = """
+    {
+        "@type": "MessageCard",
+        "@context": "http://schema.org/extensions",
+        "themeColor": "${color}",
+        "summary": "Jenkins Build: ${env.JOB_NAME} - ${status}",
+        "sections": [{
+            "activityTitle": "${message}",
+            "facts": [
+                { "name": "Project", "value": "${env.JOB_NAME}" },
+                { "name": "Build", "value": "<a href='${env.BUILD_URL}'>#${env.BUILD_NUMBER}</a>" },
+                { "name": "Status", "value": "${status}" }
+            ],
+            "markdown": true
+        }]
+    }
+    """
+    // 웹훅 URL에 특수문자가 포함될 수 있으므로 작은따옴표로 감싸줍니다.
+    sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' '${TEAMS_WEBHOOK_URL}'")
 }
