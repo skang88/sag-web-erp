@@ -47,7 +47,7 @@ app.use('/api/shelly', shellyRoutes)
 app.use('/api/plate-recognitions', plateRecognitionRoutes); // /api/plate-recognitions 경로로 라우트
 
 app.get('/', (req, res) => {
-  res.send('This is the backend server');
+  res.send('Welcome to Seohan Auto Georgia!!');
 });
 
 
