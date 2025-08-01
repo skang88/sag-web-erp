@@ -50,7 +50,7 @@ const PlateEventCard = ({ event, onExpire }) => {
 
     const isUnregistered = event.registrationStatus === 'UNREGISTERED';
     const registrationUrl = `https://your-erp-system.com/register-vehicle?plate=${event.bestPlateNumber || ''}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(registrationUrl)}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden transform animate-fade-in border-l-8 border-blue-500 flex flex-col">
@@ -78,7 +78,7 @@ const PlateEventCard = ({ event, onExpire }) => {
                     {/* Left Side: QR Code (if unregistered) */}
                     {isUnregistered && (
                         <div className="w-1/2 flex-shrink-0 flex flex-col items-center justify-center text-center bg-gray-50 rounded-lg p-4 h-full">
-                            <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-full max-w-xs h-auto mb-3" />
+                            <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-full max-w-md h-auto mb-3" />
                             <p className="text-xl font-bold text-gray-800">Register Vehicle</p>
                             <p className="text-md text-gray-600 mt-1">Scan the QR code to register.</p>
                         </div>
