@@ -147,8 +147,20 @@ const PlateRealTimeMonitoringPage = () => {
                 try {
                     const message = JSON.parse(event.data);
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
-                        // Add new event to the top of the list
-                        setEvents(prevEvents => [message.payload, ...prevEvents]);
+                        const newEvent = message.payload;
+                        setEvents(prevEvents => {
+                            const existingEventIndex = prevEvents.findIndex(e => e.bestUuid === newEvent.bestUuid);
+
+                            if (existingEventIndex !== -1) {
+                                // Event with this UUID exists, update it in place.
+                                const updatedEvents = [...prevEvents];
+                                updatedEvents[existingEventIndex] = newEvent;
+                                return updatedEvents;
+                            } else {
+                                // New event, add it to the front.
+                                return [newEvent, ...prevEvents];
+                            }
+                        });
                     }
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
