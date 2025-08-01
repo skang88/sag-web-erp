@@ -55,58 +55,58 @@ const PlateEventCard = ({ event, onExpire }) => {
 
     // Sample QR code URL for unregistered vehicles (replace with actual registration page link later)
     const registrationUrl = `https://your-erp-system.com/register-vehicle?plate=${event.bestPlateNumber || ''}`; // Include plate number in URL
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(registrationUrl)}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(registrationUrl)}`;
 
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden transform animate-fade-in border-l-8 border-blue-500">
-            <div className={`p-5 ${isUnregistered ? 'flex gap-4' : ''}`}>
+            <div className={`p-8 ${isUnregistered ? 'flex gap-8 items-start' : ''}`}>
                 {/* Left: Display QR code for unregistered vehicles */}
                 {isUnregistered && (
-                    <div className="flex-shrink-0 flex flex-col items-center justify-center text-center w-56 p-4 bg-gray-50 rounded-lg">
-                        <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-48 h-48 mb-3" />
-                        <p className="text-lg font-bold text-gray-800">Register Vehicle</p>
-                        <p className="text-sm text-gray-600 mt-1">Scan the QR code<br />to register the vehicle.</p>
+                    <div className="flex-shrink-0 flex flex-col items-center justify-center text-center w-96 p-4 bg-gray-50 rounded-lg">
+                        <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-80 h-80 mb-4" />
+                        <p className="text-2xl font-bold text-gray-800">Register Vehicle</p>
+                        <p className="text-lg text-gray-600 mt-2">Scan the QR code<br />to register the vehicle.</p>
                     </div>
                 )}
 
                 {/* Right: Vehicle recognition information */}
                 <div className={`${isUnregistered ? 'flex-grow' : ''} flex flex-col`}>
                     {/* Top: Plate number, status, countdown */}
-                    <div className="flex justify-between items-start mb-2">
+                    <div className="flex justify-between items-start mb-4">
                         <div>
-                            <p className="text-5xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
+                            <p className="text-8xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
                         </div>
-                        <div className="text-right">
-                            <div className={`px-3 py-1 text-base font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
+                        <div className="text-right flex-shrink-0 ml-8">
+                            <div className={`px-4 py-2 text-lg font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
                                 {statusText[event.registrationStatus] || 'Unknown'}
                             </div>
-                            <div className="mt-2">
-                                <p className="text-sm font-semibold text-gray-500">Next scan in</p>
-                                <p className="text-3xl font-bold text-gray-700">{countdown}s</p>
+                            <div className="mt-3">
+                                <p className="text-lg font-semibold text-gray-500">Next scan in</p>
+                                <p className="text-5xl font-bold text-gray-700">{countdown}s</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Middle: License plate and vehicle images */}
-                    <div className={`flex items-center space-x-4 mb-4 ${!isUnregistered ? 'justify-center' : ''}`}>
+                    <div className={`flex items-start justify-center space-x-6 mb-4`}>
                         {event.plateCropJpeg && (
                             <img 
                                 src={`data:image/jpeg;base64,${event.plateCropJpeg}`} 
                                 alt="License Plate" 
-                                className="w-56 h-auto rounded-md border" 
+                                className="w-1/3 h-auto rounded-md border" 
                             />
                         )}
                         {event.vehicleCropJpeg && (
                             <img 
                                 src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} 
                                 alt="Vehicle" 
-                                className="w-72 h-auto rounded-md border" 
+                                className="w-2/3 h-auto rounded-md border" 
                             />
                         )}
                     </div>
 
                     {/* Bottom: Additional information */}
-                    <div className="text-base text-gray-600 mt-auto pt-2">
+                    <div className="text-lg text-gray-600 mt-auto pt-4">
                         <p><strong>Recognition Time:</strong> {formatDateTime(event.startTime)}</p>
                         {event.registrationStatus === 'REGISTERED' && (
                             <p><strong>Registered By:</strong> {event.userEmail}</p>
@@ -115,9 +115,9 @@ const PlateEventCard = ({ event, onExpire }) => {
                 </div>
             </div>
              {/* Countdown progress bar */}
-             <div className="w-full bg-gray-200 h-1.5">
+             <div className="w-full bg-gray-200 h-2.5">
                 <div 
-                    className="bg-blue-500 h-1.5"
+                    className="bg-blue-500 h-2.5"
                     style={{ width: `${(countdown / 60) * 100}%`, transition: 'width 1s linear' }}
                 ></div>
             </div>
