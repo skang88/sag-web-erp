@@ -13,6 +13,7 @@ const itemRoutes = require('./routes/itemRoutes');
 const shellyRoutes = require('./routes/shellyRouters');
 const userRoutes = require('./routes/userRoutes');
 const plateRecognitionRoutes = require('./routes/plateRecognitionRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
 require('dotenv').config(); // .env 파일 로드
 
@@ -45,6 +46,7 @@ app.use('/api/items', itemRoutes);
 // 바게이트 관련 라우트
 app.use('/api/shelly', shellyRoutes)
 app.use('/api/plate-recognitions', plateRecognitionRoutes); // /api/plate-recognitions 경로로 라우트
+app.use('/api/email', emailRoutes);
 
 app.get('/', (req, res) => {
   res.send('Welcome to Seohan Auto Georgia!!');

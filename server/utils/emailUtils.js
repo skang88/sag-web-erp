@@ -49,3 +49,15 @@ exports.sendPasswordResetEmail = async (email, resetToken) => {
     await transporter.sendMail(mailOptions);
     console.log(`Password reset email sent to ${email}`);
 };
+
+exports.sendCustomEmail = async ({to, subject, html}) => {
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: to,
+    subject: subject,
+    html: html,
+  };
+
+  await transporter.sendMail(mailOptions);
+  console.log(`Custom email sent to ${to}`);
+};
