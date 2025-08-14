@@ -18,4 +18,7 @@ router.post('/toggle/:id', shellyController.toggleRelay);
 // 상태 조회 (데이터 조회는 GET 메서드 사용)
 router.get('/status/:id', shellyController.getStatus);
 
+// Shelly 장치에서 Slack으로 메시지 전송
+router.get('/sendSlackMessage', shellyController.sendSlackMessage);
+
 module.exports = router;

@@ -109,12 +109,37 @@ const getStatus = async (req, res) => {
   }
 };
 
+// Slack으로 메시지를 보내는 컨트롤러 함수
+const sendSlackMessage = async (req, res) => {
+  const { shelly, TEXT } = req.query;
+  const slackWebhookUrl = process.env.SLACK_BARGATE_WEBHOOK_URL
+
+  if (!shelly || !TEXT) {
+    return res.status(400).json({ error: "Shelly ID와 TEXT는 필수 파라미터입니다." });
+  }
+
+  const message = {
+    text: `Shelly ID: ${shelly}, Message: ${TEXT}`,
+  };
+
+  try {
+    await axios.post(slackWebhookUrl, message, {
+      headers: { "Content-Type": "application/json" },
+    });
+    res.status(200).json({ success: true, message: "슬랙 메시지를 성공적으로 보냈습니다." });
+  } catch (error) {
+    console.error("슬랙 메시지 전송 실패:", error);
+    res.status(500).json({ success: false, message: "슬랙 메시지 전송에 실패했습니다." });
+  }
+};
+
 // [수정] 내부 호출용 함수들을 export에 추가합니다.
 module.exports = {
   turnOnRelay,
   turnOffRelay,
   toggleRelay,
   getStatus,
+  sendSlackMessage,
   _turnOn,
   _turnOff
 };
