@@ -28,6 +28,7 @@ const escapeMarkdownV2 = (text) => {
  * @param {Object} res - Express 응답 객체
  */
 exports.createPlateRecognition = async (req, res) => {
+    console.log('Received body:', JSON.stringify(req.body, null, 2));
     try {
         const requestBody = req.body;
 
