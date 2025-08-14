@@ -108,31 +108,34 @@ exports.createPlateRecognition = async (req, res) => {
                 currentRegistrationStatus = 'REGISTERED';
                 userEmailInfo = registeredUser.email || '등록자 이메일 없음';
                 console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 차량입니다. 사용자: ${userEmailInfo}`);
-
-                // camera_id를 기반으로 카메라 설정 조회
-                cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
-
-                if (cameraConfig && cameraConfig.shellyId) {
-                    if (!overallShellyOperated) {
-                        try {
-                            console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 등록된 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
-                            await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
-                            await delay(1000);
-                            await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
-                            console.log(`[${new Date().toISOString()}] Shelly ${cameraConfig.shellyId} 릴레이 시퀀스 완료.`);
-                            currentShellyOperated = true;
-                            overallShellyOperated = true;
-                        } catch (shellyError) {
-                            console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
-                        }
-                    }
-                } else {
-                    console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
-                    await sendTelegramMessage(escapeMarkdownV2(`⚠️ Unknown Camera ID: ${camera_id}. Gate was not operated.`));
-                }
             } else {
                 currentRegistrationStatus = 'UNREGISTERED';
-                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 미등록 차량입니다. Shelly를 작동하지 않습니다.`);
+                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 미등록 차량입니다.`);
+            }
+
+            // !! 등록 여부와 관계없이 Shelly 작동 !!
+            console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 차량 감지. 등록 여부(${currentRegistrationStatus})와 관계없이 Shelly 작동을 시도합니다.`);
+            
+            // camera_id를 기반으로 카메라 설정 조회
+            cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
+
+            if (cameraConfig && cameraConfig.shellyId) {
+                if (!overallShellyOperated) {
+                    try {
+                        console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                        await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
+                        await delay(1000);
+                        await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
+                        console.log(`[${new Date().toISOString()}] Shelly ${cameraConfig.shellyId} 릴레이 시퀀스 완료.`);
+                        currentShellyOperated = true;
+                        overallShellyOperated = true;
+                    } catch (shellyError) {
+                        console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
+                    }
+                }
+            } else {
+                console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
+                await sendTelegramMessage(escapeMarkdownV2(`⚠️ Unknown Camera ID: ${camera_id}. Gate was not operated.`));
             }
         } else {
             console.log(`[${new Date().toISOString()}] 인식된 번호판이 유효하지 않습니다 (NO_PLATE). Shelly를 작동하지 않습니다.`);
