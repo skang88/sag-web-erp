@@ -10,15 +10,7 @@ const { broadcast } = require('./websocketController'); // WebSocket 컨트롤�
 // 릴레이 작동 지연 함수 (비동기)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// 텔레그램 MarkdownV2 형식에서 예약된 문자를 이스케이프하는 유틸리티 함수
-const escapeMarkdownV2 = (text) => {
-    if (text === null || typeof text === 'undefined') {
-        return 'N/A';
-    }
-    const textString = String(text);
-    const reservedChars = /([_*[\]()~`>#+\-=|{}.!])/g;
-    return textString.replace(reservedChars, '\\$1');
-};
+
 
 /**
  * Rekor Scout POST 요청을 받아 번호판 데이터를 처리하고 DB에 저장합니다.
@@ -90,7 +82,7 @@ exports.createPlateRecognition = async (req, res) => {
         }
 
         let overallShellyOperated = false;
-        const telegramMessages = [];
+        
 
         const detectedPlateNumber = best_plate_number.toUpperCase().trim();
         const detectionTime = new Date(epoch_start).toLocaleString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -138,7 +130,7 @@ exports.createPlateRecognition = async (req, res) => {
                 }
             } else {
                 console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
-                await sendTelegramMessage(escapeMarkdownV2(`⚠️ Unknown Camera ID: ${camera_id}. Gate was not operated.`));
+                
             }
         } else {
             console.log(`[${new Date().toISOString()}] 인식된 번호판이 유효하지 않습니다 (NO_PLATE). Shelly를 작동하지 않습니다.`);
@@ -187,31 +179,12 @@ exports.createPlateRecognition = async (req, res) => {
 
         const createdPlateDocs = [createdDoc];
 
-        const cameraNameForMessage = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
-
-        let telegramMessage = `🚗 *차량 번호판 인식 알림* 🚗\n`;
-        telegramMessage += `*카메라:* ${escapeMarkdownV2(cameraNameForMessage)}\n`;
-        telegramMessage += `*시간:* ${escapeMarkdownV2(detectionTime)}\n`;
-        telegramMessage += `*번호판:* \`${escapeMarkdownV2(detectedPlateNumber || 'N/A')}\`\n`;
-        telegramMessage += `*등록 여부:* \`${escapeMarkdownV2(currentRegistrationStatus)}\`\n`;
-
-        if (currentRegistrationStatus === 'REGISTERED') {
-            telegramMessage += `*등록자:* ${escapeMarkdownV2(userEmailInfo)}\n`;
-            if (cameraConfig && cameraConfig.shellyId) {
-                telegramMessage += `*게이트 작동:* ${currentShellyOperated ? `✅ 열림 (Shelly ${cameraConfig.shellyId})` : '❌ 작동 안 함 (오류)'}\n`;
-            } else {
-                telegramMessage += `*게이트 작동:* ❌ 작동 안 함 (카메라 설정 없음)\n`;
-            }
-        } else {
-            telegramMessage += `*게이트 작동:* ❌ 작동 안 함\n`;
-        }
+        
 
         console.log(`[${new Date().toISOString()}] 데이터베이스에 ${createdPlateDocs.length}개의 번호판 정보 저장 완료.`);
         console.log(`[${new Date().toISOString()}] 전체 요청에서 Shelly는 ${overallShellyOperated ? '작동했습니다.' : '작동하지 않았습니다.'}`);
 
-        for (const msg of telegramMessages) {
-            await sendTelegramMessage(msg);
-        }
+        
 
         res.status(201).json({
             message: 'Plate data successfully processed and saved.',
@@ -249,8 +222,6 @@ exports.createPlateRecognition = async (req, res) => {
                 error: error.message,
             });
         }
-
-        await sendTelegramMessage(escapeMarkdownV2(`❌ Server Error Processing Plate: ${error.message}`));
     }
 };
 
