@@ -6,14 +6,10 @@ const Camera = require('../models/cameraModel'); // Camera 모델 임포트!
 const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트!
 const { broadcast } = require('./websocketController'); // WebSocket 컨트롤러에서 broadcast 함수 임포트
 
-const { zonedTimeToUtc, utcToZonedTime, format } = require('date-fns-tz');
-
-
+const { DateTime } = require('luxon');
 
 // 릴레이 작동 지연 함수 (비동기)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-
 
 /**
  * Rekor Scout POST 요청을 받아 번호판 데이터를 처리하고 DB에 저장합니다.
@@ -84,7 +80,6 @@ exports.createPlateRecognition = async (req, res) => {
 
         let overallShellyOperated = false;
         
-
         const detectedPlateNumber = best_plate_number.toUpperCase().trim();
         const detectionTime = new Date(epoch_start).toLocaleString('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -116,23 +111,28 @@ exports.createPlateRecognition = async (req, res) => {
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
 
             const now = new Date(); // UTC 기준 현재 시간
-            const estTimeZone = 'America/New_York'; // EST 시간대
-
+            
             // UTC 시간을 EST 시간대로 변환
-            const nowInEst = utcToZonedTime(now, estTimeZone);
-            const currentHour = nowInEst.getHours(); // EST 기준 0-23
+            const utcNow = DateTime.utc();
+
+            // EST (America/New_York) 타임존으로 변환
+            const nowInEst = utcNow.setZone('America/New_York');
+
+            // Luxon에서는 .hour, .minute, .weekday 사용
+            const currentHour = nowInEst.hour; // 0~23
+            const currentMinute = nowInEst.minute;
+            const currentDay = nowInEst.weekday; // 1 = Monday, ..., 7 = Sunday
 
             // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (EST 운영 시간)
             const isOperatingTime = (currentHour > 3 || (currentHour === 3 && nowInEst.getMinutes() >= 30)) && currentHour < 19;
-            const currentMinute = nowInEst.getMinutes();
-            const currentDay = nowInEst.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
 
             // 월요일(1)부터 금요일(5)까지
             const isWeekday = currentDay >= 1 && currentDay <= 5;
 
             // 11:00 ~ 11:59 또는 15:00 ~ 15:59
-            const isRestrictedTime = (currentHour === 11 && currentMinute >= 0 && currentMinute <= 59) ||
-                                     (currentHour === 15 && currentMinute >= 0 && currentMinute <= 59);
+            // const isRestrictedTime = (currentHour === 11 && currentMinute >= 0 && currentMinute <= 59) ||
+            //                          (currentHour === 15 && currentMinute >= 0 && currentMinute <= 59);
+            isRestrictedTime = false
 
             if (isWeekday && isRestrictedTime) {
                 console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시 ${currentMinute}분)은 평일 제한 시간(${currentHour}:00-${currentHour}:59)이므로 릴레이를 작동하지 않습니다.`);
@@ -143,7 +143,7 @@ exports.createPlateRecognition = async (req, res) => {
                 if (isOperatingTime) {
                     if (!overallShellyOperated) {
                         try {
-                            console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시) [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                            console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시 ${currentMinute}분) [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
                             await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
                             await delay(1000);
                             await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
@@ -209,12 +209,8 @@ exports.createPlateRecognition = async (req, res) => {
 
         const createdPlateDocs = [createdDoc];
 
-        
-
         console.log(`[${new Date().toISOString()}] 데이터베이스에 ${createdPlateDocs.length}개의 번호판 정보 저장 완료.`);
         console.log(`[${new Date().toISOString()}] 전체 요청에서 Shelly는 ${overallShellyOperated ? '작동했습니다.' : '작동하지 않았습니다.'}`);
-
-        
 
         res.status(201).json({
             message: 'Plate data successfully processed and saved.',
