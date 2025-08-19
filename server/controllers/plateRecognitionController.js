@@ -123,7 +123,7 @@ exports.createPlateRecognition = async (req, res) => {
             const currentHour = nowInEst.getHours(); // EST 기준 0-23
 
             // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (EST 운영 시간)
-            const isOperatingTime = currentHour >= 4 && currentHour < 19;
+            const isOperatingTime = (currentHour > 3 || (currentHour === 3 && nowInEst.getMinutes() >= 30)) && currentHour < 19;
 
             if (cameraConfig && cameraConfig.shellyId) {
                 if (isOperatingTime) {
@@ -142,7 +142,7 @@ exports.createPlateRecognition = async (req, res) => {
                     }
                 } else {
                     // 운영 시간이 아닐 경우 로그만 남김
-                    console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시)은 Shelly 작동 시간(04:00-19:00)이 아니므로 릴레이를 작동하지 않습니다.`);
+                    console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시)은 Shelly 작동 시간(03:30-19:00)이 아니므로 릴레이를 작동하지 않습니다.`);
                 }
             } else {
                 console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
