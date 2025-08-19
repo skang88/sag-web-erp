@@ -6,6 +6,9 @@ const Camera = require('../models/cameraModel'); // Camera 모델 임포트!
 const { _turnOn, _turnOff } = require('./shellyController'); // Shelly 컨트롤러 임포트!
 const { broadcast } = require('./websocketController'); // WebSocket 컨트롤러에서 broadcast 함수 임포트
 
+const { zonedTimeToUtc, utcToZonedTime, format } = require('date-fns-tz');
+
+
 
 // 릴레이 작동 지연 함수 (비동기)
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -112,9 +115,14 @@ exports.createPlateRecognition = async (req, res) => {
             // camera_id를 기반으로 카메라 설정 조회
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
 
-            const now = new Date();
-            const currentHour = now.getHours(); // 서버 시간 기준 0-23
-            // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (운영 시간)
+            const now = new Date(); // UTC 기준 현재 시간
+            const estTimeZone = 'America/New_York'; // EST 시간대
+
+            // UTC 시간을 EST 시간대로 변환
+            const nowInEst = utcToZonedTime(now, estTimeZone);
+            const currentHour = nowInEst.getHours(); // EST 기준 0-23
+
+            // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (EST 운영 시간)
             const isOperatingTime = currentHour >= 4 && currentHour < 19;
 
             if (cameraConfig && cameraConfig.shellyId) {
