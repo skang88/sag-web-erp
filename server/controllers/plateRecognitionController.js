@@ -121,7 +121,7 @@ exports.createPlateRecognition = async (req, res) => {
                 if (isOperatingTime) {
                     if (!overallShellyOperated) {
                         try {
-                            console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                            console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시) [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
                             await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
                             await delay(1000);
                             await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
