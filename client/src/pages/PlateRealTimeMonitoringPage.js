@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const WS_URL = process.env.REACT_APP_WS_URL
+const WS_URL = process.env.REACT_APP_WS_URL;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // Helper function to format ISO date strings
 const formatDateTime = (isoString) => {
@@ -196,18 +197,44 @@ const PlateRealTimeMonitoringPage = () => {
         setEvents(prevEvents => prevEvents.filter(event => event.bestUuid !== uuid));
     }, []);
 
+    const handleOpenDoor = async (shellyId) => {
+        if (!shellyId) {
+            console.error("Shelly ID not found for this camera.");
+            return;
+        }
+        try {
+            // Turn on
+            await fetch(`${API_BASE_URL}/api/shelly/on/${shellyId}`, { method: 'POST' });
+            // Wait for 1 second
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Turn off
+            await fetch(`${API_BASE_URL}/api/shelly/off/${shellyId}`, { method: 'POST' });
+            console.log('Door opened successfully!');
+        } catch (error) {
+            console.error("Failed to open door:", error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
             <div className="w-full max-w-7xl mx-auto mt-4 p-6">
                 <header className="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-300">
                     <h1 className="text-4xl font-extrabold text-gray-900">Real-Time Vehicle Recognition</h1>
                     <div className="flex items-center space-x-2">
-                         <div className={`w-3 h-3 rounded-full ${wsStatus === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                        <div className={`w-3 h-3 rounded-full ${wsStatus === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
                         <span className="text-gray-500">{wsStatus}</span>
                     </div>
                 </header>
 
                 <main>
+                    <div className="mb-6 text-center">
+                        <button 
+                            onClick={() => handleOpenDoor(3)} 
+                            className="px-8 py-4 bg-blue-500 text-white text-xl rounded-lg hover:bg-blue-600 transition shadow-lg"
+                        >
+                            Open Door
+                        </button>
+                    </div>
                     <div className="grid grid-cols-1 gap-8">
                         {events.length > 0 ? (
                             events.map(event => (
