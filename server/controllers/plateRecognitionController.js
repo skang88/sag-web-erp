@@ -194,18 +194,23 @@ exports.createPlateRecognition = async (req, res) => {
         const createdDoc = await PlateRecognition.create(documentToCreate);
 
         // 실시간 모니터링을 위해 WebSocket 클라이언트에게 데이터 전송
-        const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
-        const broadcastData = {
-            bestUuid: createdDoc.bestUuid,
-            cameraName: cameraNameForBroadcast,
-            startTime: createdDoc.startTime,
-            bestPlateNumber: createdDoc.bestPlateNumber,
-            registrationStatus: createdDoc.registrationStatus,
-            userEmail: createdDoc.userEmail,
-            plateCropJpeg: createdDoc.plateCropJpeg,
-            vehicleCropJpeg: createdDoc.vehicleCropJpeg,
-        };
-        broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
+        // 카메라 ID가 275477815인 경우에만 데이터를 전송합니다.
+        if (String(camera_id) === '275477815') {
+            const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
+            const broadcastData = {
+                bestUuid: createdDoc.bestUuid,
+                cameraName: cameraNameForBroadcast,
+                startTime: createdDoc.startTime,
+                bestPlateNumber: createdDoc.bestPlateNumber,
+                registrationStatus: createdDoc.registrationStatus,
+                userEmail: createdDoc.userEmail,
+                plateCropJpeg: createdDoc.plateCropJpeg,
+                vehicleCropJpeg: createdDoc.vehicleCropJpeg,
+            };
+            broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
+        } else {
+            console.log(`[${new Date().toISOString()}] 카메라 ID ${camera_id}는 실시간 모니터링 대상이 아니므로 WebSocket 데이터를 전송하지 않습니다.`);
+        }
 
         const createdPlateDocs = [createdDoc];
 
