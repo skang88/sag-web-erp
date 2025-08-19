@@ -20,9 +20,7 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
  * @param {Object} res - Express 응답 객체
  */
 exports.createPlateRecognition = async (req, res) => {
-    if (req.body.data_type !== 'heartbeat') {
-      console.log('Received body:', JSON.stringify(req.body, null, 2));
-    }
+    
     try {
         const requestBody = req.body;
 
@@ -114,19 +112,29 @@ exports.createPlateRecognition = async (req, res) => {
             // camera_id를 기반으로 카메라 설정 조회
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
 
+            const now = new Date();
+            const currentHour = now.getHours(); // 서버 시간 기준 0-23
+            // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (운영 시간)
+            const isOperatingTime = currentHour >= 4 && currentHour < 19;
+
             if (cameraConfig && cameraConfig.shellyId) {
-                if (!overallShellyOperated) {
-                    try {
-                        console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
-                        await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
-                        await delay(1000);
-                        await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
-                        console.log(`[${new Date().toISOString()}] Shelly ${cameraConfig.shellyId} 릴레이 시퀀스 완료.`);
-                        currentShellyOperated = true;
-                        overallShellyOperated = true;
-                    } catch (shellyError) {
-                        console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
+                if (isOperatingTime) {
+                    if (!overallShellyOperated) {
+                        try {
+                            console.log(`[${new Date().toISOString()}] [${cameraConfig.name}]에서 차량 감지! Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                            await _turnOn(cameraConfig.shellyId); // 올바른 shellyId 전달
+                            await delay(1000);
+                            await _turnOff(cameraConfig.shellyId); // 올바른 shellyId 전달
+                            console.log(`[${new Date().toISOString()}] Shelly ${cameraConfig.shellyId} 릴레이 시퀀스 완료.`);
+                            currentShellyOperated = true;
+                            overallShellyOperated = true;
+                        } catch (shellyError) {
+                            console.error(`[${new Date().toISOString()}] [${cameraConfig.name}] Shelly ${cameraConfig.shellyId} 릴레이 제어 중 오류 발생:`, shellyError.message);
+                        }
                     }
+                } else {
+                    // 운영 시간이 아닐 경우 로그만 남김
+                    console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시)은 Shelly 작동 시간(04:00-19:00)이 아니므로 릴레이를 작동하지 않습니다.`);
                 }
             } else {
                 console.warn(`[${new Date().toISOString()}] [${camera_id}]에 대한 카메라 설정을 찾을 수 없습니다. Shelly를 작동하지 않습니다.`);
