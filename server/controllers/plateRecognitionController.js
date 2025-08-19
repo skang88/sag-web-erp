@@ -124,6 +124,20 @@ exports.createPlateRecognition = async (req, res) => {
 
             // 새벽 4시부터 저녁 7시(19시) 이전까지만 Shelly 작동 허용 (EST 운영 시간)
             const isOperatingTime = (currentHour > 3 || (currentHour === 3 && nowInEst.getMinutes() >= 30)) && currentHour < 19;
+            const currentMinute = nowInEst.getMinutes();
+            const currentDay = nowInEst.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+            // 월요일(1)부터 금요일(5)까지
+            const isWeekday = currentDay >= 1 && currentDay <= 5;
+
+            // 11:00 ~ 11:59 또는 15:00 ~ 15:59
+            const isRestrictedTime = (currentHour === 11 && currentMinute >= 0 && currentMinute <= 59) ||
+                                     (currentHour === 15 && currentMinute >= 0 && currentMinute <= 59);
+
+            if (isWeekday && isRestrictedTime) {
+                console.log(`[${new Date().toISOString()}] 현재 시간(${currentHour}시 ${currentMinute}분)은 평일 제한 시간(${currentHour}:00-${currentHour}:59)이므로 릴레이를 작동하지 않습니다.`);
+                return res.status(200).json({ message: `Shelly operation skipped due to weekday restricted time (${currentHour}:00-${currentHour}:59).` });
+            }
 
             if (cameraConfig && cameraConfig.shellyId) {
                 if (isOperatingTime) {
