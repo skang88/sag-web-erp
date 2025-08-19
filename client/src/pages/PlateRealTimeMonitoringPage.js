@@ -127,6 +127,7 @@ const PlateEventCard = ({ event, onExpire }) => {
 const PlateRealTimeMonitoringPage = () => {
     const [events, setEvents] = useState([]);
     const [wsStatus, setWsStatus] = useState('Connecting...');
+    const [isGateOpening, setIsGateOpening] = useState(false);
 
     useEffect(() => {
         let ws;
@@ -198,10 +199,10 @@ const PlateRealTimeMonitoringPage = () => {
     }, []);
 
     const handleOpenDoor = async (shellyId) => {
-        if (!shellyId) {
-            console.error("Shelly ID not found for this camera.");
+        if (!shellyId || isGateOpening) {
             return;
         }
+        setIsGateOpening(true);
         try {
             // Turn on
             await fetch(`${API_BASE_URL}/api/shelly/on/${shellyId}`, { method: 'POST' });
@@ -212,6 +213,8 @@ const PlateRealTimeMonitoringPage = () => {
             console.log('Door opened successfully!');
         } catch (error) {
             console.error("Failed to open door:", error);
+        } finally {
+            setIsGateOpening(false);
         }
     };
 
@@ -228,11 +231,16 @@ const PlateRealTimeMonitoringPage = () => {
 
                 <main>
                     <div className="mb-6 text-center">
-                        <button 
-                            onClick={() => handleOpenDoor(3)} 
-                            className="px-8 py-4 bg-blue-500 text-white text-xl rounded-lg hover:bg-blue-600 transition shadow-lg"
+                        <button
+                            onClick={() => handleOpenDoor(3)}
+                            disabled={isGateOpening}
+                            className={`px-8 py-4 text-white text-xl rounded-lg transition shadow-lg ${
+                                isGateOpening
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-500 hover:bg-blue-600'
+                            }`}
                         >
-                            Open Door
+                            {isGateOpening ? 'Opening...' : 'Open Gate'}
                         </button>
                     </div>
                     <div className="grid grid-cols-1 gap-8">
