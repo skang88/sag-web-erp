@@ -220,6 +220,24 @@ const PlateRealTimeMonitoringPage = () => {
                         )}
                     </div>
                 </main>
+
+                <div className="mt-8 text-center text-gray-500">
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Privacy Notice</h3>
+                        <div className="text-left">
+                            <div className="mb-4">
+                                <p className="font-bold">Korean</p>
+                                <p className="text-sm">방문자 출입은 CCTV에 의해 촬영되며, 영상은 보안 목적으로 최대 1개월간 보관됩니다.</p>
+                                <p className="text-sm">보관된 영상은 법적 요구 또는 보안 사고 조사 목적 외에는 사용되지 않습니다.</p>
+                            </div>
+                            <div>
+                                <p className="font-bold">English</p>
+                                <p className="text-sm">Visitor access will be recorded by CCTV, and footage will be stored for up to one month for security purposes.</p>
+                                <p className="text-sm">The recorded data will not be used for any other purpose except in response to legal requirements or security investigations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
