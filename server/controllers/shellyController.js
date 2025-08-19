@@ -5,8 +5,9 @@ require('dotenv').config();
 
 // Shelly IP 주소를 객체로 관리하여 확장성을 높입니다.
 const SHELLY_IPS = {
-  1: process.env.SHELLY_IP,    // .env 파일의 SHELLY_IP
+  1: process.env.SHELLY_IP,    // .env 파일의 SHELLY_IP (입구-닫힘)
   2: process.env.SHELLY2_IP,   // .env 파일의 SHELLY2_IP
+  3: process.env.SHELLY3_IP,   // .env 파일의 SHELLY2_IP (입구-열림)
   // Shelly가 추가되면 여기에 3: process.env.SHELLY3_IP 와 같이 추가하면 됩니다.
 };
 
