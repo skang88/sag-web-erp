@@ -5,14 +5,14 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // 관리할 Shelly 장치 목록
 const SHELLIES = [
-  { id: 1, name: 'Shelly 1 (Entrance - Close)' },
-  { id: 2, name: 'Shelly 2 (Exit)' },
-  { id: 3, name: 'Shelly 3 (Entrance - Open)' },
-  { id: 4, name: 'Shelly 4 (TBD)' },
-  { id: 5, name: 'Shelly 5 (TBD)' },
-  { id: 6, name: 'Shelly 6 (TBD)' },
-  { id: 7, name: 'Shelly 7 (TBD)' },
-  { id: 8, name: 'Shelly 8 (TBD)' },
+  { id: 1, name: 'Visitor Entrance - Close' },
+  { id: 2, name: 'Visitor Exit - Close' },
+  { id: 3, name: 'Visitor Entrance - Open' },
+  { id: 4, name: 'Visitor Exit - Open' },
+  { id: 5, name: 'Staff Exit - Open' },
+  { id: 6, name: 'Staff Exit - Close' },
+  { id: 7, name: 'Staff Entrance - Close' },  // Shelly 7
+  { id: 8, name: 'Staff Entrance - Open' },  // Shelly 8
 ];
 
 // 각 장치의 상태와 제어 UI를 담는 카드 컴포넌트
