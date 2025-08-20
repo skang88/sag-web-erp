@@ -194,8 +194,8 @@ exports.createPlateRecognition = async (req, res) => {
         const createdDoc = await PlateRecognition.create(documentToCreate);
 
         // 실시간 모니터링을 위해 WebSocket 클라이언트에게 데이터 전송
-        // 카메라 ID가 275477815인 경우에만 데이터를 전송합니다.
-        if (String(camera_id) === '275477815') {
+        // 카메라 ID가 275477815, 5862396인 경우에만 데이터를 전송합니다.
+        if (String(camera_id) === '275477815' || String(camera_id) === '5862396') {
             const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
             const broadcastData = {
                 bestUuid: createdDoc.bestUuid,
