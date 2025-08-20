@@ -8,6 +8,11 @@ const SHELLIES = [
   { id: 1, name: 'Shelly 1 (Entrance - Close)' },
   { id: 2, name: 'Shelly 2 (Exit)' },
   { id: 3, name: 'Shelly 3 (Entrance - Open)' },
+  { id: 4, name: 'Shelly 4 (TBD)' },
+  { id: 5, name: 'Shelly 5 (TBD)' },
+  { id: 6, name: 'Shelly 6 (TBD)' },
+  { id: 7, name: 'Shelly 7 (TBD)' },
+  { id: 8, name: 'Shelly 8 (TBD)' },
 ];
 
 // 각 장치의 상태와 제어 UI를 담는 카드 컴포넌트

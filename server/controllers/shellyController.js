@@ -8,6 +8,11 @@ const SHELLY_IPS = {
   1: process.env.SHELLY_IP,    // .env 파일의 SHELLY_IP (입구-닫힘)
   2: process.env.SHELLY2_IP,   // .env 파일의 SHELLY2_IP
   3: process.env.SHELLY3_IP,   // .env 파일의 SHELLY2_IP (입구-열림)
+  4: process.env.SHELLY4_IP,
+  5: process.env.SHELLY5_IP,
+  6: process.env.SHELLY6_IP,
+  7: process.env.SHELLY7_IP,
+  8: process.env.SHELLY8_IP 
   // Shelly가 추가되면 여기에 3: process.env.SHELLY3_IP 와 같이 추가하면 됩니다.
 };
 
