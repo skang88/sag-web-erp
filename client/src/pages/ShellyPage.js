@@ -22,7 +22,7 @@ const DeviceCard = ({ shelly, status, onAction, onRefresh, isLoading }) => {
       <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">{shelly.name}</h2>
       
       {/* 상태 표시 영역 */}
-      <div className="h-24">
+      <div className="h-16">
         {status && !status.error ? (
           <div className="space-y-2 text-lg">
             <p>
