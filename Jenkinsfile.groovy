@@ -9,7 +9,7 @@ pipeline {
         BACKEND_CONTAINER = 'sag-web-erp-backend'
         FRONTEND_CONTAINER = 'sag-web-erp-front'
         BACKEND_PORT = '8001:3000' 
-        RTSP_PORT = '9999:9999' // RTSP 스트림 포트 설정 
+        RTSP_PORT = '8082:8082' // RTSP 스트림 포트 설정 
         FRONTEND_PORT = '8000:3000'
     }
     stages {
