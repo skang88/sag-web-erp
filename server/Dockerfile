@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm install
 
 # FFmpeg 설치 (apt 사용)
-RUN apt-get update && apt-get install -y netcat-openbsd
+RUN apt-get update && apt-get install -y ffmpeg
 
 # 전체 소스 코드 복사
 # 앱 파일 복사
@@ -21,4 +21,4 @@ COPY . .
 RUN ls -al
 
 # 앱 실행
-CMD ["node", "server.js"]
+CMD ["npm", "start"]

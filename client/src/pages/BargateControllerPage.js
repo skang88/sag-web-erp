@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import JsmpegPlayer from '../components/JsmpegPlayer';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -16,11 +17,13 @@ const BACKGROUND_IMAGE_PATH = '/BargateBackground.png';
 
 // Button positions for each gate (top, left in %)
 const GATE_POSITIONS = {
-  1: { top: '50%', left: '30%' },
+  1: { top: '50%', left: '35%' },
   2: { top: '50%', left: '65%' },
-  3: { top: '50%', left: '13%' },
+  3: { top: '50%', left: '18%' },
   4: { top: '50%', left: '82%' },
 };
+
+const WEBSOCKET_URL = 'ws://172.16.220.32:8082/api/stream';
 // --- End of Settings Area ---
 
 
@@ -143,6 +146,13 @@ const BargateControllerPage = () => {
 
   return (
     <div className="relative w-screen h-screen bg-gray-200">
+      {/* Live View */}
+      <div className="absolute top-4 right-4 z-30">
+        <div className="w-96 h-72 bg-black rounded-lg shadow-lg overflow-hidden">
+          <JsmpegPlayer websocketUrl={WEBSOCKET_URL} />
+        </div>
+      </div>
+
       {/* Background Image */}
       <div 
         className="absolute top-0 left-0 w-full h-full bg-contain bg-center bg-no-repeat"
