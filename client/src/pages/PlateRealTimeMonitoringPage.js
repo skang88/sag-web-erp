@@ -50,7 +50,7 @@ const PlateEventCard = ({ event, onExpire }) => {
     };
 
     const isUnregistered = event.registrationStatus === 'UNREGISTERED';
-    const registrationUrl = `https://your-erp-system.com/register-vehicle?plate=${event.bestPlateNumber || ''}`;
+    const registrationUrl = `https://seohan.com/register-visiter?plate=${event.bestPlateNumber || ''}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
 
     return (
@@ -210,9 +210,9 @@ const PlateRealTimeMonitoringPage = () => {
             await new Promise(resolve => setTimeout(resolve, 1000));
             // Turn off
             await fetch(`${API_BASE_URL}/api/shelly/off/${shellyId}`, { method: 'POST' });
-            console.log('Door opened successfully!');
+            console.log(`Shelly action for ID ${shellyId} successful!`);
         } catch (error) {
-            console.error("Failed to open door:", error);
+            console.error(`Failed to trigger shelly ID ${shellyId}:`, error);
         } finally {
             setIsGateOpening(false);
         }
@@ -230,7 +230,7 @@ const PlateRealTimeMonitoringPage = () => {
                 </header>
 
                 <main>
-                    <div className="mb-6 text-center">
+                    <div className="mb-6 text-center flex justify-center space-x-4">
                         <button
                             onClick={() => handleOpenDoor(3)}
                             disabled={isGateOpening}
@@ -240,7 +240,18 @@ const PlateRealTimeMonitoringPage = () => {
                                     : 'bg-blue-500 hover:bg-blue-600'
                             }`}
                         >
-                            {isGateOpening ? 'Opening...' : 'Open Gate'}
+                            {isGateOpening ? 'Processing...' : 'Open Gate'}
+                        </button>
+                        <button
+                            onClick={() => handleOpenDoor(1)}
+                            disabled={isGateOpening}
+                            className={`px-8 py-4 text-white text-xl rounded-lg transition shadow-lg ${
+                                isGateOpening
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-red-500 hover:bg-red-600'
+                            }`}
+                        >
+                            {isGateOpening ? 'Processing...' : 'Close Gate'}
                         </button>
                     </div>
                     <div className="grid grid-cols-1 gap-8">
