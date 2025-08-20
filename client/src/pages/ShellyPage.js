@@ -115,7 +115,7 @@ function ShellyPage() {
 
     const intervalId = setInterval(() => {
       SHELLIES.forEach(shelly => getStatus(shelly.id));
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(intervalId);
   }, [getStatus]);
