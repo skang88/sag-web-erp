@@ -4,15 +4,16 @@ import { useState, useEffect, useCallback } from 'react';
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
 
 // 관리할 Shelly 장치 목록
+// 이 배열의 순서를 변경하여 카드 표시 순서를 커스터마이징할 수 있습니다.
 const SHELLIES = [
-  { id: 1, name: 'Visitor Entrance - Close' },
-  { id: 2, name: 'Visitor Exit - Close' },
+  { id: 8, name: 'Staff Entrance - Open' },  // Shelly 8
+  { id: 7, name: 'Staff Entrance - Close' },  // Shelly 7
   { id: 3, name: 'Visitor Entrance - Open' },
+  { id: 1, name: 'Visitor Entrance - Close' },
   { id: 4, name: 'Visitor Exit - Open' },
+  { id: 2, name: 'Visitor Exit - Close' },
   { id: 5, name: 'Staff Exit - Open' },
   { id: 6, name: 'Staff Exit - Close' },
-  { id: 7, name: 'Staff Entrance - Close' },  // Shelly 7
-  { id: 8, name: 'Staff Entrance - Open' },  // Shelly 8
 ];
 
 // 각 장치의 상태와 제어 UI를 담는 카드 컴포넌트
