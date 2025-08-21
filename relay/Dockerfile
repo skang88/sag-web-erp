@@ -1,5 +1,5 @@
 # 1. 기반 이미지로 공식 Node.js 이미지를 사용합니다.
-FROM node:18
+FROM node:22
 
 # 2. ffmpeg를 설치하고 apt 캐시를 정리하여 레이어 크기를 최적화합니다.
 RUN apt-get update && \

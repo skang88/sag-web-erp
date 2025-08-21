@@ -6,11 +6,14 @@ pipeline {
     environment {
         BACKEND_IMAGE = 'sag-web-erp-backend'
         FRONTEND_IMAGE = 'sag-web-erp-front'
+        RELAY_IMAGE = 'sag-web-erp-relay'
         BACKEND_CONTAINER = 'sag-web-erp-backend'
         FRONTEND_CONTAINER = 'sag-web-erp-front'
+        RELAY_CONTAINER = 'sag-web-erp-relay'
         BACKEND_PORT = '8001:3000' 
         RTSP_PORT = '8082:8082' // RTSP 스트림 포트 설정 
         FRONTEND_PORT = '8000:3000'
+        RELAY_PORT = '8082:8082'
     }
     stages {
         stage('Notify Build Start') { // 빌드 시작 알림
@@ -108,6 +111,37 @@ pipeline {
                                 dockerInspect(FRONTEND_CONTAINER, '/usr/src/app/src/App.js')
                                 echo '--- Verifying frontend .env file content ---'
                                 sh "docker exec ${FRONTEND_CONTAINER} cat /usr/src/app/.env"
+                            }
+                        }
+                    }
+                }
+                stage('Relay') {
+                    stages {
+                        stage('Build Relay Image') { // 릴레이 도커 이미지 빌드
+                            steps {
+                                dir('relay') {
+                                    sh "docker build -t ${RELAY_IMAGE} ."
+                                }
+                            }
+                        }
+
+                        stage('Clean Up Old Relay Container') { // 기존 릴레이 컨테이너 정리
+                            steps {
+                                script {
+                                    dockerStopRemove(RELAY_CONTAINER)
+                                }
+                            }
+                        }
+
+                        stage('Run Relay Container') { // 새 릴레이 컨테이너 실행
+                            steps {
+                                sh "docker run -d --name ${RELAY_CONTAINER} -p ${RELAY_PORT} --restart always ${RELAY_IMAGE}"
+                            }
+                        }
+
+                        stage('Verify Relay Deployment') { // 릴레이 컨테이너 상태 확인
+                            steps {
+                                dockerInspect(RELAY_CONTAINER, '/usr/src/app/relay.js')
                             }
                         }
                     }
