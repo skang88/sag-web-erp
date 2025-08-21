@@ -23,7 +23,7 @@ const GATE_POSITIONS = {
   4: { top: '50%', left: '82%' },
 };
 
-const WEBSOCKET_URL = 'ws://172.16.220.46:8082/api/stream';
+const WEBSOCKET_URL = 'ws://172.16.220.32:8082/api/stream';
 // --- End of Settings Area ---
 
 
