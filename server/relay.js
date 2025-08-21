@@ -6,7 +6,7 @@ const { proxy } = require('rtsp-relay')(app);
 
 const handler = proxy({
   url: 'rtsp://admin:1q2w3e4r@172.16.222.44:554',
-  verbose: false,
+  verbose: true,
 });
 
 app.ws('/api/stream', handler);
