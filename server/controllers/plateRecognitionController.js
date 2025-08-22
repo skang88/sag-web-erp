@@ -109,7 +109,6 @@ exports.createPlateRecognition = async (req, res) => {
             
             // camera_id를 기반으로 카메라 설정 조회
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
-            console.log('Fetched camera config:', cameraConfig); // 디버깅용 로그 추가
 
             const now = new Date(); // UTC 기준 현재 시간
             
