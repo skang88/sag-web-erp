@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
       type: String,
       trim: true,
       uppercase: true, // 번호판은 대문자로 저장
-      unique: true, // 각 번호판은 고유해야 함 (스키마 내에서 고유)
+      // unique: true, // 각 번호판은 고유해야 함 (스키마 내에서 고유)
       sparse: true, // null 값은 unique 검사에서 제외
     }
   ],
