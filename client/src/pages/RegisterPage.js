@@ -3,7 +3,7 @@ import { useState } from 'react';
 import RegisterForm from '../components/RegisterForm';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // Backend URL from environment variable
+const API_BASE_URL = process.env.REACT_APP_API_URL; // Backend URL from environment variable
 
 const RegisterPage = () => {
     const [message, setMessage] = useState(''); // For success or error messages
@@ -27,7 +27,7 @@ const RegisterPage = () => {
         // --- ⭐ Validation Complete ⭐ ---
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/register`, { // Your endpoint
+            const response = await fetch(`${API_BASE_URL}/auth/register`, { // Your endpoint
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
