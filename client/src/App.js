@@ -1,6 +1,6 @@
 // src/App.js
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Navigate 임포트 추가
 import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext'; // AuthProvider 및 useAuth 임포트
 
@@ -33,30 +33,35 @@ function MainAppContent() {
         <Navbar isLoggedIn={isLoggedIn} /> {/* isLoggedIn prop 전달 */}
         <main>
           <Routes>
-            {/* ⭐ 수정: 기본 경로와 로그인 경로를 AuthPage로 연결 ⭐ */}
+            {/* 공개 라우트 */}
             <Route path="/" element={<AuthPage />} />
-            <Route path="/login" element={<AuthPage />} /> {/* /login 경로도 AuthPage로 연결 */}
-
-            <Route path="/access" element={<AccessData />} />
-            <Route path="/lastlogin" element={<LastLogin />} />
-            <Route path="/packing" element={<PackingSummary />} />
-            <Route path="/packing/items" element={<PackingItems />} />
-            <Route path="/packing/pallets" element={<ContainerPackingViz />} />
-            <Route path="/asn" element={<AsnPage />} />
-            <Route path="/barcode-tester" element={<StocktakingPage />} />
-
+            <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/shelly" element={<ShellyPage />} />
-            <Route path="/bargate-controller" element={<BargateControllerPage />} />
-            <Route path="/plate-log" element={<PlateLogPage />} />
-            <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} /> {/* ⭐ 새로 추가: 실시간 모니터링 페이지 라우트 ⭐ */}
-
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
 
-            {/* 만약 로그인되지 않은 상태에서 보호된 페이지로 접근 시 /login으로 리디렉트하는 로직이 필요하다면 */}
-            {/* <Route path="*" element={localStorage.getItem('token') ? null : <Navigate to="/login" />} /> */}
+            {/* 보호된 라우트 */}
+            {isLoggedIn ? (
+              <>
+                <Route path="/access" element={<AccessData />} />
+                <Route path="/lastlogin" element={<LastLogin />} />
+                <Route path="/packing" element={<PackingSummary />} />
+                <Route path="/packing/items" element={<PackingItems />} />
+                <Route path="/packing/pallets" element={<ContainerPackingViz />} />
+                <Route path="/asn" element={<AsnPage />} />
+                <Route path="/barcode-tester" element={<StocktakingPage />} />
+                <Route path="/shelly" element={<ShellyPage />} />
+                <Route path="/bargate-controller" element={<BargateControllerPage />} />
+                <Route path="/plate-log" element={<PlateLogPage />} />
+                <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                {/* 로그인 후 기본 페이지로 사용할 라우트 (예: /home) */}
+                <Route path="/home" element={<AccessData />} />
+              </>
+            ) : (
+              // 로그인되지 않은 상태에서 보호된 페이지 접근 시 /login으로 리디렉트
+              <Route path="*" element={<Navigate to="/login" />} />
+            )}
           </Routes>
         </main>
       </header>
