@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
 
   // --- ⭐ Added Email Domain Validation (Server-side) ⭐ ---
     const allowedDomain = '@seohan.com';
-    if (!email.endsWith(allowedDomain)) {
+    if (!email || !email.endsWith(allowedDomain)) {
         return res.status(400).json({ message: `You must use an email from the '${allowedDomain}' domain to register.` });
     }
     // --- ⭐ Validation Complete ⭐ ---
