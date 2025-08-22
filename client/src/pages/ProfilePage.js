@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // 백엔드 API 기본 URL (환경 변수에서 가져옴)
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const ProfilePage = () => {
     // 상태 변수 정의
@@ -38,7 +38,7 @@ const ProfilePage = () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
+                const response = await fetch(`${API_BASE_URL}/users/profile`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const ProfilePage = () => {
                 updateData.password = newPassword;
             }
 
-            const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
+            const response = await fetch(`${API_BASE_URL}/users/profile`, {
                 method: 'PUT', // PUT 또는 PATCH 메서드 사용
                 headers: {
                     'Content-Type': 'application/json',

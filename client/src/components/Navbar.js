@@ -83,9 +83,9 @@ const navLinks = [
 ];
 
 
-function Navbar() {
+function Navbar({ isLoggedIn }) { // isLoggedIn prop을 받도록 수정
   // AuthContext에서 전역 로그인 상태, 사용자 정보, 로그아웃 함수를 가져옵니다.
-  const { isLoggedIn, user, logout } = useAuth(); 
+  const { user, logout } = useAuth(); // isLoggedIn은 prop으로 받으므로 제거
   const navigate = useNavigate();
   // ⭐ 제거할 코드: 아래 세 줄은 더 이상 필요 없습니다. ⭐
   // const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -105,6 +105,15 @@ function Navbar() {
   // user가 null이거나 email 속성이 없으면 빈 문자열이 됩니다.
   const userIdToDisplay = user ? user.email : ''; 
 
+  // 로그인 상태에 따라 필터링된 navLinks
+  const filteredNavLinks = navLinks.filter(menuItem => {
+    const hiddenLabels = ['HR', 'MAT', 'Visitor', 'Dashboard'];
+    if (hiddenLabels.includes(menuItem.label) && !isLoggedIn) {
+      return false; // 로그인되지 않은 경우 해당 메뉴 숨김
+    }
+    return true;
+  });
+
   return (
     <nav className="bg-[#0B4DA3] flex justify-between items-center p-2 w-full fixed top-0 left-0 z-[1000]">
       {/* 왼쪽 메뉴 (로고 및 기존 메뉴) */}
@@ -114,7 +123,7 @@ function Navbar() {
             <Logo />
           </Link>
         </li>
-        {navLinks.map((menuItem) => (
+        {filteredNavLinks.map((menuItem) => (
           <li key={menuItem.label} className="relative mx-4 group">
             {menuItem.isRouterLink ? (
               <Link to={menuItem.path} className="text-white no-underline font-bold text-lg hover:text-yellow-300">
