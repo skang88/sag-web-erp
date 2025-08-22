@@ -68,7 +68,7 @@ const LastLoginFetcher = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/accs/lastlogin`);
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/accs/lastlogin`);
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
                 const contentType = response.headers.get('Content-Type');

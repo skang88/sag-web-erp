@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 // 개발 환경에서 사용할 백엔드 URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
+const API_BASE_URL = process.env.REACT_APP_API_URL; 
 
 // 관리할 Shelly 장치 목록
 // 이 배열의 순서를 변경하여 카드 표시 순서를 커스터마이징할 수 있습니다.
@@ -86,7 +86,7 @@ function ShellyPage() {
   // 상태를 가져오는 함수
   const getStatus = useCallback(async (shellyId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/shelly/status/${shellyId}`);
+      const res = await fetch(`${API_BASE_URL}/shelly/status/${shellyId}`);
       if (!res.ok) {
         throw new Error(`Device not responding (HTTP ${res.status})`);
       }
@@ -127,7 +127,7 @@ function ShellyPage() {
     const shellyName = SHELLIES.find(s => s.id === shellyId)?.name || `Device ${shellyId}`;
     setActionMessage(`Sending ${cmd.toUpperCase()} command to ${shellyName}...`);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/shelly/${cmd}/${shellyId}`, {
+      const response = await fetch(`${API_BASE_URL}/shelly/${cmd}/${shellyId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

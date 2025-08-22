@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx'; // xlsx 라이브러리 import
 import jsPDF from 'jspdf'; // 📄 jsPDF import
 import autoTable from 'jspdf-autotable'; // Changed import for jspdf-autotable
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const getTodayDate = () => {
   const today = new Date();
@@ -45,7 +45,7 @@ function AsnPage() {
       }).toString();
 
       // 1. Fetch ASN Data
-      const asnApiUrl = `${API_BASE_URL}/api/asn?${queryParams}`;
+      const asnApiUrl = `${API_BASE_URL}/asn?${queryParams}`;
 
       const response = await fetch(asnApiUrl, {
         method: 'GET',

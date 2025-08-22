@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const WS_URL = process.env.REACT_APP_WS_URL;
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // Helper function to format ISO date strings
 const formatDateTime = (isoString) => {
@@ -207,11 +207,11 @@ const PlateRealTimeMonitoringPage = () => {
         setIsGateOpening(true);
         try {
             // Turn on
-            await fetch(`${API_BASE_URL}/api/shelly/on/${shellyId}`, { method: 'POST' });
+            await fetch(`${API_BASE_URL}/shelly/on/${shellyId}`, { method: 'POST' });
             // Wait for 1 second
             await new Promise(resolve => setTimeout(resolve, 1000));
             // Turn off
-            await fetch(`${API_BASE_URL}/api/shelly/off/${shellyId}`, { method: 'POST' });
+            await fetch(`${API_BASE_URL}/shelly/off/${shellyId}`, { method: 'POST' });
             console.log(`Shelly action for ID ${shellyId} successful!`);
         } catch (error) {
             console.error(`Failed to trigger shelly ID ${shellyId}:`, error);

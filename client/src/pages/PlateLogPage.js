@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // Helper function to get today's date in YYYY-MM-DD format
 const getTodayDate = () => {
@@ -51,7 +51,7 @@ const PlateLogPage = () => {
     useEffect(() => {
         const fetchCameras = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/plate-recognitions/cameras`);
+                const response = await fetch(`${API_BASE_URL}/plate-recognitions/cameras`);
                 if (!response.ok) {
                     throw new Error('카메라 목록을 불러오는데 실패했습니다.');
                 }
@@ -84,7 +84,7 @@ const PlateLogPage = () => {
         queryParams.append('page', currentPage);
         queryParams.append('limit', itemsPerPage);
 
-        const url = `${API_BASE_URL}/api/plate-recognitions?${queryParams.toString()}`;
+        const url = `${API_BASE_URL}/plate-recognitions?${queryParams.toString()}`;
 
         try {
             const response = await fetch(url, {

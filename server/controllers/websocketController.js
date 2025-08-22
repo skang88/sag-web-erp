@@ -7,9 +7,9 @@ let wss;
  * WebSocket 서버를 초기화하고, 연결된 클라이언트에 대한 Heartbeat(핑퐁) 메커니즘을 설정합니다.
  * @param {object} server - Node.js의 http.Server 인스턴스
  */
-const initWebSocketServer = (server) => {
+const initWebSocketServer = (server, path) => {
     // express-ws를 사용하는 대신, http 서버에 직접 ws 서버를 연결합니다.
-    wss = new WebSocket.Server({ server });
+    wss = new WebSocket.Server({ server, path });
 
     wss.on('connection', (ws, req) => {
         console.log('[WebSocket] Client connected.');

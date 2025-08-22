@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import JsmpegPlayer from '../components/JsmpegPlayer';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // --- Settings Area ---
 // Configure the name and Shelly IDs for each gate.
@@ -23,9 +23,8 @@ const GATE_POSITIONS = {
   4: { top: '50%', left: '82%' },
 };
 
-const WEBSOCKET_URL = 'ws://172.16.220.32:8082/api/stream';
+const WEBSOCKET_URL = 'wss://seohanga.com/api/stream';
 // --- End of Settings Area ---
-
 
 const BargateControllerPage = () => {
   const [holdOpenState, setHoldOpenState] = useState({});
@@ -34,7 +33,7 @@ const BargateControllerPage = () => {
 
   const fetchShellyStatus = useCallback(async (shellyId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/shelly/status/${shellyId}`);
+      const res = await fetch(`${API_BASE_URL}/shelly/status/${shellyId}`);
       if (!res.ok) throw new Error('Failed to fetch status');
       const data = await res.json();
       const output = data.status?.result?.output ?? data.status?.output;
@@ -68,9 +67,9 @@ const BargateControllerPage = () => {
     setLoadingState(prev => ({ ...prev, [loadingKey]: true }));
     showMessage(`${gateName} - ${action} in progress...`);
     try {
-      await fetch(`${API_BASE_URL}/api/shelly/on/${shellyId}`, { method: 'POST' });
+      await fetch(`${API_BASE_URL}/shelly/on/${shellyId}`, { method: 'POST' });
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await fetch(`${API_BASE_URL}/api/shelly/off/${shellyId}`, { method: 'POST' });
+      await fetch(`${API_BASE_URL}/shelly/off/${shellyId}`, { method: 'POST' });
       showMessage(`${gateName} - ${action} complete`);
     } catch (error) {
       console.error('Pulse action failed:', error);
@@ -91,7 +90,7 @@ const BargateControllerPage = () => {
 
     showMessage(`${gate.name}: ${actionText}...`);
     try {
-      await fetch(`${API_BASE_URL}/api/shelly/${targetAction}/${gate.openShellyId}`, { method: 'POST' });
+      await fetch(`${API_BASE_URL}/shelly/${targetAction}/${gate.openShellyId}`, { method: 'POST' });
       setHoldOpenState(prev => ({ ...prev, [gate.id]: !isCurrentlyHeld }));
       showMessage(`${gate.name}: ${actionText} complete`);
     } catch (error) {
@@ -128,7 +127,7 @@ const BargateControllerPage = () => {
     showMessage(`${actionText}...`);
     try {
         const promises = GATES_CONFIG.map(gate =>
-            fetch(`${API_BASE_URL}/api/shelly/${action}/${gate.openShellyId}`, { method: 'POST' })
+            fetch(`${API_BASE_URL}/shelly/${action}/${gate.openShellyId}`, { method: 'POST' })
         );
         await Promise.all(promises);
 

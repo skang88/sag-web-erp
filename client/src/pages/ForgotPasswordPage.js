@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; // 백엔드 URL
+const API_BASE_URL = process.env.REACT_APP_API_URL; // 백엔드 URL
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +18,7 @@ const ForgotPasswordPage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
