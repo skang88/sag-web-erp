@@ -80,7 +80,8 @@ const AccDataFetcher = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/accs`);
+        //const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/api/accs`);
+        const response = await fetch('https://seohanga.com/api/accs');
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const contentType = response.headers.get('Content-Type');
