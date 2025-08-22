@@ -13,10 +13,14 @@ const cameraSchema = new mongoose.Schema({
         trim: true,
         description: 'A human-readable name for the camera (e.g., "Entrance Camera").'
     },
-    shellyId: {
-        type: Number,
+    type: Number,
         required: true,
         description: 'The ID of the Shelly device associated with this camera (e.g., 1 or 2).'
+    },
+    isMonitoring: {
+        type: Boolean,
+        default: false,
+        description: 'Whether this camera should broadcast events to the real-time monitoring page.'
     }
 }, { timestamps: true });
 

@@ -109,6 +109,7 @@ exports.createPlateRecognition = async (req, res) => {
             
             // camera_id를 기반으로 카메라 설정 조회
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
+            console.log('Fetched camera config:', cameraConfig); // 디버깅용 로그 추가
 
             const now = new Date(); // UTC 기준 현재 시간
             
@@ -199,10 +200,10 @@ exports.createPlateRecognition = async (req, res) => {
         const ageInSeconds = (now - eventTimestamp) / 1000;
 
         // 실시간 모니터링을 위해 WebSocket 클라이언트에게 데이터 전송
-        // 카메라 ID가 275477815, 5862396인 경우에만 데이터를 전송합니다.
-        if (String(camera_id) === '275477815' || String(camera_id) === '5862396') {
+        // cameraConfig의 isMonitoring 플래그를 확인하여 전송 여부를 결정합니다.
+        if (cameraConfig && cameraConfig.isMonitoring) {
             if (ageInSeconds <= 15) { // 15초 룰
-                const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
+                const cameraNameForBroadcast = cameraConfig.name || `Unknown (${camera_id})`;
                 const broadcastData = {
                     bestUuid: createdDoc.bestUuid,
                     cameraName: cameraNameForBroadcast,
