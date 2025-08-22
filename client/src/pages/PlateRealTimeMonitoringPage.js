@@ -146,8 +146,10 @@ const PlateRealTimeMonitoringPage = () => {
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
+                    console.log('Received WebSocket message:', message); // <-- Add this log
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
                         const newEvent = message.payload;
+                        console.log(`Processing event with startTime: ${newEvent.startTime}`); // <-- Add this log
                         setEvents(prevEvents => {
                             const existingEventIndex = prevEvents.findIndex(e => e.bestUuid === newEvent.bestUuid);
 

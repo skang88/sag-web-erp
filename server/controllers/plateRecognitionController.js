@@ -193,21 +193,31 @@ exports.createPlateRecognition = async (req, res) => {
 
         const createdDoc = await PlateRecognition.create(documentToCreate);
 
+        // (추가) 실시간 브로드캐스트는 15초 이내에 수신된 이벤트에 대해서만 수행
+        const eventTimestamp = new Date(epoch_start);
+        const now = new Date();
+        const ageInSeconds = (now - eventTimestamp) / 1000;
+
         // 실시간 모니터링을 위해 WebSocket 클라이언트에게 데이터 전송
         // 카메라 ID가 275477815, 5862396인 경우에만 데이터를 전송합니다.
         if (String(camera_id) === '275477815' || String(camera_id) === '5862396') {
-            const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
-            const broadcastData = {
-                bestUuid: createdDoc.bestUuid,
-                cameraName: cameraNameForBroadcast,
-                startTime: createdDoc.startTime,
-                bestPlateNumber: createdDoc.bestPlateNumber,
-                registrationStatus: createdDoc.registrationStatus,
-                userEmail: createdDoc.userEmail,
-                plateCropJpeg: createdDoc.plateCropJpeg,
-                vehicleCropJpeg: createdDoc.vehicleCropJpeg,
-            };
-            broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
+            if (ageInSeconds <= 15) { // 15초 룰
+                const cameraNameForBroadcast = cameraConfig ? cameraConfig.name : `Unknown (${camera_id})`;
+                const broadcastData = {
+                    bestUuid: createdDoc.bestUuid,
+                    cameraName: cameraNameForBroadcast,
+                    startTime: createdDoc.startTime,
+                    bestPlateNumber: createdDoc.bestPlateNumber,
+                    registrationStatus: createdDoc.registrationStatus,
+                    userEmail: createdDoc.userEmail,
+                    plateCropJpeg: createdDoc.plateCropJpeg,
+                    vehicleCropJpeg: createdDoc.vehicleCropJpeg,
+                };
+                broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
+                console.log(`[${new Date().toISOString()}] [${best_plate_number}] 실시간 이벤트 (수신 지연: ${ageInSeconds.toFixed(1)}초)를 WebSocket으로 전송했습니다.`);
+            } else {
+                console.log(`[${new Date().toISOString()}] [${best_plate_number}] 오래된 이벤트 (수신 지연: ${ageInSeconds.toFixed(1)}초)이므로 WebSocket으로 전송하지 않습니다.`);
+            }
         } else {
             console.log(`[${new Date().toISOString()}] 카메라 ID ${camera_id}는 실시간 모니터링 대상이 아니므로 WebSocket 데이터를 전송하지 않습니다.`);
         }
