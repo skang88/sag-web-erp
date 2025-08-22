@@ -23,7 +23,7 @@ const GATE_POSITIONS = {
   4: { top: '50%', left: '82%' },
 };
 
-const WEBSOCKET_URL = 'wss://seohanga.com/api/stream';
+const WEBSOCKET_URL = process.env.REACT_APP_RTSP_WS_URL;
 // --- End of Settings Area ---
 
 const BargateControllerPage = () => {
