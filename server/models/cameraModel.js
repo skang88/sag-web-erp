@@ -13,7 +13,8 @@ const cameraSchema = new mongoose.Schema({
         trim: true,
         description: 'A human-readable name for the camera (e.g., "Entrance Camera").'
     },
-    type: Number,
+    shellyId: {
+        type: Number,
         required: true,
         description: 'The ID of the Shelly device associated with this camera (e.g., 1 or 2).'
     },
