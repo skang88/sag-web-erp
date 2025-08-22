@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-const WS_URL = process.env.REACT_APP_WS_URL;
+const WS_URL = 'wss://seohanga.com/ws';
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 // Helper function to format ISO date strings
