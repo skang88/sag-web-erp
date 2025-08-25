@@ -1,6 +1,6 @@
 // src/App.js
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Navigate 임포트 추가
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'; // Navigate, useLocation 임포트 추가
 import './App.css';
 import { AuthProvider, useAuth } from './contexts/AuthContext'; // AuthProvider 및 useAuth 임포트
 
@@ -26,11 +26,18 @@ import AuthPage from './pages/AuthPage'; // ⭐ 새로 추가: AuthPage 임포�
 // MainAppContent 컴포넌트 정의
 function MainAppContent() {
   const { isLoggedIn } = useAuth(); // AuthProvider의 자식에서 useAuth 훅 사용
+  const location = useLocation(); // 현재 경로를 가져오기 위해 useLocation 훅 사용
+
+  // Navbar를 표시하지 않을 경로 목록
+  const noNavbarPaths = ['/plate-monitoring'];
+
+  // 현재 경로가 noNavbarPaths에 포함되는지 확인
+  const showNavbar = !noNavbarPaths.includes(location.pathname);
 
   return (
     <div className="App">
       <header className="App-header">
-        <Navbar isLoggedIn={isLoggedIn} /> {/* isLoggedIn prop 전달 */}
+        {showNavbar && <Navbar isLoggedIn={isLoggedIn} />} {/* showNavbar 값에 따라 Navbar 렌더링 */}
         <main>
           <Routes>
             {/* 공개 라우트 */}
@@ -39,6 +46,7 @@ function MainAppContent() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} />
 
             {/* 보호된 라우트 */}
             {isLoggedIn ? (
@@ -53,7 +61,6 @@ function MainAppContent() {
                 <Route path="/shelly" element={<ShellyPage />} />
                 <Route path="/bargate-controller" element={<BargateControllerPage />} />
                 <Route path="/plate-log" element={<PlateLogPage />} />
-                <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 {/* 로그인 후 기본 페이지로 사용할 라우트 (예: /home) */}
                 <Route path="/home" element={<AccessData />} />
