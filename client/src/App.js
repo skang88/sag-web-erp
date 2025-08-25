@@ -19,17 +19,18 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProfilePage from './pages/ProfilePage';
 import PlateLogPage from './pages/PlateLogPage';
-import PlateRealTimeMonitoringPage from './pages/PlateRealTimeMonitoringPage'; // ⭐ 새로 추가: 실시간 모니터링 페이지 임포트 ⭐
-import BargateControllerPage from './pages/BargateControllerPage'; // BargateControllerPage 임포트
-import AuthPage from './pages/AuthPage'; // ⭐ 새로 추가: AuthPage 임포트 ⭐
+import PlateRealTimeMonitoringPage from './pages/PlateRealTimeMonitoringPage';
+import BargateControllerPage from './pages/BargateControllerPage';
+import AuthPage from './pages/AuthPage';
+import VisitorRegistrationPage from './pages/VisitorRegistrationPage'; // Import the new page
 
 // MainAppContent 컴포넌트 정의
 function MainAppContent() {
-  const { isLoggedIn } = useAuth(); // AuthProvider의 자식에서 useAuth 훅 사용
-  const location = useLocation(); // 현재 경로를 가져오기 위해 useLocation 훅 사용
+  const { isLoggedIn } = useAuth();
+  const location = useLocation();
 
   // Navbar를 표시하지 않을 경로 목록
-  const noNavbarPaths = ['/plate-monitoring'];
+  const noNavbarPaths = ['/plate-monitoring', '/register-visitor'];
 
   // 현재 경로가 noNavbarPaths에 포함되는지 확인
   const showNavbar = !noNavbarPaths.includes(location.pathname);
@@ -47,6 +48,7 @@ function MainAppContent() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} />
+            <Route path="/register-visitor" element={<VisitorRegistrationPage />} /> {/* Add the new route */}
 
             {/* 보호된 라우트 */}
             {isLoggedIn ? (

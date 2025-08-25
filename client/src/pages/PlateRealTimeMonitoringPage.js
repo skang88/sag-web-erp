@@ -20,6 +20,16 @@ const formatDateTime = (isoString) => {
 
 const PlateEventCard = ({ event, onExpire }) => {
     const [countdown, setCountdown] = useState(60);
+    const [isUnregistered, setIsUnregistered] = useState(event.registrationStatus === 'UNREGISTERED');
+    
+    // Kiosk state
+    const [purpose, setPurpose] = useState(null);
+    const [duration, setDuration] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const purposeOptions = ['Delivery', 'Meeting', 'Interview', 'Maintenance'];
+    const durationOptions = [1, 7, 30];
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -37,6 +47,38 @@ const PlateEventCard = ({ event, onExpire }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const handleRegisterAndOpen = async () => {
+        if (!purpose) {
+            setMessage('Please select a purpose for your visit.');
+            return;
+        }
+        setIsLoading(true);
+        setMessage('');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/visitor/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licensePlate: event.bestPlateNumber,
+                    purpose,
+                    durationInDays: duration,
+                }),
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Registration failed.');
+
+            setMessage('Registration successful! Gate is opening.');
+            setIsUnregistered(false); // Visually update the card to 'registered' state
+
+        } catch (err) {
+            setMessage(err.message || 'An error occurred.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const statusStyles = {
         REGISTERED: 'bg-green-100 text-green-800',
         UNREGISTERED: 'bg-red-100 text-red-800',
@@ -49,10 +91,6 @@ const PlateEventCard = ({ event, onExpire }) => {
         NO_PLATE: 'No Plate Recognized',
     };
 
-    const isUnregistered = event.registrationStatus === 'UNREGISTERED';
-    const registrationUrl = `https://seohan.com/register-visiter?plate=${event.bestPlateNumber || ''}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
-
     return (
         <div className="bg-white rounded-xl shadow-lg overflow-hidden transform animate-fade-in border-l-8 border-blue-500 flex flex-col">
             {/* Top Row: Plate Info & Status */}
@@ -62,8 +100,8 @@ const PlateEventCard = ({ event, onExpire }) => {
                         <p className="text-7xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
                     </div>
                     <div className="text-right flex-shrink-0 ml-6">
-                        <div className={`px-4 py-2 text-lg font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
-                            {statusText[event.registrationStatus] || 'Unknown'}
+                        <div className={`px-4 py-2 text-lg font-semibold rounded-full ${isUnregistered ? statusStyles.UNREGISTERED : statusStyles.REGISTERED}`}>
+                            {isUnregistered ? statusText.UNREGISTERED : statusText.REGISTERED}
                         </div>
                         <div className="mt-2">
                             <p className="text-md font-semibold text-gray-500">Next scan in</p>
@@ -73,15 +111,48 @@ const PlateEventCard = ({ event, onExpire }) => {
                 </div>
             </div>
 
-            {/* Main Content: Images */}
+            {/* Main Content: Images and Kiosk Form */}
             <div className="p-6 pt-4 flex-grow">
                 <div className="flex gap-6 items-start h-full">
-                    {/* Left Side: QR Code (if unregistered) */}
+                    {/* Left Side: Kiosk Form (if unregistered) */}
                     {isUnregistered && (
-                        <div className="w-1/2 flex-shrink-0 flex flex-col items-center justify-center text-center bg-gray-50 rounded-lg p-4 h-full">
-                            <img src={qrCodeUrl} alt="Vehicle Registration QR Code" className="w-full max-w-md h-auto mb-3" />
-                            <p className="text-xl font-bold text-gray-800">Register Vehicle</p>
-                            <p className="text-md text-gray-600 mt-1">Scan the QR code to register.</p>
+                        <div className="w-1/2 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">New Visitor Registration</h3>
+                                
+                                <div className="mb-6">
+                                    <p className="text-lg font-semibold text-gray-700 mb-3">1. Purpose of Visit</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {purposeOptions.map(opt => (
+                                            <button key={opt} onClick={() => setPurpose(opt)} className={`p-4 text-lg font-bold rounded-lg transition ${purpose === opt ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
+                                                {opt}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <p className="text-lg font-semibold text-gray-700 mb-3">2. Duration of Stay</p>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {durationOptions.map(days => (
+                                            <button key={days} onClick={() => setDuration(days)} className={`p-4 text-lg font-bold rounded-lg transition ${duration === days ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
+                                                {days} Day{days > 1 && 's'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-auto">
+                                {message && <p className="text-center text-lg font-semibold mb-3 p-3 rounded-lg bg-yellow-100 text-yellow-800">{message}</p>}
+                                <button 
+                                    onClick={handleRegisterAndOpen}
+                                    disabled={!purpose || isLoading}
+                                    className="w-full py-5 text-2xl font-bold text-white rounded-lg transition shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700"
+                                >
+                                    {isLoading ? 'Processing...' : 'Register and Open Gate'}
+                                </button>
+                            </div>
                         </div>
                     )}
 
@@ -127,7 +198,6 @@ const PlateEventCard = ({ event, onExpire }) => {
 const PlateRealTimeMonitoringPage = () => {
     const [events, setEvents] = useState([]);
     const [wsStatus, setWsStatus] = useState('Connecting...');
-    const [isGateOpening, setIsGateOpening] = useState(false);
 
     useEffect(() => {
         let ws;
@@ -146,20 +216,15 @@ const PlateRealTimeMonitoringPage = () => {
             ws.onmessage = (event) => {
                 try {
                     const message = JSON.parse(event.data);
-                    console.log('Received WebSocket message:', message); // <-- Add this log
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
                         const newEvent = message.payload;
-                        console.log(`Processing event with startTime: ${newEvent.startTime}`); // <-- Add this log
                         setEvents(prevEvents => {
                             const existingEventIndex = prevEvents.findIndex(e => e.bestUuid === newEvent.bestUuid);
-
                             if (existingEventIndex !== -1) {
-                                // Event with this UUID exists, update it in place.
                                 const updatedEvents = [...prevEvents];
                                 updatedEvents[existingEventIndex] = newEvent;
                                 return updatedEvents;
                             } else {
-                                // New event, add it to the front.
                                 return [newEvent, ...prevEvents];
                             }
                         });
@@ -172,53 +237,30 @@ const PlateRealTimeMonitoringPage = () => {
             ws.onclose = () => {
                 console.log('WebSocket Disconnected');
                 setWsStatus('Disconnected. Retrying in 5s...');
-                // 5초 후 재연결 시도
                 reconnectTimer = setTimeout(connect, 5000);
             };
 
             ws.onerror = (error) => {
                 console.error('WebSocket Error:', error);
                 setWsStatus('Connection Error');
-                // 에러 발생 시 WebSocket이 자동으로 close 이벤트를 호출하므로, onclose에서 재연결 로직이 처리됩니다.
                 ws.close();
             };
         };
 
-        connect(); // 초기 연결 시도
+        connect();
 
-        // Cleanup on component unmount
         return () => {
-            clearTimeout(reconnectTimer); // 컴포넌트 언마운트 시 재연결 타이머 제거
+            clearTimeout(reconnectTimer);
             if (ws) {
-                ws.onclose = null; // 재연결 로직이 실행되지 않도록 핸들러 제거
+                ws.onclose = null;
                 ws.close();
             }
         };
-    }, []); // Empty dependency array ensures this runs only once on mount
+    }, []);
 
     const handleExpire = useCallback((uuid) => {
         setEvents(prevEvents => prevEvents.filter(event => event.bestUuid !== uuid));
     }, []);
-
-    const handleOpenDoor = async (shellyId) => {
-        if (!shellyId || isGateOpening) {
-            return;
-        }
-        setIsGateOpening(true);
-        try {
-            // Turn on
-            await fetch(`${API_BASE_URL}/shelly/on/${shellyId}`, { method: 'POST' });
-            // Wait for 1 second
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            // Turn off
-            await fetch(`${API_BASE_URL}/shelly/off/${shellyId}`, { method: 'POST' });
-            console.log(`Shelly action for ID ${shellyId} successful!`);
-        } catch (error) {
-            console.error(`Failed to trigger shelly ID ${shellyId}:`, error);
-        } finally {
-            setIsGateOpening(false);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
@@ -232,30 +274,6 @@ const PlateRealTimeMonitoringPage = () => {
                 </header>
 
                 <main>
-                    <div className="mb-6 text-center flex justify-center space-x-4">
-                        <button
-                            onClick={() => handleOpenDoor(3)}
-                            disabled={isGateOpening}
-                            className={`px-8 py-4 text-white text-xl rounded-lg transition shadow-lg ${
-                                isGateOpening
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-blue-500 hover:bg-blue-600'
-                            }`}
-                        >
-                            {isGateOpening ? 'Processing...' : 'Open Gate'}
-                        </button>
-                        <button
-                            onClick={() => handleOpenDoor(1)}
-                            disabled={isGateOpening}
-                            className={`px-8 py-4 text-white text-xl rounded-lg transition shadow-lg ${
-                                isGateOpening
-                                    ? 'bg-gray-400 cursor-not-allowed'
-                                    : 'bg-red-500 hover:bg-red-600'
-                            }`}
-                        >
-                            {isGateOpening ? 'Processing...' : 'Close Gate'}
-                        </button>
-                    </div>
                     <div className="grid grid-cols-1 gap-8">
                         {events.length > 0 ? (
                             events.map(event => (
