@@ -37,7 +37,7 @@ const AuthPage = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email: inputEmail, password: inputPassword }),
+                body: JSON.stringify({ email: inputEmail.toLowerCase(), password: inputPassword }),
             });
 
             const data = await response.json();

@@ -14,7 +14,8 @@ const generateEmailVerificationToken = (userId) => {
 
 // 회원가입 (기존 코드 그대로)
 exports.register = async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  email = email.toLowerCase(); // Convert email to lowercase
 
   // --- ⭐ Added Email Domain Validation (Server-side) ⭐ ---
     const allowedDomain = '@seohan.com';
@@ -47,7 +48,8 @@ exports.register = async (req, res) => {
 
 // 로그인 (기존 코드 그대로)
 exports.login = async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
+  email = email.toLowerCase(); // Convert email to lowercase
 
   try {
     const user = await User.findOne({ email });
@@ -179,7 +181,8 @@ exports.verifyEmail = async (req, res) => {
 
 // --- 새로 추가되는 부분: 비밀번호 재설정 요청 ---
 exports.forgotPassword = async (req, res) => {
-    const { email } = req.body;
+    let { email } = req.body;
+    email = email.toLowerCase(); // Convert email to lowercase
 
     try {
         const user = await User.findOne({ email });
