@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom'; // useParams 대신 useLocation 임포트
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const ResetPasswordPage = () => {
   // const { token } = useParams(); // 이 줄은 제거합니다.
