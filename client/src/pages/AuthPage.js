@@ -44,21 +44,21 @@ const AuthPage = () => {
             setIsLoading(false);
 
             if (!response.ok) {
-                setError(data.message || '로그인에 실패했습니다. 다시 시도해주세요.');
+                setError(data.message || 'Login failed. Please try again.');
                 return;
             }
 
-            console.log('AuthPage: 백엔드 응답 (토큰만):', data);
+            console.log('AuthPage: Backend response (token only):', data);
             
             const token = data.token;
             
             let decodedToken = {};
             try {
                 decodedToken = jwtDecode(token);
-                console.log('AuthPage: 디코딩된 JWT 페이로드:', decodedToken);
+                console.log('AuthPage: Decoded JWT payload:', decodedToken);
             } catch (decodeError) {
                 console.error("Failed to decode token after login:", decodeError);
-                setError('로그인에는 성공했으나, 사용자 정보를 읽을 수 없습니다.');
+                setError('Login successful, but user information could not be read.');
                 return;
             }
 
@@ -72,7 +72,7 @@ const AuthPage = () => {
             
         } catch (err) {
             setIsLoading(false);
-            setError('예상치 못한 오류가 발생했습니다. 다시 시도해주세요.');
+            setError('An unexpected error occurred. Please try again.');
             console.error('AuthPage: Login error:', err);
         }
     };
