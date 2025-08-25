@@ -56,7 +56,7 @@ const ResetPasswordPage = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password/${token}`, {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password/${token}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
