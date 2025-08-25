@@ -31,6 +31,10 @@ const PlateEventCard = ({ event, onExpire }) => {
     const purposeOptions = ['Delivery', 'Meeting', 'Interview', 'Maintenance'];
     const durationOptions = [1, 7, 30];
 
+    // QR Code URLs
+    const registrationUrl = `/register-visitor?plate=${event.bestPlateNumber || ''}`;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
+
     useEffect(() => {
         const interval = setInterval(() => {
             setCountdown(prev => (prev > 0 ? prev - 1 : 0));
@@ -114,7 +118,7 @@ const PlateEventCard = ({ event, onExpire }) => {
             {/* Main Content: Images and Kiosk Form */}
             <div className="p-6 pt-4 flex-grow">
                 <div className="flex gap-6 items-start h-full">
-                    {/* Left Side: Kiosk Form (if unregistered) */}
+                    {/* Left Side: Kiosk Form & QR Code (if unregistered) */}
                     {isUnregistered && (
                         <div className="w-1/2 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
                             <div>
@@ -152,6 +156,11 @@ const PlateEventCard = ({ event, onExpire }) => {
                                 >
                                     {isLoading ? 'Processing...' : 'Register and Open Gate'}
                                 </button>
+
+                                <div className="mt-6 border-t pt-4 text-center">
+                                    <p className="text-md font-semibold text-gray-600 mb-2">Or Register on Your Phone</p>
+                                    <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32 mx-auto" />
+                                </div>
                             </div>
                         </div>
                     )}
