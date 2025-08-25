@@ -32,7 +32,7 @@ const PlateEventCard = ({ event, onExpire }) => {
     const durationOptions = [1, 7, 30];
 
     // QR Code URLs
-    const registrationUrl = `/register-visitor?plate=${event.bestPlateNumber || ''}`;
+    const registrationUrl = `https://seohanga.com/register-visitor?plate=${event.bestPlateNumber || ''}`;
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
 
     useEffect(() => {
