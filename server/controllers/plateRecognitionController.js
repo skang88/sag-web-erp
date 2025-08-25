@@ -98,15 +98,12 @@ exports.createPlateRecognition = async (req, res) => {
             if (registeredUser) {
                 currentRegistrationStatus = 'REGISTERED';
                 userEmailInfo = registeredUser.email || '등록자 이메일 없음';
-                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 차량입니다. 사용자: ${userEmailInfo}`);
+                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 차량입니다. 사용자: ${userEmailInfo}. 등록 여부(${currentRegistrationStatus})와 관계없이 Shelly 작동을 시도합니다.`);
             } else {
                 currentRegistrationStatus = 'UNREGISTERED';
-                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 미등록 차량입니다.`);
+                console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 미등록 차량입니다. 등록 여부(${currentRegistrationStatus})와 관계없이 Shelly 작동을 시도합니다.`);
             }
 
-            // !! 등록 여부와 관계없이 Shelly 작동 !!
-            console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 차량 감지. 등록 여부(${currentRegistrationStatus})와 관계없이 Shelly 작동을 시도합니다.`);
-            
             // camera_id를 기반으로 카메라 설정 조회
             cameraConfig = await Camera.findOne({ cameraId: String(camera_id) }).lean(); // String으로 변환하여 조회
 
