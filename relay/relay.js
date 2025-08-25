@@ -19,7 +19,8 @@ const createStreamHandler = (url) => {
     // 분석 문제를 해결하기 위해 이 카메라에 필수적인 플래그들입니다.
     additionalFlags: [
       '-analyzeduration', '20000000',
-      '-probesize', '20000000'
+      '-probesize', '20000000',
+      '-vf', 'scale=640:360'
     ],
   });
 };
