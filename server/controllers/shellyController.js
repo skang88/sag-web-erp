@@ -125,7 +125,7 @@ const sendSlackMessage = async (req, res) => {
   }
 
   const message = {
-    text: `Shelly ID: ${shelly}, Message: ${TEXT}`,
+    text: `ID: ${shelly}, Message: ${TEXT}`,
   };
 
   try {

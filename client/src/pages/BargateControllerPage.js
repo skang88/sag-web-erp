@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import JsmpegPlayer from '../components/JsmpegPlayer';
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -13,7 +14,7 @@ const GATES_CONFIG = [
 ];
 
 // Background image path (relative to the public folder)
-const BACKGROUND_IMAGE_PATH = '/BargateBackground.png';  
+const BACKGROUND_IMAGE_PATH = '/BargateBackground.png';
 
 // Button positions for each gate (top, left in %)
 const GATE_POSITIONS = {
@@ -27,9 +28,22 @@ const WEBSOCKET_URL = process.env.REACT_APP_RTSP_WS_URL;
 // --- End of Settings Area ---
 
 const BargateControllerPage = () => {
+  const { user } = useAuth(); // Get user from AuthContext
   const [holdOpenState, setHoldOpenState] = useState({});
   const [loadingState, setLoadingState] = useState({});
   const [message, setMessage] = useState('');
+
+  // Function to send Slack notification
+  const sendSlackNotification = useCallback(async (gateName, action) => {
+    if (!user || !user.email) return; // Do nothing if user is not logged in
+
+    const text = `${gateName} - ${action} by ${user.email}`;
+    try {
+      await fetch(`${API_BASE_URL}/shelly/sendSlackMessage?shelly=${encodeURIComponent(user.email)}&TEXT=${encodeURIComponent(text)}`);
+    } catch (error) {
+      console.error('Failed to send Slack message:', error);
+    }
+  }, [user]);
 
   const fetchShellyStatus = useCallback(async (shellyId) => {
     try {
@@ -71,6 +85,7 @@ const BargateControllerPage = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       await fetch(`${API_BASE_URL}/shelly/off/${shellyId}`, { method: 'POST' });
       showMessage(`${gateName} - ${action} complete`);
+      sendSlackNotification(gateName, action); // Send notification
     } catch (error) {
       console.error('Pulse action failed:', error);
       showMessage(`${gateName} - ${action} failed`);
@@ -93,6 +108,7 @@ const BargateControllerPage = () => {
       await fetch(`${API_BASE_URL}/shelly/${targetAction}/${gate.openShellyId}`, { method: 'POST' });
       setHoldOpenState(prev => ({ ...prev, [gate.id]: !isCurrentlyHeld }));
       showMessage(`${gate.name}: ${actionText} complete`);
+      sendSlackNotification(gate.name, actionText); // Send notification
     } catch (error) {
       console.error('Toggle hold open failed:', error);
       showMessage(`${gate.name}: ${actionText} failed`);
@@ -108,6 +124,7 @@ const BargateControllerPage = () => {
         GATES_CONFIG.map(gate => handlePulse(gate.openShellyId, gate.name, 'Open'))
     );
     showMessage('All Open action complete.');
+    sendSlackNotification('All Gates', 'Open');
   };
 
   const handleAllClose = async () => {
@@ -116,6 +133,7 @@ const BargateControllerPage = () => {
         GATES_CONFIG.map(gate => handlePulse(gate.closeShellyId, gate.name, 'Close'))
     );
     showMessage('All Close action complete.');
+    sendSlackNotification('All Gates', 'Close');
   };
 
   const handleToggleAllHoldOpen = async () => {
@@ -135,6 +153,7 @@ const BargateControllerPage = () => {
         GATES_CONFIG.forEach(gate => { newHoldState[gate.id] = targetState; });
         setHoldOpenState(newHoldState);
         showMessage(`${actionText} complete.`);
+        sendSlackNotification('All Gates', actionText);
     } catch (error) {
         console.error('All Hold/Release action failed:', error);
         showMessage('Global action failed.');
