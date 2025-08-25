@@ -22,7 +22,8 @@ import PlateLogPage from './pages/PlateLogPage';
 import PlateRealTimeMonitoringPage from './pages/PlateRealTimeMonitoringPage';
 import BargateControllerPage from './pages/BargateControllerPage';
 import AuthPage from './pages/AuthPage';
-import VisitorRegistrationPage from './pages/VisitorRegistrationPage'; // Import the new page
+import VisitorRegistrationPage from './pages/VisitorRegistrationPage';
+import VisitorListPage from './pages/VisitorListPage'; // Import VisitorListPage
 
 // MainAppContent 컴포넌트 정의
 function MainAppContent() {
@@ -48,7 +49,7 @@ function MainAppContent() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/plate-monitoring" element={<PlateRealTimeMonitoringPage />} />
-            <Route path="/register-visitor" element={<VisitorRegistrationPage />} /> {/* Add the new route */}
+            <Route path="/register-visitor" element={<VisitorRegistrationPage />} />
 
             {/* 보호된 라우트 */}
             {isLoggedIn ? (
@@ -63,6 +64,7 @@ function MainAppContent() {
                 <Route path="/shelly" element={<ShellyPage />} />
                 <Route path="/bargate-controller" element={<BargateControllerPage />} />
                 <Route path="/plate-log" element={<PlateLogPage />} />
+                <Route path="/visitors" element={<VisitorListPage />} /> {/* Add Visitor List Route */}
                 <Route path="/profile" element={<ProfilePage />} />
                 {/* 로그인 후 기본 페이지로 사용할 라우트 (예: /home) */}
                 <Route path="/home" element={<AccessData />} />

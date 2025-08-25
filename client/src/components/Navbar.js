@@ -37,6 +37,7 @@ const navLinks = [
       { label: 'Shelly', path: '/shelly', isRouterLink: true },
       { label: 'Bargate Controller', path: '/bargate-controller', isRouterLink: true },
       { label: 'Plate Log', path: '/plate-log', isRouterLink: true },
+      { label: 'Visitor List', path: '/visitors', isRouterLink: true },
       { label: 'Plate Monitoring', path: '/plate-monitoring', isRouterLink: true },
     ],
     submenuWidth: 'w-64', // Adjusted width for new item

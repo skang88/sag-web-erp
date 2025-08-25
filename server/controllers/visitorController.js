@@ -65,3 +65,58 @@ exports.registerVisitor = async (req, res) => {
         res.status(500).json({ message: 'An error occurred during registration.' });
     }
 };
+
+exports.getVisitors = async (req, res) => {
+    try {
+        const { startDate, endDate, plateNumber, status, page = 1, limit = 10 } = req.query;
+
+        let query = {};
+
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) {
+                query.createdAt.$gte = new Date(`${startDate}T00:00:00.000Z`);
+            }
+            if (endDate) {
+                const nextDay = new Date(`${endDate}T00:00:00.000Z`);
+                nextDay.setDate(nextDay.getDate() + 1);
+                query.createdAt.$lt = nextDay;
+            }
+        }
+
+        if (plateNumber) {
+            query.licensePlate = new RegExp(plateNumber, 'i');
+        }
+
+        if (status) {
+            query.status = status.toUpperCase();
+        }
+
+        const pageNum = parseInt(page, 10);
+        const limitNum = parseInt(limit, 10);
+        const skip = (pageNum - 1) * limitNum;
+
+        const totalItems = await Visitor.countDocuments(query);
+        const totalPages = Math.ceil(totalItems / limitNum);
+
+        const visitors = await Visitor.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limitNum);
+
+        res.status(200).json({
+            message: 'Visitors retrieved successfully.',
+            data: visitors,
+            pagination: {
+                totalItems,
+                totalPages,
+                currentPage: pageNum,
+                limit: limitNum,
+            },
+        });
+
+    } catch (error) {
+        console.error('Error retrieving visitors:', error);
+        res.status(500).json({ message: 'Error retrieving visitors', error: error.message });
+    }
+};

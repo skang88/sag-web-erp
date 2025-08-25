@@ -7,4 +7,9 @@ const visitorController = require('../controllers/visitorController');
 // @access  Public
 router.post('/register', visitorController.registerVisitor);
 
+// @route   GET /api/visitor
+// @desc    Get a list of visitors
+// @access  Protected
+router.get('/', visitorController.getVisitors);
+
 module.exports = router;
