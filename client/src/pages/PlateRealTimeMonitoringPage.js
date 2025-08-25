@@ -60,7 +60,7 @@ const PlateEventCard = ({ event, onExpire }) => {
         setMessage('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/visitor/register`, {
+            const response = await fetch(`${API_BASE_URL}/visitor/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
