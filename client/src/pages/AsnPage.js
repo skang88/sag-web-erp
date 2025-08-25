@@ -66,7 +66,7 @@ function AsnPage() {
 
       if (asnData.data && asnData.data.length > 0) { // ASN 데이터가 있을 때만 중량 조회 시도
         try {
-          const packingApiUrl = `${API_BASE_URL}/api/packing/items?${queryParams}`;
+          const packingApiUrl = `${API_BASE_URL}/packing/items?${queryParams}`;
           const packingResponse = await fetch(packingApiUrl, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
