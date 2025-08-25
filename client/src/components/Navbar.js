@@ -40,24 +40,19 @@ const navLinks = [
       { label: 'Plate Monitoring', path: '/plate-monitoring', isRouterLink: true },
     ],
     submenuWidth: 'w-64', // Adjusted width for new item
-  },,
+  },
   {
-    label: 'Dashboard',
+    label: 'Apps',
     isRouterLink: false,
     submenu: [
       {
-        label: 'Inventory Plan',
-        url: 'http://172.16.220.32:9090/d/bejpb6qiyiakgb/inventory-plan?orgId=1&from=now-5m&to=now&timezone=browser&var-itmno=$__all&var-chj=$__all&var-pumcd=$__all&var-pmjcd=$__all&refresh=5s',
+        label: 'Grafana',
+        url: 'https://grafana.seohanga.com',
         isPopup: true,
       },
       {
-        label: 'Lot In Status',
-        url: 'http://172.16.220.32:9090/d/cej6swgueibcwb/lot-in-dashboard?orgId=1&from=now-5m&to=now&timezone=browser&refresh=auto',
-        isPopup: true,
-      },
-      {
-        label: 'StandBy Inventory',
-        url: 'http://172.16.220.32:9090/d/feif5m482ffuoa/standby-inventory-dashboard?orgId=1&from=now-5m&to=now&timezone=browser&refresh=auto',
+        label: 'Rstudio',
+        url: 'https://rstudio.seohanga.com',
         isPopup: true,
       },
     ],
@@ -68,7 +63,7 @@ const navLinks = [
     isRouterLink: false,
     submenu: [
       {
-        label: 'Manuals',
+        label: 'Guides',
         url: 'https://efficacious-sand-116.notion.site/1bd471a31f6180c485d5fc4941b6ba49?v=1bd471a31f61800c9317000cd622af8d&source=copy_link',
         isPopup: true,
       },
@@ -107,7 +102,7 @@ function Navbar({ isLoggedIn }) { // isLoggedIn prop을 받도록 수정
 
   // 로그인 상태에 따라 필터링된 navLinks
   const filteredNavLinks = navLinks.filter(menuItem => {
-    const hiddenLabels = ['HR', 'MAT', 'Visitor', 'Dashboard'];
+    const hiddenLabels = ['HR', 'MAT', 'Visitor', 'Apps'];
     if (hiddenLabels.includes(menuItem.label) && !isLoggedIn) {
       return false; // 로그인되지 않은 경우 해당 메뉴 숨김
     }
