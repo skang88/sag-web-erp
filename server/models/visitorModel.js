@@ -10,7 +10,7 @@ const visitorSchema = new mongoose.Schema({
     purpose: {
         type: String,
         required: true,
-        enum: ['Delivery', 'Meeting', 'Interview', 'Maintenance', 'Other'],
+        enum: ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'],
     },
     visitStartDate: {
         type: Date,

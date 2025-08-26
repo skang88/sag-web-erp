@@ -61,7 +61,7 @@ const PlateRecognitionSchema = new mongoose.Schema({
     
     registrationStatus: {
         type: String,
-        enum: ['REGISTERED', 'UNREGISTERED', 'NO_PLATE'],
+        enum: ['REGISTERED', 'UNREGISTERED', 'NO_PLATE', 'REGISTERED_VISITOR'],
         default: 'NO_PLATE',
         required: true,
         index: true
