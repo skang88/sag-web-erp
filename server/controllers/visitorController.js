@@ -11,8 +11,10 @@ const VISITOR_GATE_SHELLY_ID = 3; // The Shelly ID for the main visitor gate
  */
 const calculateEndDate = (durationInDays) => {
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + durationInDays);
-    endDate.setHours(23, 59, 59, 999); // Set to the end of the day
+    // The visit starts today, so we subtract 1 from the duration.
+    endDate.setDate(endDate.getDate() + durationInDays - 1);
+    // Set the expiration time to 8 PM.
+    endDate.setHours(20, 0, 0, 0);
     return endDate;
 };
 
