@@ -237,7 +237,7 @@ exports.getPlateRecognitions = async (req, res) => {
         }
 
         if (registrationStatus) {
-            const validStatus = ['REGISTERED', 'REGISTERED_VISITOR', 'UNREGISTERED', 'NO_PLATE']; // Add new status
+            const validStatus = ['REGISTERED', 'REGISTERED_VISITOR', 'UNREGISTERED', 'NO_PLATE'];
             const upperCaseStatus = registrationStatus.toUpperCase();
             if (validStatus.includes(upperCaseStatus)) {
                 query.registrationStatus = upperCaseStatus;
@@ -257,11 +257,30 @@ exports.getPlateRecognitions = async (req, res) => {
         const totalItems = await PlateRecognition.countDocuments(query);
         const totalPages = Math.ceil(totalItems / limitNum);
         
-        const plates = await PlateRecognition.find(query)
-            .sort({ startTime: -1 })
-            .skip(skip)
-            .limit(limitNum)
-            .lean();
+        const plates = await PlateRecognition.aggregate([
+            { $match: query },
+            { $sort: { startTime: -1 } },
+            { $skip: skip },
+            { $limit: limitNum },
+            {
+                $lookup: {
+                    from: 'cameras', // The collection name for the Camera model
+                    localField: 'cameraId',
+                    foreignField: 'cameraId',
+                    as: 'cameraInfo'
+                }
+            },
+            {
+                $addFields: {
+                    cameraName: { $ifNull: [{ $arrayElemAt: ['$cameraInfo.name', 0] }, 'N/A'] }
+                }
+            },
+            {
+                $project: {
+                    cameraInfo: 0 // Exclude the cameraInfo array from the final output
+                }
+            }
+        ]);
 
         res.status(200).json({
             message: 'Plate recognition data successfully retrieved.',
