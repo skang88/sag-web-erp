@@ -1,7 +1,9 @@
 // c/Users/admin/Projects/VSCodeProject/sag-web-erp/server/scripts/update-visitor-status.js
-require('dotenv').config({ path: '../.env' });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
 const Visitor = require('../models/visitorModel');
+const { DateTime } = require('luxon');
 
 const updateExpiredVisitors = async () => {
     try {
