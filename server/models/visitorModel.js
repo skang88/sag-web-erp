@@ -22,7 +22,7 @@ const visitorSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['ACTIVE', 'EXPIRED'],
+        enum: ['ACTIVE', 'EXPIRED', 'PERMANENT'],
         default: 'ACTIVE',
     },
     // Fields for future expansion

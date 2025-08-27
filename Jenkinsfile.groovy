@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    parameters {
+        booleanParam(name: 'RUN_MAINTENANCE', defaultValue: false, description: 'Run daily maintenance tasks to update visitor statuses.')
+    }
     tools {
         nodejs 'NodeJs' // Jenkins에 설치된 Node.js 버전 사용
     }
@@ -17,6 +20,9 @@ pipeline {
     }
     stages {
         stage('Notify Build Start') { // 빌드 시작 알림
+            when {
+                not { expression { params.RUN_MAINTENANCE } }
+            }
             steps {
                 script {
                     sendTeamsNotification("빌드를 시작합니다.", "0078D7") // Blue
@@ -30,7 +36,30 @@ pipeline {
             }
         }
 
+        stage('Run Maintenance Tasks') {
+            when {
+                expression { params.RUN_MAINTENANCE }
+            }
+            steps {
+                script {
+                    try {
+                        echo "Executing daily maintenance script: update-visitor-status.js"
+                        sh "docker start ${BACKEND_CONTAINER} || true"
+                        sh "docker exec ${BACKEND_CONTAINER} node /usr/src/app/scripts/update-visitor-status.js"
+                        sendTeamsNotification("일일 방문객 상태 업데이트 스크립트가 성공적으로 실행되었습니다.", "28A745") // Green
+                    } catch (e) {
+                        echo "Failed to execute maintenance script: ${e.message}"
+                        sendTeamsNotification("일일 방문객 상태 업데이트 스크립트 실행에 실패했습니다.", "DC3545") // Red
+                        error "Maintenance script failed"
+                    }
+                }
+            }
+        }
+
         stage('Prepare Environment') { // 디버깅을 위한 기본 환경 확인
+            when {
+                not { expression { params.RUN_MAINTENANCE } }
+            }
             steps {
                 sh 'pwd'
                 sh 'ls -al'
@@ -39,6 +68,9 @@ pipeline {
         }
 
         stage('Build & Deploy') { // 백엔드와 프론트엔드를 병렬로 빌드 및 배포
+            when {
+                not { expression { params.RUN_MAINTENANCE } }
+            }
             parallel {
                 stage('Back-end') {
                     stages {
@@ -152,12 +184,16 @@ pipeline {
     post {
         success {
             script {
-                sendTeamsNotification("빌드가 성공적으로 완료되었습니다.", "28A745") // Green
+                if (!params.RUN_MAINTENANCE) {
+                    sendTeamsNotification("빌드가 성공적으로 완료되었습니다.", "28A745") // Green
+                }
             }
         }
         failure {
             script {
-                sendTeamsNotification("빌드에 실패했습니다.", "DC3545") // Red
+                if (!params.RUN_MAINTENANCE) {
+                    sendTeamsNotification("빌드에 실패했습니다.", "DC3545") // Red
+                }
             }
         }
         always {

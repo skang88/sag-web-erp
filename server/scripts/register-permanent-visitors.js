@@ -40,6 +40,7 @@ const registerVisitors = async () => {
                     $set: {
                         purpose: visitorData.purpose,
                         visitEndDate: farFutureDate,
+                        status: 'PERMANENT',
                     },
                 },
                 {

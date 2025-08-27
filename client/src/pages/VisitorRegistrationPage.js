@@ -56,7 +56,7 @@ const VisitorRegistrationPage = () => {
         }
     };
 
-    const purposeOptions = ['Delivery', 'Meeting', 'Interview', 'Maintenance', 'Other'];
+    const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
     const durationOptions = [
         { label: '1 Day', value: 1 },
         { label: '1 Week', value: 7 },

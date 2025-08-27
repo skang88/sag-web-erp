@@ -28,7 +28,7 @@ const PlateEventCard = ({ event, onExpire }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const purposeOptions = ['Delivery', 'Meeting', 'Interview', 'Maintenance'];
+    const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
     const durationOptions = [1, 7, 30];
 
     // QR Code URLs
@@ -104,8 +104,8 @@ const PlateEventCard = ({ event, onExpire }) => {
                         <p className="text-7xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
                     </div>
                     <div className="text-right flex-shrink-0 ml-6">
-                        <div className={`px-4 py-2 text-lg font-semibold rounded-full ${isUnregistered ? statusStyles.UNREGISTERED : statusStyles.REGISTERED}`}>
-                            {isUnregistered ? statusText.UNREGISTERED : statusText.REGISTERED}
+                        <div className={`px-4 py-2 text-lg font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
+                            {statusText[event.registrationStatus] || statusText.NO_PLATE}
                         </div>
                         <div className="mt-2">
                             <p className="text-md font-semibold text-gray-500">Next scan in</p>
