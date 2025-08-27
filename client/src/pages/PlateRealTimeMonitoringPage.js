@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import CiLogo from '../components/CiLogo';
 
 const WS_URL = process.env.REACT_APP_WS_URL;
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -273,6 +274,9 @@ const PlateRealTimeMonitoringPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
+            <div className="absolute top-4 left-4">
+                <CiLogo />
+            </div>
             <div className="w-full max-w-7xl mx-auto mt-4 p-6">
                 <header className="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-300">
                     <h1 className="text-4xl font-extrabold text-gray-900">Real-Time Vehicle Recognition</h1>
