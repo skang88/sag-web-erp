@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    parameters {
-        booleanParam(name: 'RUN_MAINTENANCE', defaultValue: false, description: 'Run daily maintenance tasks to update visitor statuses.')
-    }
     tools {
         nodejs 'NodeJs' // Jenkins에 설치된 Node.js 버전 사용
     }
@@ -21,7 +18,7 @@ pipeline {
     stages {
         stage('Notify Build Start') { // 빌드 시작 알림
             when {
-                not { expression { params.RUN_MAINTENANCE } }
+                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
             }
             steps {
                 script {
@@ -38,7 +35,7 @@ pipeline {
 
         stage('Run Maintenance Tasks') {
             when {
-                expression { params.RUN_MAINTENANCE }
+                triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause'
             }
             steps {
                 script {
@@ -58,7 +55,7 @@ pipeline {
 
         stage('Prepare Environment') { // 디버깅을 위한 기본 환경 확인
             when {
-                not { expression { params.RUN_MAINTENANCE } }
+                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
             }
             steps {
                 sh 'pwd'
@@ -69,7 +66,7 @@ pipeline {
 
         stage('Build & Deploy') { // 백엔드와 프론트엔드를 병렬로 빌드 및 배포
             when {
-                not { expression { params.RUN_MAINTENANCE } }
+                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
             }
             parallel {
                 stage('Back-end') {
@@ -184,14 +181,14 @@ pipeline {
     post {
         success {
             script {
-                if (!params.RUN_MAINTENANCE) {
+                if (!currentBuild.getBuildCauses().toString().contains('TimerTrigger')) {
                     sendTeamsNotification("빌드가 성공적으로 완료되었습니다.", "28A745") // Green
                 }
             }
         }
         failure {
             script {
-                if (!params.RUN_MAINTENANCE) {
+                if (!currentBuild.getBuildCauses().toString().contains('TimerTrigger')) {
                     sendTeamsNotification("빌드에 실패했습니다.", "DC3545") // Red
                 }
             }
@@ -231,7 +228,7 @@ def sendTeamsNotification(message, color) {
             "markdown": true
         }]
     }
-    """
+    """.trim()
     // withCredentials 블록을 사용하여 Jenkins에 저장된 Secret text를 안전하게 불러옵니다. << New
     withCredentials([string(credentialsId: 'teams-webhook-url', variable: 'TEAMS_WEBHOOK_URL')]) {
         sh(script: "curl -H 'Content-Type: application/json' -d '${payload.trim()}' \"${TEAMS_WEBHOOK_URL}\"")
