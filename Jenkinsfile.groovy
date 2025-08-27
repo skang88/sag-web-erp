@@ -45,15 +45,6 @@ pipeline {
                     try {
                         echo "Executing daily maintenance script: update-visitor-status.js"
                         sh "docker start ${BACKEND_CONTAINER} || true"
-
-                        // --- DEBUGGING STEPS ---
-                        echo "--- [DEBUG] Checking .env file existence and permissions ---"
-                        sh "docker exec ${BACKEND_CONTAINER} ls -l /usr/src/app/.env"
-                        echo "--- [DEBUG] Checking .env file content ---"
-                        sh "docker exec ${BACKEND_CONTAINER} cat /usr/src/app/.env"
-                        echo "--- [DEBUG] End of debugging steps ---"
-                        // --- END DEBUGGING ---
-
                         sh "docker exec ${BACKEND_CONTAINER} node /usr/src/app/scripts/update-visitor-status.js"
                         sendTeamsNotification("일일 방문객 상태 업데이트 스크립트가 성공적으로 실행되었습니다.", "28A745") // Green
                     } catch (e) {
