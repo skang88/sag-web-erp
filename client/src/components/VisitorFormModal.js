@@ -33,12 +33,15 @@ const VisitorFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
                 personToVisit: initialData.personToVisit || ''
             });
         } else {
+            const defaultEndDate = new Date();
+            defaultEndDate.setHours(19, 0, 0, 0); // 7 PM
+
             // Reset form for new entry
             setFormData({
                 licensePlate: '',
                 purpose: 'Delivery',
                 visitStartDate: nowLocal,
-                visitEndDate: '',
+                visitEndDate: toLocalISOString(defaultEndDate),
                 status: 'ACTIVE',
                 name: '',
                 personToVisit: ''
