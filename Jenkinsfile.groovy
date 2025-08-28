@@ -16,16 +16,9 @@ pipeline {
         RELAY_PORT = '8082:8082'
     }
     stages {
-        stage('Debug Trigger') {
-            steps {
-                script {
-                    echo "Build causes: ${currentBuild.getBuildCauses()}"
-                }
-            }
-        }
         stage('Notify Build Start') { // 빌드 시작 알림
             when {
-                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
+                expression { !currentBuild.getBuildCauses().toString().contains('TimerTrigger') }
             }
             steps {
                 script {
@@ -42,7 +35,7 @@ pipeline {
 
         stage('Run Maintenance Tasks') {
             when {
-                triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause'
+                expression { currentBuild.getBuildCauses().toString().contains('TimerTrigger') }
             }
             steps {
                 script {
@@ -62,7 +55,7 @@ pipeline {
 
         stage('Prepare Environment') { // 디버깅을 위한 기본 환경 확인
             when {
-                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
+                expression { !currentBuild.getBuildCauses().toString().contains('TimerTrigger') }
             }
             steps {
                 sh 'pwd'
@@ -73,7 +66,7 @@ pipeline {
 
         stage('Build & Deploy') { // 백엔드와 프론트엔드를 병렬로 빌드 및 배포
             when {
-                not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
+                expression { !currentBuild.getBuildCauses().toString().contains('TimerTrigger') }
             }
             parallel {
                 stage('Back-end') {
