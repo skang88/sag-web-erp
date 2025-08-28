@@ -12,12 +12,22 @@ const VisitorFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
     });
 
     useEffect(() => {
+        // Helper function to convert UTC date to local YYYY-MM-DDTHH:mm string
+        const toLocalISOString = (date) => {
+            if (!date) return '';
+            const d = new Date(date);
+            const pad = (num) => (num < 10 ? '0' : '') + num;
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        };
+
+        const nowLocal = toLocalISOString(new Date());
+
         if (initialData) {
             setFormData({
                 licensePlate: initialData.licensePlate || '',
                 purpose: initialData.purpose || 'Delivery',
-                visitStartDate: initialData.visitStartDate ? new Date(initialData.visitStartDate).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
-                visitEndDate: initialData.visitEndDate ? new Date(initialData.visitEndDate).toISOString().slice(0, 16) : '',
+                visitStartDate: toLocalISOString(initialData.visitStartDate) || nowLocal,
+                visitEndDate: toLocalISOString(initialData.visitEndDate),
                 status: initialData.status || 'ACTIVE',
                 name: initialData.name || '',
                 personToVisit: initialData.personToVisit || ''
@@ -27,7 +37,7 @@ const VisitorFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
             setFormData({
                 licensePlate: '',
                 purpose: 'Delivery',
-                visitStartDate: new Date().toISOString().slice(0, 16),
+                visitStartDate: nowLocal,
                 visitEndDate: '',
                 status: 'ACTIVE',
                 name: '',
@@ -43,7 +53,12 @@ const VisitorFormModal = ({ isOpen, onClose, onSubmit, initialData }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        const dataToSend = {
+            ...formData,
+            visitStartDate: new Date(formData.visitStartDate).toISOString(),
+            visitEndDate: new Date(formData.visitEndDate).toISOString(),
+        };
+        onSubmit(dataToSend);
     };
 
     if (!isOpen) return null;

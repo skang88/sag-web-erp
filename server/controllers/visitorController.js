@@ -14,7 +14,7 @@ const calculateEndDate = (durationInDays) => {
     // The visit starts today, so we subtract 1 from the duration.
     endDate.setDate(endDate.getDate() + durationInDays - 1);
     // Set the expiration time to 8 PM.
-    endDate.setHours(20, 0, 0, 0);
+    endDate.setHours(23, 0, 0, 0);
     return endDate;
 };
 
