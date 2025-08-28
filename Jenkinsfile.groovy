@@ -16,6 +16,13 @@ pipeline {
         RELAY_PORT = '8082:8082'
     }
     stages {
+        stage('Debug Trigger') {
+            steps {
+                script {
+                    echo "Build causes: ${currentBuild.getBuildCauses()}"
+                }
+            }
+        }
         stage('Notify Build Start') { // 빌드 시작 알림
             when {
                 not { triggeredBy 'hudson.triggers.TimerTrigger$TimerTriggerCause' }
