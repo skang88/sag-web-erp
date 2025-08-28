@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import CiLogo from '../components/CiLogo';
+import ManualVisitorRegistrationModal from '../components/ManualVisitorRegistrationModal';
 
 const WS_URL = process.env.REACT_APP_WS_URL;
 const API_BASE_URL = process.env.REACT_APP_API_URL;
@@ -208,6 +209,8 @@ const PlateEventCard = ({ event, onExpire }) => {
 const PlateRealTimeMonitoringPage = () => {
     const [events, setEvents] = useState([]);
     const [wsStatus, setWsStatus] = useState('Connecting...');
+    const [isManualModalOpen, setManualModalOpen] = useState(false);
+    const [message, setMessage] = useState('');
 
     useEffect(() => {
         let ws;
@@ -272,6 +275,36 @@ const PlateRealTimeMonitoringPage = () => {
         setEvents(prevEvents => prevEvents.filter(event => event.bestUuid !== uuid));
     }, []);
 
+    const handleManualSubmit = async ({ licensePlate, purpose, duration }) => {
+        if (!licensePlate || !purpose || !duration) {
+            setMessage('Missing information for manual registration.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/visitor/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    licensePlate,
+                    purpose,
+                    durationInDays: duration,
+                }),
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Manual registration failed.');
+
+            setMessage(`Successfully registered ${licensePlate}. Gate is opening.`);
+            setManualModalOpen(false);
+
+        } catch (err) {
+            setMessage(err.message || 'An error occurred during manual registration.');
+        } finally {
+            setTimeout(() => setMessage(''), 5000); // Clear message after 5 seconds
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
             <div className="absolute top-4 left-4">
@@ -286,6 +319,21 @@ const PlateRealTimeMonitoringPage = () => {
                     </div>
                 </header>
 
+                <div className="my-4 text-center">
+                    <button 
+                        onClick={() => setManualModalOpen(true)}
+                        className="px-8 py-4 bg-blue-600 text-white font-bold text-xl rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105"
+                    >
+                        Manual Registration
+                    </button>
+                </div>
+
+                {message && (
+                    <div className="mb-4 p-4 text-center font-semibold text-white bg-green-500 rounded-lg">
+                        {message}
+                    </div>
+                )}
+
                 <main>
                     <div className="grid grid-cols-1 gap-8">
                         {events.length > 0 ? (
@@ -293,8 +341,12 @@ const PlateRealTimeMonitoringPage = () => {
                                 <PlateEventCard key={event.bestUuid} event={event} onExpire={handleExpire} />
                             ))
                         ) : (
-                            <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md">
-                                <p className="text-gray-500 text-2xl">Waiting for vehicle entry...</p>
+                            <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md px-8">
+                                <p className="text-gray-600 text-2xl">
+                                    Waiting for vehicle entry. When a vehicle is recognized, a visitor registration menu will appear automatically. <br />
+                                    Select the purpose and duration of the visit, then press the 'Register' button to open the gate. <br />
+                                    If the vehicle recognition card does not appear, please use the 'Manual Registration' button above.
+                                </p>
                             </div>
                         )}
                     </div>
@@ -318,6 +370,11 @@ const PlateRealTimeMonitoringPage = () => {
                     </div>
                 </div>
             </div>
+            <ManualVisitorRegistrationModal 
+                isOpen={isManualModalOpen}
+                onClose={() => setManualModalOpen(false)}
+                onSubmit={handleManualSubmit}
+            />
         </div>
     );
 };
