@@ -52,7 +52,24 @@ const VisitorListPage = () => {
     };
 
     const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleString();
+        const options = {
+            dateStyle: 'short',
+            timeStyle: 'short'
+        };
+        return new Date(dateString).toLocaleString(undefined, options);
+    };
+
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'ACTIVE':
+                return 'bg-green-200 text-green-800';
+            case 'EXPIRED':
+                return 'bg-red-200 text-red-800';
+            case 'PERMANENT':
+                return 'bg-blue-200 text-blue-800';
+            default:
+                return 'bg-gray-200 text-gray-800';
+        }
     };
 
     return (
@@ -67,6 +84,7 @@ const VisitorListPage = () => {
                     <option value="">All Statuses</option>
                     <option value="ACTIVE">Active</option>
                     <option value="EXPIRED">Expired</option>
+                    <option value="PERMANENT">Permanent</option>
                 </select>
                 <button type="submit" className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Filter</button>
             </form>
@@ -92,7 +110,7 @@ const VisitorListPage = () => {
                                         <td className="p-2 font-mono">{visitor.licensePlate}</td>
                                         <td className="p-2">{visitor.purpose}</td>
                                         <td className="p-2">
-                                            <span className={`px-2 py-1 rounded-full text-sm ${visitor.status === 'ACTIVE' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                                            <span className={`px-2 py-1 rounded-full text-sm ${getStatusClass(visitor.status)}`}>
                                                 {visitor.status}
                                             </span>
                                         </td>
