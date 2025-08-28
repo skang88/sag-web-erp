@@ -122,3 +122,58 @@ exports.getVisitors = async (req, res) => {
         res.status(500).json({ message: 'Error retrieving visitors', error: error.message });
     }
 };
+
+exports.createVisitor = async (req, res) => {
+    try {
+        const newVisitor = new Visitor(req.body);
+        await newVisitor.save();
+        res.status(201).json({
+            message: 'Visitor created successfully.',
+            visitor: newVisitor,
+        });
+    } catch (error) {
+        console.error('Error creating visitor:', error);
+        res.status(500).json({ message: 'Error creating visitor.', error: error.message });
+    }
+};
+
+exports.updateVisitor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedVisitor = await Visitor.findByIdAndUpdate(
+            id,
+            { $set: req.body },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedVisitor) {
+            return res.status(404).json({ message: 'Visitor not found.' });
+        }
+
+        res.status(200).json({
+            message: 'Visitor updated successfully.',
+            visitor: updatedVisitor,
+        });
+
+    } catch (error) {
+        console.error('Error updating visitor:', error);
+        res.status(500).json({ message: 'Error updating visitor.', error: error.message });
+    }
+};
+
+exports.deleteVisitor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const deletedVisitor = await Visitor.findByIdAndDelete(id);
+
+        if (!deletedVisitor) {
+            return res.status(404).json({ message: 'Visitor not found.' });
+        }
+
+        res.status(200).json({ message: 'Visitor deleted successfully.' });
+
+    } catch (error) {
+        console.error('Error deleting visitor:', error);
+        res.status(500).json({ message: 'Error deleting visitor.', error: error.message });
+    }
+};
