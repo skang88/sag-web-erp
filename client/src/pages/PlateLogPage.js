@@ -135,7 +135,7 @@ const PlateLogPage = () => {
 
     // Table headers definition (Vehicle Color, Make, Model, Body Type removed)
     const tableHeaders = [
-        '카메라', '시간', '번호판', '신뢰도', '상태', '쉘리 작동', '사용자 이메일', '번호판 이미지', '차량 이미지'
+        '카메라', '시간', '번호판', '상태', '게이트 작동', '차체 유형', '번호판 이미지', '차량 이미지'
     ];
 
     return (
@@ -260,9 +260,6 @@ const PlateLogPage = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
                                             {plate.bestPlateNumber || 'N/A'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {plate.bestConfidence ? plate.bestConfidence.toFixed(2) + '%' : 'N/A'}
-                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                                 plate.registrationStatus === 'REGISTERED' ? 'bg-green-100 text-green-800' :
@@ -280,7 +277,7 @@ const PlateLogPage = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {plate.userEmail || 'N/A'}
+                                            {plate.vehicle?.bodyType || 'N/A'}
                                         </td>
                                         {/* Plate Image Column */}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
