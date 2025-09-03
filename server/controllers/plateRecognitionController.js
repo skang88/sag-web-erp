@@ -179,6 +179,8 @@ exports.createPlateRecognition = async (req, res) => {
         const eventTimestamp = new Date(epoch_start);
         const ageInSeconds = (new Date() - eventTimestamp) / 1000;
 
+        console.log(`[${new Date().toISOString()}] [${best_plate_number}] WebSocket broadcast check: cameraConfig: ${JSON.stringify(cameraConfig)}, isMonitoring: ${cameraConfig?.isMonitoring}, ageInSeconds: ${ageInSeconds.toFixed(1)}`);
+
         if (cameraConfig && cameraConfig.isMonitoring && ageInSeconds <= 15) {
             const cameraNameForBroadcast = cameraConfig.name || `Unknown (${camera_id})`;
             const broadcastData = {
