@@ -118,7 +118,6 @@ exports.createPlateRecognition = async (req, res) => {
 
                 if (registeredVisitor) {
                     currentRegistrationStatus = 'REGISTERED_VISITOR';
-                    console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 방문자 차량입니다. 만료일: ${registeredVisitor.visitEndDate.toISOString()}.`);
                 } else {
                     currentRegistrationStatus = 'UNREGISTERED';
                     console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 미등록 차량입니다.`);
@@ -146,7 +145,7 @@ exports.createPlateRecognition = async (req, res) => {
             if (registeredVisitor && cameraConfig && cameraConfig.shellyId) {
                 if (isOperatingTime) {
                     try {
-                        console.log(`[${new Date().toISOString()}] 방문자 차량 확인. Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
+                        console.log(`[${new Date().toISOString()}] [${detectedPlateNumber}] 등록된 방문자 차량입니다. 만료일: ${registeredVisitor.visitEndDate.toISOString()}. Shelly ${cameraConfig.shellyId} 릴레이 시퀀스를 시작합니다.`);
                         await _turnOn(cameraConfig.shellyId);
                         await delay(1000);
                         await _turnOff(cameraConfig.shellyId);
@@ -214,12 +213,16 @@ exports.createPlateRecognition = async (req, res) => {
                 vehicleCropJpeg: createdDoc.vehicleCropJpeg,
             };
             broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
-            console.log(`[${new Date().toISOString()}] [${best_plate_number}] 실시간 이벤트 (수신 지연: ${ageInSeconds.toFixed(1)}초)를 WebSocket으로 전송했습니다.`);
-        } else {
-            console.log(`[${new Date().toISOString()}] [${best_plate_number}] WebSocket 전송을 건너뜁니다. 수신 지연(ageInSeconds): ${ageInSeconds.toFixed(1)}초 > 15초.`);
         }
 
-        console.log(`[${new Date().toISOString()}] 데이터베이스에 번호판 정보 저장 완료.`);
+        let finalLogMessage = `[${new Date().toISOString()}] 데이터베이스에 번호판 정보 저장 완료.`;
+
+        if (cameraConfig && cameraConfig.isMonitoring && ageInSeconds <= 15) {
+            finalLogMessage += ` 실시간 이벤트 (수신 지연: ${ageInSeconds.toFixed(1)}초)를 WebSocket으로 전송했습니다.`;
+        } else {
+            finalLogMessage += ` WebSocket 전송을 건너뜁니다. 수신 지연(ageInSeconds): ${ageInSeconds.toFixed(1)}초 > 15초.`;
+        }
+        console.log(finalLogMessage);
         
         res.status(201).json({
             message: 'Plate data successfully processed and saved.',
