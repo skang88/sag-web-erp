@@ -25,7 +25,7 @@ const PlateEventCard = ({ event, onExpire }) => {
     const [isUnregistered, setIsUnregistered] = useState(event.registrationStatus === 'UNREGISTERED');
     
     // Kiosk state
-    const [purpose, setPurpose] = useState(null);
+    const [purpose, setPurpose] = useState('Delivery');
     const [duration, setDuration] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -122,15 +122,15 @@ const PlateEventCard = ({ event, onExpire }) => {
                 <div className="flex gap-6 items-start h-full">
                     {/* Left Side: Kiosk Form & QR Code (if unregistered) */}
                     {isUnregistered && (
-                        <div className="w-1/2 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
+                        <div className="w-3/5 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
                             <div>
                                 <h3 className="text-2xl font-bold text-gray-800 mb-4">New Visitor Check-in</h3>
                                 
                                 <div className="mb-6">
-                                    <p className="text-lg font-semibold text-gray-700 mb-3">1. Purpose of Visit</p>
+                                    <p className="text-lg font-semibold text-gray-700 mb-3">1. Select a Purpose of Visit</p>
                                     <div className="grid grid-cols-2 gap-3">
                                         {purposeOptions.map(opt => (
-                                            <button key={opt} onClick={() => setPurpose(opt)} className={`p-4 text-lg font-bold rounded-lg transition ${purpose === opt ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
+                                            <button key={opt} onClick={() => setPurpose(opt)} className={`p-5 text-xl font-bold rounded-lg transition ${purpose === opt ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
                                                 {opt}
                                             </button>
                                         ))}
@@ -138,10 +138,10 @@ const PlateEventCard = ({ event, onExpire }) => {
                                 </div>
 
                                 <div className="mb-6">
-                                    <p className="text-lg font-semibold text-gray-700 mb-3">2. Duration of Stay</p>
+                                    <p className="text-lg font-semibold text-gray-700 mb-3">2. Select a Duration of Stay</p>
                                     <div className="grid grid-cols-3 gap-3">
                                         {durationOptions.map(days => (
-                                            <button key={days} onClick={() => setDuration(days)} className={`p-4 text-lg font-bold rounded-lg transition ${duration === days ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
+                                            <button key={days} onClick={() => setDuration(days)} className={`p-5 text-xl font-bold rounded-lg transition ${duration === days ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
                                                 {days} Day{days > 1 && 's'}
                                             </button>
                                         ))}
@@ -168,7 +168,7 @@ const PlateEventCard = ({ event, onExpire }) => {
                     )}
 
                     {/* Right Side / Main: Vehicle & Plate Images */}
-                    <div className={`${isUnregistered ? 'w-1/2' : 'w-full'} flex items-center justify-center`}>
+                    <div className={`${isUnregistered ? 'w-2/5' : 'w-full'} flex items-center justify-center`}>
                         <div className={`flex ${isUnregistered ? 'flex-col w-full gap-4' : 'w-full gap-6 items-start'}`}>
                             {event.vehicleCropJpeg && (
                                 <img 
@@ -322,7 +322,7 @@ const PlateRealTimeMonitoringPage = () => {
                 <div className="my-4 text-center">
                     <button 
                         onClick={() => setManualModalOpen(true)}
-                        className="px-8 py-4 bg-blue-600 text-white font-bold text-xl rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105"
+                        className="px-8 py-4 bg-gray-500 text-white font-bold text-xl rounded-lg shadow-md hover:bg-gray-600 transition-transform transform hover:scale-105"
                     >
                         Manual Check-in
                     </button>
