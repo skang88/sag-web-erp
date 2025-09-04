@@ -11,8 +11,8 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
 
 // --- New Modal Component for Visitor Flow ---
-const VisitorFlowModal = ({ event, onClose, onSubmit }) => {
-    const [step, setStep] = useState('confirm'); // 'confirm', 'purpose', 'manual', 'success', 'error'
+const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' }) => {
+    const [step, setStep] = useState(initialStep); // 'confirm', 'purpose', 'manual', 'success', 'error'
     const [manualStep, setManualStep] = useState('input'); // 'input', 'purpose' for manual flow
     const [manualPlate, setManualPlate] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -156,24 +156,19 @@ const PlateRealTimeMonitoringPage = () => {
     const [loadingState, setLoadingState] = useState({});
 
     const handleVisitorEntranceOpen = async () => {
-        const gate = VISITOR_ENTRANCE_GATE;
-        const loadingKey = `${gate.openShellyId}-Open`;
-        setLoadingState(prev => ({ ...prev, [loadingKey]: true }));
-        setGlobalMessage(`${gate.name} - Opening in progress...`);
-        try {
-            await fetch(`${API_BASE_URL}/shelly/on/${gate.openShellyId}`, { method: 'POST' });
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await fetch(`${API_BASE_URL}/shelly/off/${gate.openShellyId}`, { method: 'POST' });
-            setGlobalMessage(`${gate.name} - Opening complete`);
-            setTimeout(() => setGlobalMessage(''), 3000);
-            
-        } catch (error) {
-            console.error('Open action failed:', error);
-            setGlobalMessage(`${gate.name} - Opening failed`);
-            setTimeout(() => setGlobalMessage(''), 3000);
-        } finally {
-            setLoadingState(prev => ({ ...prev, [loadingKey]: false }));
-        }
+        setLoadingState(prev => ({ ...prev, [VISITOR_ENTRANCE_GATE.openShellyId]: true }));
+        setGlobalMessage(`${VISITOR_ENTRANCE_GATE.name} - Initiating manual registration...`);
+        
+        // Create a dummy event object to trigger the modal in manual mode
+        const dummyEvent = {
+            bestPlateNumber: '', // No plate recognized yet
+            vehicleCropJpeg: '', // No image
+            plateCropJpeg: '',   // No image
+            registrationStatus: 'UNREGISTERED' // Treat as unregistered to show the modal
+        };
+        setActiveEvent(dummyEvent);
+        setLoadingState(prev => ({ ...prev, [VISITOR_ENTRANCE_GATE.openShellyId]: false }));
+        setTimeout(() => setGlobalMessage(''), 3000); // Clear message after a short delay
     };
 
     useEffect(() => {
@@ -269,6 +264,22 @@ const PlateRealTimeMonitoringPage = () => {
             
             setGlobalMessage(`Successfully registered ${licensePlate}.`);
             setTimeout(() => setGlobalMessage(''), 5000);
+
+            // --- Open the gate after successful registration ---
+            const gate = VISITOR_ENTRANCE_GATE;
+            try {
+                await fetch(`${API_BASE_URL}/shelly/on/${gate.openShellyId}`, { method: 'POST' });
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                await fetch(`${API_BASE_URL}/shelly/off/${gate.openShellyId}`, { method: 'POST' });
+                setGlobalMessage(`${gate.name} - Opened for ${licensePlate}`);
+                setTimeout(() => setGlobalMessage(''), 3000);
+            } catch (error) {
+                console.error('Failed to open gate after registration:', error);
+                setGlobalMessage(`${gate.name} - Failed to open gate for ${licensePlate}`);
+                setTimeout(() => setGlobalMessage(''), 3000);
+            }
+            // --- End of gate opening logic ---
+
             return true;
 
         } catch (err) {
@@ -316,7 +327,7 @@ const PlateRealTimeMonitoringPage = () => {
                             onClick={handleVisitorEntranceOpen}
                             disabled={loadingState[`${VISITOR_ENTRANCE_GATE.openShellyId}-Open`]}
                             className="px-16 py-10 bg-green-500 text-white text-4xl rounded hover:bg-green-600 disabled:opacity-50"                        >
-                            Visitor Gate Open
+                            Check In
                     </button>
                 </div>
 
@@ -344,6 +355,7 @@ const PlateRealTimeMonitoringPage = () => {
                     event={activeEvent}
                     onClose={() => setActiveEvent(null)}
                     onSubmit={handleRegistration}
+                    initialStep={activeEvent.bestPlateNumber === '' ? 'manual' : 'confirm'}
                 />
             )}
         </div>
