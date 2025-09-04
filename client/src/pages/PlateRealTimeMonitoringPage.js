@@ -124,7 +124,7 @@ const PlateEventCard = ({ event, onExpire }) => {
                     {isUnregistered && (
                         <div className="w-1/2 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
                             <div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">New Visitor Registration</h3>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-4">New Visitor Check-in</h3>
                                 
                                 <div className="mb-6">
                                     <p className="text-lg font-semibold text-gray-700 mb-3">1. Purpose of Visit</p>
@@ -156,11 +156,11 @@ const PlateEventCard = ({ event, onExpire }) => {
                                     disabled={!purpose || isLoading}
                                     className="w-full py-5 text-2xl font-bold text-white rounded-lg transition shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700"
                                 >
-                                    {isLoading ? 'Processing...' : 'Register and Open Gate'}
+                                    {isLoading ? 'Processing...' : 'Check-in and Open Gate'}
                                 </button>
 
                                 <div className="mt-6 border-t pt-4 text-center">
-                                    <p className="text-md font-semibold text-gray-600 mb-2">Or Register on Your Phone</p>
+                                    <p className="text-md font-semibold text-gray-600 mb-2">Or Check-in on Your Phone</p>
                                     <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32 mx-auto" />
                                 </div>
                             </div>
@@ -312,7 +312,7 @@ const PlateRealTimeMonitoringPage = () => {
             </div>
             <div className="w-full max-w-7xl mx-auto mt-4 p-6">
                 <header className="flex justify-between items-center mb-6 border-b-2 pb-4 border-gray-300">
-                    <h1 className="text-4xl font-extrabold text-gray-900">Real-Time Vehicle Recognition</h1>
+                    <h1 className="text-4xl font-extrabold text-gray-900">Check in</h1>
                     <div className="flex items-center space-x-2">
                         <div className={`w-3 h-3 rounded-full ${wsStatus === 'Connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
                         <span className="text-gray-500">{wsStatus}</span>
@@ -324,7 +324,7 @@ const PlateRealTimeMonitoringPage = () => {
                         onClick={() => setManualModalOpen(true)}
                         className="px-8 py-4 bg-blue-600 text-white font-bold text-xl rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105"
                     >
-                        Manual Registration
+                        Manual Check-in
                     </button>
                 </div>
 
@@ -345,7 +345,7 @@ const PlateRealTimeMonitoringPage = () => {
                                 <p className="text-gray-600 text-2xl">
                                     Waiting for vehicle entry. When a vehicle is recognized, a visitor registration menu will appear automatically. <br />
                                     Select the purpose and duration of the visit, then press the 'Register' button to open the gate. <br />
-                                    If the vehicle recognition card does not appear, please use the 'Manual Registration' button above.
+                                    If the vehicle recognition card does not appear, please use the 'Manual Check-in' button above.
                                 </p>
                             </div>
                         )}
