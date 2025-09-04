@@ -11,11 +11,13 @@ const { DateTime } = require('luxon');
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-exports.createPlateRecognition = async (req, res) => {
-    
-    try {
-        const requestBody = req.body;
+const processingPlates = new Set();
 
+exports.createPlateRecognition = async (req, res) => {
+    const requestBody = req.body;
+    let detectedPlateNumberForCheck = null; // Declare here for finally block access
+
+    try {
         if (requestBody && requestBody.error) {
             console.warn(`[${new Date().toISOString()}] 번호판 인식기(소스)로부터 에러를 수신했습니다:`, requestBody.error);
             return res.status(400).json({
@@ -32,9 +34,45 @@ exports.createPlateRecognition = async (req, res) => {
             });
         }
 
+        // Extract best_plate_number early for duplicate check
+        const { epoch_start, best_plate_number } = requestBody;
+
+        if (!epoch_start || !best_plate_number) { // Basic check before more detailed destructuring
+            console.warn(`[${new Date().toISOString()}] Missing essential fields (epoch_start, best_plate_number) for alpr_group data.`);
+            return res.status(400).json({ message: 'Missing essential fields (epoch_start, best_plate_number) for alpr_group data.' });
+        }
+
+        detectedPlateNumberForCheck = best_plate_number.toUpperCase().trim();
+
+        // --- Start Duplicate Check ---
+        if (processingPlates.has(detectedPlateNumberForCheck)) {
+            console.log(`[${new Date().toISOString()}] [${detectedPlateNumberForCheck}] 이미 처리 중인 번호판입니다. 중복 처리를 방지합니다.`);
+            return res.status(200).json({
+                message: `Plate ${detectedPlateNumberForCheck} is already being processed. Ignoring duplicate.`,
+                plateNumber: detectedPlateNumberForCheck,
+            });
+        }
+
+        processingPlates.add(detectedPlateNumberForCheck); // Mark as processing
+
+        const oneMinuteAgo = new Date(new Date(epoch_start).getTime() - 60000);
+        const recentRecognition = await PlateRecognition.findOne({
+            bestPlateNumber: detectedPlateNumberForCheck,
+            startTime: { $gte: oneMinuteAgo }
+        }).sort({ startTime: -1 });
+
+        if (recentRecognition) {
+            const timeSinceLast = (new Date(epoch_start) - recentRecognition.startTime) / 1000;
+            console.log(`[${new Date().toISOString()}] [${detectedPlateNumberForCheck}] ${timeSinceLast.toFixed(1)}초 전 동일한 번호판이 인식되어 중복 처리를 방지합니다. (ID: ${recentRecognition._id})`);
+            return res.status(200).json({
+                message: `Duplicate plate recognized within a minute. Last seen ${timeSinceLast.toFixed(1)}s ago. Ignoring.`,
+                plateNumber: detectedPlateNumberForCheck,
+            });
+        }
+        // --- End Duplicate Check ---
+
+        // Rest of the original destructuring
         const {
-            epoch_start,
-            best_plate_number,
             best_confidence,
             vehicle_crop_jpeg,
             best_plate,
@@ -48,27 +86,9 @@ exports.createPlateRecognition = async (req, res) => {
 
         const plate_crop_jpeg = best_plate ? best_plate.plate_crop_jpeg : undefined;
 
-        if (!epoch_start || !best_plate_number || best_confidence === undefined || !best_uuid) {
-            console.warn(`[${new Date().toISOString()}] Missing required fields for alpr_group data.`);
-            return res.status(400).json({ message: 'Missing required fields (epoch_start, best_plate_number, best_confidence, best_uuid) for alpr_group data.' });
-        }
-
-        const detectedPlateNumberForCheck = best_plate_number.toUpperCase().trim();
-        if (detectedPlateNumberForCheck) {
-            const oneMinuteAgo = new Date(new Date(epoch_start).getTime() - 60000);
-            const recentRecognition = await PlateRecognition.findOne({
-                bestPlateNumber: detectedPlateNumberForCheck,
-                startTime: { $gte: oneMinuteAgo }
-            }).sort({ startTime: -1 });
-
-            if (recentRecognition) {
-                const timeSinceLast = (new Date(epoch_start) - recentRecognition.startTime) / 1000;
-                console.log(`[${new Date().toISOString()}] [${detectedPlateNumberForCheck}] ${timeSinceLast.toFixed(1)}초 전 동일한 번호판이 인식되어 중복 처리를 방지합니다. (ID: ${recentRecognition._id})`);
-                return res.status(200).json({
-                    message: `Duplicate plate recognized within a minute. Last seen ${timeSinceLast.toFixed(1)}s ago. Ignoring.`,
-                    plateNumber: detectedPlateNumberForCheck,
-                });
-            }
+        if (best_confidence === undefined || !best_uuid) { // Remaining required fields check
+            console.warn(`[${new Date().toISOString()}] Missing required fields (best_confidence, best_uuid) for alpr_group data.`);
+            return res.status(400).json({ message: 'Missing required fields (best_confidence, best_uuid) for alpr_group data.' });
         }
 
         let overallShellyOperated = false;
@@ -217,6 +237,10 @@ exports.createPlateRecognition = async (req, res) => {
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Error processing Plate data:`, error);
         res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    } finally {
+        if (detectedPlateNumberForCheck) {
+            processingPlates.delete(detectedPlateNumberForCheck); // Ensure cleanup
+        }
     }
 };
 
