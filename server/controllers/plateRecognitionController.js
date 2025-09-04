@@ -195,6 +195,8 @@ exports.createPlateRecognition = async (req, res) => {
             };
             broadcast({ type: 'NEW_PLATE_RECOGNITION', payload: broadcastData });
             console.log(`[${new Date().toISOString()}] [${best_plate_number}] 실시간 이벤트 (수신 지연: ${ageInSeconds.toFixed(1)}초)를 WebSocket으로 전송했습니다.`);
+        } else {
+            console.log(`[${new Date().toISOString()}] [${best_plate_number}] WebSocket 전송을 건너뜁니다. 수신 지연(ageInSeconds): ${ageInSeconds.toFixed(1)}초 > 15초.`);
         }
 
         console.log(`[${new Date().toISOString()}] 데이터베이스에 번호판 정보 저장 완료.`);
