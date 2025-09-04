@@ -3,6 +3,8 @@ import CiLogo from '../components/CiLogo';
 import CustomKeyboard from '../components/CustomKeyboard';
 import 'react-simple-keyboard/build/css/index.css';
 
+const VISITOR_ENTRANCE_GATE = { id: 1, name: 'Visitor Entrance', openShellyId: 3, closeShellyId: 1 };
+
 const WS_URL = process.env.REACT_APP_WS_URL;
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
@@ -129,7 +131,13 @@ const VisitorFlowModal = ({ event, onClose, onSubmit }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 animate-fade-in">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-auto p-8 m-4 flex flex-col">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-auto p-8 m-4 flex flex-col relative">
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold"
+                >
+                    &times;
+                </button>
                 {isLoading && <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center"><p className="text-3xl font-bold">Processing...</p></div>}
                 {step === 'confirm' && renderConfirmation()}
                 {step === 'purpose' && renderPurposeSelection()}
@@ -145,6 +153,28 @@ const PlateRealTimeMonitoringPage = () => {
     const [activeEvent, setActiveEvent] = useState(null);
     const [wsStatus, setWsStatus] = useState('Connecting...');
     const [globalMessage, setGlobalMessage] = useState('');
+    const [loadingState, setLoadingState] = useState({});
+
+    const handleVisitorEntranceOpen = async () => {
+        const gate = VISITOR_ENTRANCE_GATE;
+        const loadingKey = `${gate.openShellyId}-Open`;
+        setLoadingState(prev => ({ ...prev, [loadingKey]: true }));
+        setGlobalMessage(`${gate.name} - Opening in progress...`);
+        try {
+            await fetch(`${API_BASE_URL}/shelly/on/${gate.openShellyId}`, { method: 'POST' });
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await fetch(`${API_BASE_URL}/shelly/off/${gate.openShellyId}`, { method: 'POST' });
+            setGlobalMessage(`${gate.name} - Opening complete`);
+            setTimeout(() => setGlobalMessage(''), 3000);
+            
+        } catch (error) {
+            console.error('Open action failed:', error);
+            setGlobalMessage(`${gate.name} - Opening failed`);
+            setTimeout(() => setGlobalMessage(''), 3000);
+        } finally {
+            setLoadingState(prev => ({ ...prev, [loadingKey]: false }));
+        }
+    };
 
     useEffect(() => {
         let ws;
@@ -280,6 +310,15 @@ const PlateRealTimeMonitoringPage = () => {
                         </div>
                     )}
                 </main>
+                
+                <div className="mt-8 text-center">
+                    <button
+                            onClick={handleVisitorEntranceOpen}
+                            disabled={loadingState[`${VISITOR_ENTRANCE_GATE.openShellyId}-Open`]}
+                            className="px-16 py-10 bg-green-500 text-white text-4xl rounded hover:bg-green-600 disabled:opacity-50"                        >
+                            Visitor Gate Open
+                    </button>
+                </div>
 
                 <div className="mt-8 text-center text-gray-500">
                     <div className="bg-white p-6 rounded-lg shadow-md">
