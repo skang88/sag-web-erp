@@ -1,216 +1,150 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import CiLogo from '../components/CiLogo';
-import ManualVisitorRegistrationModal from '../components/ManualVisitorRegistrationModal';
+import CustomKeyboard from '../components/CustomKeyboard';
+import 'react-simple-keyboard/build/css/index.css';
 
 const WS_URL = process.env.REACT_APP_WS_URL;
 const API_BASE_URL = process.env.REACT_APP_API_URL;
 
-// Helper function to format ISO date strings
-const formatDateTime = (isoString) => {
-    if (!isoString) return 'N/A';
-    try {
-        return new Date(isoString).toLocaleString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-        });
-    } catch {
-        return 'Invalid Date';
-    }
-};
+const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
 
-const PlateEventCard = ({ event, onExpire }) => {
-    const [countdown, setCountdown] = useState(60);
-    const [isUnregistered, setIsUnregistered] = useState(event.registrationStatus === 'UNREGISTERED');
-    
-    // Kiosk state
-    const [purpose, setPurpose] = useState('Delivery');
-    const [duration, setDuration] = useState(1);
+// --- New Modal Component for Visitor Flow ---
+const VisitorFlowModal = ({ event, onClose, onSubmit }) => {
+    const [step, setStep] = useState('confirm'); // 'confirm', 'purpose', 'manual', 'success', 'error'
+    const [manualStep, setManualStep] = useState('input'); // 'input', 'purpose' for manual flow
+    const [manualPlate, setManualPlate] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
-    const durationOptions = [1, 7, 30];
-
-    // QR Code URLs
-    const registrationUrl = `https://seohanga.com/register-visitor?plate=${event.bestPlateNumber || ''}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(registrationUrl)}`;
-
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCountdown(prev => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-
         const expireTimer = setTimeout(() => {
-            onExpire(event.bestUuid);
-        }, 60000);
+            onClose();
+        }, 60000); // Auto-close modal after 60 seconds of inactivity
 
-        return () => {
-            clearInterval(interval);
-            clearTimeout(expireTimer);
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        return () => clearTimeout(expireTimer);
+    }, [onClose]);
 
-    const handleRegisterAndOpen = async () => {
-        if (!purpose) {
-            setMessage('Please select a purpose for your visit.');
-            return;
-        }
+    const handlePurposeSelection = async (purpose) => {
         setIsLoading(true);
-        setMessage('');
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/visitor/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    licensePlate: event.bestPlateNumber,
-                    purpose,
-                    durationInDays: duration,
-                }),
-            });
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Registration failed.');
-
-            setMessage('Registration successful! Gate is opening.');
-            setIsUnregistered(false); // Visually update the card to 'registered' state
-
-        } catch (err) {
-            setMessage(err.message || 'An error occurred.');
-        } finally {
-            setIsLoading(false);
+        const plateToRegister = step === 'manual' ? manualPlate : event.bestPlateNumber;
+        const success = await onSubmit(plateToRegister, purpose);
+        setIsLoading(false);
+        if (success) {
+            setStep('success');
+            setTimeout(onClose, 3000); // Close success message after 3s
+        } else {
+            setMessage('Registration failed. Please try again.');
+            setStep('error');
         }
     };
 
-    const statusStyles = {
-        REGISTERED: 'bg-green-100 text-green-800',
-        UNREGISTERED: 'bg-red-100 text-red-800',
-        NO_PLATE: 'bg-gray-100 text-gray-800',
+    const renderConfirmation = () => (
+        <div className="flex flex-col h-full">
+            <div className="grid grid-cols-2 gap-4 mb-4">
+                <img src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} alt="Vehicle" className="rounded-lg w-full" />
+                <img src={`data:image/jpeg;base64,${event.plateCropJpeg}`} alt="License Plate" className="rounded-lg w-full" />
+            </div>
+            <div className="text-center bg-gray-800 text-white py-4 rounded-lg mb-4">
+                <p className="text-8xl font-mono font-bold tracking-widest">{event.bestPlateNumber}</p>
+            </div>
+            <p className="text-center text-3xl font-semibold text-gray-800 mb-auto">Is this your license plate?</p>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+                <button onClick={() => setStep('purpose')} className="w-full py-8 text-4xl font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">YES</button>
+                <button onClick={() => setStep('manual')} className="w-full py-8 text-4xl font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">NO</button>
+            </div>
+        </div>
+    );
+
+    const renderPurposeSelection = () => (
+        <div className="flex flex-col h-full">
+            <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">Select Purpose of Visit</h2>
+            <div className="grid grid-cols-2 gap-4 flex-grow">
+                {purposeOptions.map(purpose => (
+                    <button 
+                        key={purpose} 
+                        onClick={() => handlePurposeSelection(purpose)}
+                        className="py-8 text-3xl font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-lg"
+                    >
+                        {purpose}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+
+    const renderManualInput = () => {
+        if (manualStep === 'input') {
+            return (
+                <div className="flex flex-col h-full">
+                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">Enter License Plate Manually</h2>
+                    <div className="w-full text-center text-5xl font-mono font-bold p-4 border-4 border-gray-300 rounded-lg mb-4 bg-gray-100">
+                        {manualPlate || ' '} 
+                    </div>
+                    <CustomKeyboard
+                        value={manualPlate}
+                        onChange={setManualPlate}
+                    />
+                    <button
+                        onClick={() => setManualStep('purpose')}
+                        disabled={!manualPlate || manualPlate.length < 4}
+                        className="w-full mt-4 py-6 text-3xl font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 transition shadow-lg disabled:bg-gray-400"
+                    >
+                        Next
+                    </button>
+                </div>
+            );
+        }
+
+        if (manualStep === 'purpose') {
+            return (
+                <div className="flex flex-col h-full">
+                    <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">Select Purpose of Visit</h2>
+                    <p className="text-center text-3xl font-mono mb-4">Registering for: <strong>{manualPlate}</strong></p>
+                    <div className="grid grid-cols-2 gap-4 flex-grow">
+                        {purposeOptions.map(purpose => (
+                            <button 
+                                key={purpose} 
+                                onClick={() => handlePurposeSelection(purpose)}
+                                className="py-8 text-3xl font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-lg"
+                            >
+                                {purpose}
+                            </button>
+                        ))}
+                    </div>
+                    <button onClick={() => setManualStep('input')} className="mt-4 text-lg text-gray-600 hover:underline">Back to plate input</button>
+                </div>
+            );
+        }
     };
 
-    const statusText = {
-        REGISTERED: 'Registered Vehicle',
-        UNREGISTERED: 'Unregistered Vehicle',
-        NO_PLATE: 'No Plate Recognized',
-    };
+    const renderStatus = (status) => (
+        <div className="flex flex-col items-center justify-center h-full">
+            {status === 'success' ? (
+                <p className="text-5xl font-bold text-green-600">Registration Complete! Gate is opening.</p>
+            ) : (
+                <p className="text-5xl font-bold text-red-600">{message || 'An error occurred.'}</p>
+            )}
+        </div>
+    );
 
     return (
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden transform animate-fade-in border-l-8 border-blue-500 flex flex-col">
-            {/* Top Row: Plate Info & Status */}
-            <div className="p-6 pb-2">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <p className="text-7xl font-bold text-gray-800 font-mono tracking-wider">{event.bestPlateNumber || '---'}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0 ml-6">
-                        <div className={`px-4 py-2 text-lg font-semibold rounded-full ${statusStyles[event.registrationStatus] || statusStyles.NO_PLATE}`}>
-                            {statusText[event.registrationStatus] || statusText.NO_PLATE}
-                        </div>
-                        <div className="mt-2">
-                            <p className="text-md font-semibold text-gray-500">Next scan in</p>
-                            <p className="text-4xl font-bold text-gray-700">{countdown}s</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content: Images and Kiosk Form */}
-            <div className="p-6 pt-4 flex-grow">
-                <div className="flex gap-6 items-start h-full">
-                    {/* Left Side: Kiosk Form & QR Code (if unregistered) */}
-                    {isUnregistered && (
-                        <div className="w-3/5 flex-shrink-0 flex flex-col justify-between bg-gray-50 rounded-lg p-6 h-full">
-                            <div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">New Visitor Check-in</h3>
-                                
-                                <div className="mb-6">
-                                    <p className="text-lg font-semibold text-gray-700 mb-3">1. Select a Purpose of Visit</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {purposeOptions.map(opt => (
-                                            <button key={opt} onClick={() => setPurpose(opt)} className={`p-5 text-xl font-bold rounded-lg transition ${purpose === opt ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
-                                                {opt}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="mb-6">
-                                    <p className="text-lg font-semibold text-gray-700 mb-3">2. Select a Duration of Stay</p>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {durationOptions.map(days => (
-                                            <button key={days} onClick={() => setDuration(days)} className={`p-5 text-xl font-bold rounded-lg transition ${duration === days ? 'bg-blue-600 text-white' : 'bg-white hover:bg-blue-100'}`}>
-                                                {days} Day{days > 1 && 's'}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-auto">
-                                {message && <p className="text-center text-lg font-semibold mb-3 p-3 rounded-lg bg-yellow-100 text-yellow-800">{message}</p>}
-                                <button 
-                                    onClick={handleRegisterAndOpen}
-                                    disabled={!purpose || isLoading}
-                                    className="w-full py-5 text-2xl font-bold text-white rounded-lg transition shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700"
-                                >
-                                    {isLoading ? 'Processing...' : 'Check-in and Open Gate'}
-                                </button>
-
-                                <div className="mt-6 border-t pt-4 text-center">
-                                    <p className="text-md font-semibold text-gray-600 mb-2">Or Check-in on Your Phone</p>
-                                    <img src={qrCodeUrl} alt="QR Code" className="w-32 h-32 mx-auto" />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Right Side / Main: Vehicle & Plate Images */}
-                    <div className={`${isUnregistered ? 'w-2/5' : 'w-full'} flex items-center justify-center`}>
-                        <div className={`flex ${isUnregistered ? 'flex-col w-full gap-4' : 'w-full gap-6 items-start'}`}>
-                            {event.vehicleCropJpeg && (
-                                <img 
-                                    src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} 
-                                    alt="Vehicle" 
-                                    className={`${isUnregistered ? 'w-full' : 'w-2/3'} h-auto rounded-md border`} 
-                                />
-                            )}
-                            {event.plateCropJpeg && (
-                                <img 
-                                    src={`data:image/jpeg;base64,${event.plateCropJpeg}`} 
-                                    alt="License Plate" 
-                                    className={`${isUnregistered ? 'w-full' : 'w-1/3'} h-auto rounded-md border`} 
-                                />
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom: Additional Info & Progress Bar */}
-            <div className="px-6 pb-4 text-base text-gray-600">
-                <p><strong>Recognition Time:</strong> {formatDateTime(event.startTime)}</p>
-                {event.registrationStatus === 'REGISTERED' && (
-                    <p><strong>Registered By:</strong> {event.userEmail}</p>
-                )}
-            </div>
-            <div className="w-full bg-gray-200 h-2">
-                <div 
-                    className="bg-blue-500 h-2"
-                    style={{ width: `${(countdown / 60) * 100}%`, transition: 'width 1s linear' }}
-                ></div>
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-auto p-8 m-4 flex flex-col">
+                {isLoading && <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center"><p className="text-3xl font-bold">Processing...</p></div>}
+                {step === 'confirm' && renderConfirmation()}
+                {step === 'purpose' && renderPurposeSelection()}
+                {step === 'manual' && renderManualInput()}
+                {(step === 'success' || step === 'error') && renderStatus(step)}
             </div>
         </div>
     );
 };
 
+
 const PlateRealTimeMonitoringPage = () => {
-    const [events, setEvents] = useState([]);
+    const [activeEvent, setActiveEvent] = useState(null);
     const [wsStatus, setWsStatus] = useState('Connecting...');
-    const [isManualModalOpen, setManualModalOpen] = useState(false);
-    const [message, setMessage] = useState('');
+    const [globalMessage, setGlobalMessage] = useState('');
 
     useEffect(() => {
         let ws;
@@ -231,14 +165,26 @@ const PlateRealTimeMonitoringPage = () => {
                     const message = JSON.parse(event.data);
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
                         const newEvent = message.payload;
-                        setEvents(prevEvents => {
-                            const existingEventIndex = prevEvents.findIndex(e => e.bestUuid === newEvent.bestUuid);
-                            if (existingEventIndex !== -1) {
-                                const updatedEvents = [...prevEvents];
-                                updatedEvents[existingEventIndex] = newEvent;
-                                return updatedEvents;
+                        
+                        // Using a callback with setActiveEvent ensures we have the latest state
+                        // and avoids race conditions without needing 'activeEvent' in the dependency array.
+                        setActiveEvent(currentActiveEvent => {
+                            if (newEvent.registrationStatus === 'UNREGISTERED') {
+                                // If no modal is active, show the new one for the unregistered visitor.
+                                if (!currentActiveEvent) {
+                                    return newEvent;
+                                }
+                                // If a modal is already active, ignore the new event to prevent pop-ups over pop-ups.
+                                return currentActiveEvent;
                             } else {
-                                return [newEvent, ...prevEvents];
+                                // For registered staff or visitors, don't show a modal.
+                                // Just show a temporary global message for feedback.
+                                const statusText = newEvent.registrationStatus === 'REGISTERED' ? 'Staff' : 'Visitor';
+                                setGlobalMessage(`Welcome, ${statusText} ${newEvent.bestPlateNumber}!`);
+                                setTimeout(() => setGlobalMessage(''), 4000);
+                                
+                                // Do not change the active event, keeping the current modal if it exists.
+                                return currentActiveEvent;
                             }
                         });
                     }
@@ -269,16 +215,12 @@ const PlateRealTimeMonitoringPage = () => {
                 ws.close();
             }
         };
-    }, []);
+    }, []); // Dependency array is intentionally empty to prevent WebSocket reconnects on state changes.
 
-    const handleExpire = useCallback((uuid) => {
-        setEvents(prevEvents => prevEvents.filter(event => event.bestUuid !== uuid));
-    }, []);
-
-    const handleManualSubmit = async ({ licensePlate, purpose, duration }) => {
-        if (!licensePlate || !purpose || !duration) {
-            setMessage('Missing information for manual registration.');
-            return;
+    const handleRegistration = async (licensePlate, purpose) => {
+        if (!licensePlate || !purpose) {
+            setGlobalMessage('Missing information for registration.');
+            return false;
         }
 
         try {
@@ -288,20 +230,21 @@ const PlateRealTimeMonitoringPage = () => {
                 body: JSON.stringify({
                     licensePlate,
                     purpose,
-                    durationInDays: duration,
+                    durationInDays: 1, // Duration is now fixed to 1 day
                 }),
             });
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.message || 'Manual registration failed.');
-
-            setMessage(`Successfully registered ${licensePlate}. Gate is opening.`);
-            setManualModalOpen(false);
+            if (!response.ok) throw new Error(data.message || 'Registration failed.');
+            
+            setGlobalMessage(`Successfully registered ${licensePlate}.`);
+            setTimeout(() => setGlobalMessage(''), 5000);
+            return true;
 
         } catch (err) {
-            setMessage(err.message || 'An error occurred during manual registration.');
-        } finally {
-            setTimeout(() => setMessage(''), 5000); // Clear message after 5 seconds
+            setGlobalMessage(err.message || 'An error occurred during registration.');
+            setTimeout(() => setGlobalMessage(''), 5000);
+            return false;
         }
     };
 
@@ -319,37 +262,23 @@ const PlateRealTimeMonitoringPage = () => {
                     </div>
                 </header>
 
-                <div className="my-4 text-center">
-                    <button 
-                        onClick={() => setManualModalOpen(true)}
-                        className="px-8 py-4 bg-gray-500 text-white font-bold text-xl rounded-lg shadow-md hover:bg-gray-600 transition-transform transform hover:scale-105"
-                    >
-                        Manual Check-in
-                    </button>
-                </div>
-
-                {message && (
-                    <div className="mb-4 p-4 text-center font-semibold text-white bg-green-500 rounded-lg">
-                        {message}
+                {globalMessage && (
+                    <div className={`mb-4 p-4 text-center font-semibold text-white ${globalMessage.includes('Welcome') ? 'bg-blue-500' : 'bg-green-500'} rounded-lg`}>
+                        {globalMessage}
                     </div>
                 )}
 
                 <main>
-                    <div className="grid grid-cols-1 gap-8">
-                        {events.length > 0 ? (
-                            events.map(event => (
-                                <PlateEventCard key={event.bestUuid} event={event} onExpire={handleExpire} />
-                            ))
-                        ) : (
-                            <div className="col-span-full text-center py-16 bg-white rounded-lg shadow-md px-8">
-                                <p className="text-gray-600 text-2xl">
-                                    Waiting for vehicle entry. When a vehicle is recognized, a visitor registration menu will appear automatically. <br />
-                                    Select the purpose and duration of the visit, then press the 'Register' button to open the gate. <br />
-                                    If the vehicle recognition card does not appear, please use the 'Manual Check-in' button above.
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                    {!activeEvent && (
+                        <div className="text-center py-16 bg-white rounded-lg shadow-md px-8">
+                            <p className="text-gray-600 text-3xl">
+                                Waiting for vehicle entry...
+                            </p>
+                            <p className="text-gray-500 text-xl mt-4">
+                                When a vehicle is recognized, a check-in screen will appear automatically.
+                            </p>
+                        </div>
+                    )}
                 </main>
 
                 <div className="mt-8 text-center text-gray-500">
@@ -370,11 +299,14 @@ const PlateRealTimeMonitoringPage = () => {
                     </div>
                 </div>
             </div>
-            <ManualVisitorRegistrationModal 
-                isOpen={isManualModalOpen}
-                onClose={() => setManualModalOpen(false)}
-                onSubmit={handleManualSubmit}
-            />
+
+            {activeEvent && (
+                <VisitorFlowModal 
+                    event={activeEvent}
+                    onClose={() => setActiveEvent(null)}
+                    onSubmit={handleRegistration}
+                />
+            )}
         </div>
     );
 };
