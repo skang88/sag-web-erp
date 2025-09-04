@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 // --- 설정값 (여기를 수정해서 테스트하세요) ---
-const PLATE_NUMBER = "TEST-1243"; // 테스트할 차량 번호
+const PLATE_NUMBER = "TEST-1245"; // 테스트할 차량 번호
 // ----------------------------------------
 
 async function sendTestRequest() {
