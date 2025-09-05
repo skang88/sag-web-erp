@@ -19,12 +19,22 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const expireTimer = setTimeout(() => {
-            onClose();
-        }, 60000); // Auto-close modal after 60 seconds of inactivity
+        let expireTimer = null;
 
-        return () => clearTimeout(expireTimer);
-    }, [onClose]);
+        // Only set the auto-close timer if the user is not in the manual input step.
+        // This prevents the modal from closing while they are typing.
+        if (step !== 'manual') {
+            expireTimer = setTimeout(() => {
+                onClose();
+            }, 60000); // Auto-close modal after 60 seconds of inactivity
+        }
+
+        return () => {
+            if (expireTimer) {
+                clearTimeout(expireTimer);
+            }
+        };
+    }, [step, onClose]);
 
     const handlePurposeSelection = async (purpose) => {
         setIsLoading(true);
