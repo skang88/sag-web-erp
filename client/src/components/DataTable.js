@@ -1,6 +1,6 @@
 import { flexRender } from '@tanstack/react-table';
 
-const DataTable = ({ table }) => {
+const DataTable = ({ table, onRowClick }) => {
   return (
     <div className="shadow-lg rounded-lg overflow-auto">
         <table className="w-full border-collapse bg-white">
@@ -27,7 +27,11 @@ const DataTable = ({ table }) => {
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row, index) => (
-              <tr key={row.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100`}>
+              <tr 
+                key={row.id} 
+                className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 cursor-pointer`}
+                onClick={() => onRowClick && onRowClick(row.original)}
+              >
                 {row.getVisibleCells().map(cell => (
                   <td
                     key={cell.id}

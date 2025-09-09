@@ -7,6 +7,7 @@ import {
   getPaginationRowModel,
 } from '@tanstack/react-table';
 import DataTable from './DataTable';
+import DetailLogModal from './DetailLogModal';
 
 const AccDataFetcher = () => {
   const [data, setData] = useState([]);
@@ -22,6 +23,10 @@ const AccDataFetcher = () => {
     pageIndex: 0,
     pageSize: 20,
   });
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [detailLogs, setDetailLogs] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const formatDate = (dateStr) => {
     if (!dateStr || dateStr.length !== 8) return dateStr;
@@ -109,6 +114,39 @@ const AccDataFetcher = () => {
     fetchData();
   }, [fromDate, toDate]);
 
+  useEffect(() => {
+    if (selectedUser) {
+      const fetchDetailLogs = async () => {
+        setDetailLoading(true);
+        try {
+          const params = new URLSearchParams({
+            date: selectedUser.C_Date,
+            l_id: selectedUser.L_UID,
+          });
+          const response = await fetch(`${process.env.REACT_APP_API_URL}/accs/logs?${params}`);
+          if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+          const logs = await response.json();
+          setDetailLogs(logs);
+        } catch (error) {
+          console.error("Failed to fetch detail logs", error);
+          setDetailLogs([]);
+        } finally {
+          setDetailLoading(false);
+        }
+      };
+      fetchDetailLogs();
+    }
+  }, [selectedUser]);
+
+  const handleRowClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+    setDetailLogs([]);
+  };
+
   const table = useReactTable({
     data,
     columns,
@@ -178,7 +216,7 @@ const AccDataFetcher = () => {
           ))}
       </div>
 
-      <DataTable table={table} />
+      <DataTable table={table} onRowClick={handleRowClick} />
 
       {/* Pagination Controls */}
       <div className="mt-4 flex items-center gap-2 mb-10">
@@ -222,6 +260,15 @@ const AccDataFetcher = () => {
           ))}
         </select>
       </div>
+
+      {selectedUser && (
+        <DetailLogModal 
+          user={selectedUser} 
+          logs={detailLogs} 
+          loading={detailLoading} 
+          onClose={handleCloseModal} 
+        />
+      )}
     </div>
   );
 };

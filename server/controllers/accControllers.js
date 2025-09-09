@@ -31,12 +31,12 @@ const getLastLoginRecords = async (req, res) => {
 
 // Get Attendance Logs for a specific user
 const getAccLogForUser = async (req, res) => {
-    const { date, uniqueId } = req.query;
-    if (!date || !uniqueId) {
-        return res.status(400).send('Please provide date and uniqueId parameters.');
+    const { date, l_id } = req.query;
+    if (!date || !l_id) {
+        return res.status(400).send('Please provide date and l_id parameters.');
     }
     try {
-        const response = await axios.get(`${API_BASE_URL}/attendance/logs`, { params: { date, uniqueId } });
+        const response = await axios.get(`${API_BASE_URL}/attendance/logs`, { params: { date, l_id } });
         res.json(response.data);
     } catch (error) {
         console.error('Failed to retrieve attendance logs:', error);
