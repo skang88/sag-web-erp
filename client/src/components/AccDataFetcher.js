@@ -6,7 +6,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
 } from '@tanstack/react-table';
-import DataTable from './DataTable'; // DataTable은 이미 Tailwind로 전환되어 있다고 가정합니다.
+import DataTable from './DataTable';
 
 const AccDataFetcher = () => {
   const [data, setData] = useState([]);
@@ -18,64 +18,59 @@ const AccDataFetcher = () => {
 
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-
-  // 페이지네이션 상태를 직접 관리
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 20,
   });
 
+  const formatDate = (dateStr) => {
+    if (!dateStr || dateStr.length !== 8) return dateStr;
+    return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`;
+  };
+
+  const formatTime = (timeStr) => {
+    if (!timeStr || timeStr.length !== 6) return timeStr;
+    return `${timeStr.substring(0, 2)}:${timeStr.substring(2, 4)}:${timeStr.substring(4, 6)}`;
+  };
+
+  const calculateDiffInMinutes = (startTime, endTime) => {
+    if (!startTime || !endTime || startTime.length !== 6 || endTime.length !== 6) return 0;
+    const start = new Date(`1970-01-01T${formatTime(startTime)}Z`);
+    const end = new Date(`1970-01-01T${formatTime(endTime)}Z`);
+    const diff = (end.getTime() - start.getTime()) / 1000 / 60;
+    return Math.round(diff);
+  };
+
   const columns = useMemo(
     () => [
+      { accessorKey: 'C_Unique', header: 'ID', enableColumnFilter: true, filterFn: 'includesString' },
+      { accessorKey: 'C_Name', header: 'Name', enableColumnFilter: true, filterFn: 'includesString' },
       {
-        accessorKey: 'SABUN',
-        header: 'ID',
-        cell: info => info.getValue(),
-        enableColumnFilter: true,
-        filterFn: 'includesString',
-      },
-      {
-        accessorKey: 'FNAME',
-        header: 'Name',
-        cell: info => info.getValue(),
-        enableColumnFilter: true,
-        filterFn: 'includesString',
-      },
-      {
-        accessorKey: 'KDATE',
+        accessorKey: 'C_Date',
         header: 'Date',
-        cell: info => info.getValue(),
+        cell: info => formatDate(info.getValue()),
         enableColumnFilter: true,
         filterFn: 'includesString',
       },
       {
-        accessorKey: 'MINTIME',
+        accessorKey: 'EntryTime',
         header: 'In',
-        cell: info => info.getValue(),
+        cell: info => formatTime(info.getValue()),
         enableColumnFilter: true,
         filterFn: 'includesString',
       },
       {
-        accessorKey: 'MAXTIME',
+        accessorKey: 'ExitTime',
         header: 'Out',
-        cell: info => info.getValue(),
+        cell: info => formatTime(info.getValue()),
         enableColumnFilter: true,
         filterFn: 'includesString',
       },
       {
         accessorKey: 'DTIME',
         header: 'Diff (Min)',
-        cell: info => info.getValue(),
-        enableColumnFilter: true,
-        filterFn: 'includesString',
       },
-      {
-        accessorKey: 'N_Time',
-        header: 'Count',
-        cell: info => info.getValue(),
-        enableColumnFilter: true,
-        filterFn: 'includesString',
-      },
+      { accessorKey: 'RecognitionCount', header: 'Count', enableColumnFilter: true, filterFn: 'includesString' },
     ],
     []
   );
@@ -98,7 +93,12 @@ const AccDataFetcher = () => {
         }
 
         const result = await response.json();
-        setData(result);
+        const processedData = result.map(item => ({
+            ...item,
+            DTIME: calculateDiffInMinutes(item.EntryTime, item.ExitTime)
+        }));
+        setData(processedData);
+
       } catch (error) {
         setError(error);
       } finally {
@@ -133,99 +133,74 @@ const AccDataFetcher = () => {
   if (error) return <p className="text-center text-red-600 text-lg mt-8">Error: {error.message}</p>;
 
   return (
-    <div className="p-6 pb-12 max-h-screen overflow-y-auto mb-4"> {/* This is the main container */}
+    <div className="p-6 pb-12 max-h-screen overflow-y-auto mb-4"> 
       <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2>
-      <div className="flex gap-4 mb-4">
-        <div>
-          <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700">From</label>
-          <input type="date" id="fromDate" value={fromDate} onChange={e => setFromDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-        </div>
-        <div>
-          <label htmlFor="toDate" className="block text-sm font-medium text-gray-700">To</label>
-          <input type="date" id="toDate" value={toDate} onChange={e => setToDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex gap-4">
+            <div>
+              <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700">From</label>
+              <input type="date" id="fromDate" value={fromDate} onChange={e => setFromDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            </div>
+            <div>
+              <label htmlFor="toDate" className="block text-sm font-medium text-gray-700">To</label>
+              <input type="date" id="toDate" value={toDate} onChange={e => setToDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+            </div>
         </div>
       </div>
 
       {/* Filter UI */}
-      {table.getHeaderGroups().map(headerGroup => (
-        <div
-          key={headerGroup.id}
-          className="flex gap-2 mb-1.5" // display: 'flex', gap: '0.5rem' (8px) -> gap-2, marginBottom: '0.3rem' (4.8px) -> mb-1.5 (6px)
-        >
-          {headerGroup.headers.map(header => (
-            <div
-              key={header.id}
-              className="flex-1 flex flex-col items-center justify-start px-1 min-w-0" // flex: 1, display: flex, flexDirection: column, alignItems: center, justifyContent: flex-start, padding: 0 4px, minWidth: 0
-            >
-              <label
-                htmlFor={`filter-${header.id}`}
-                className="font-semibold text-xs text-gray-700 select-none mb-0.5 whitespace-nowrap" // fontWeight: '600', fontSize: '0.75rem' (12px) -> text-xs, color: '#444' -> text-gray-700, userSelect: 'none', marginBottom: '2px' -> mb-0.5, whiteSpace: 'nowrap'
-              >
-                {header.column.columnDef.header}
-              </label>
-              {header.column.getCanFilter() ? (
-                <input
-                  id={`filter-${header.id}`}
-                  value={
-                    columnFilters.find(f => f.id === header.column.id)?.value || ''
-                  }
-                  onChange={e => {
-                    const value = e.target.value;
-                    setColumnFilters(old => {
-                      const others = old.filter(f => f.id !== header.column.id);
-                      return value ? [...others, { id: header.column.id, value }] : others;
-                    });
-                  }}
-                  placeholder={`Search`}
-                  className="w-full max-w-[120px] px-2 py-1 text-sm rounded border border-gray-300 box-border transition-colors duration-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" // width: '100%', maxWidth: '120px', padding: '4px 8px' -> px-2 py-1, fontSize: '0.85rem' (13.6px) -> text-sm, borderRadius: '4px' -> rounded, border: '1px solid #ccc' -> border border-gray-300, boxSizing: 'border-box', transition: 'border-color 0.2s ease', onFocus/onBlur 대체
-                />
-              ) : (
-                <div className="h-[26px]" /> // height: '26px' -> h-[26px] (임의 값 지정)
-              )}
-            </div>
+      <div className="flex gap-2 mb-1.5">
+          {table.getHeaderGroups().map(headerGroup => (
+              headerGroup.headers.map(header => (
+                <div key={header.id} className="flex-1 flex flex-col items-center justify-start px-1 min-w-0">
+                  <label htmlFor={`filter-${header.id}`} className="font-semibold text-xs text-gray-700 select-none mb-0.5 whitespace-nowrap">
+                    {header.column.columnDef.header}
+                  </label>
+                  {header.column.getCanFilter() ? (
+                    <input
+                      id={`filter-${header.id}`}
+                      value={columnFilters.find(f => f.id === header.column.id)?.value || ''}
+                      onChange={e => {
+                        const value = e.target.value;
+                        setColumnFilters(old => {
+                          const others = old.filter(f => f.id !== header.column.id);
+                          return value ? [...others, { id: header.column.id, value }] : others;
+                        });
+                      }}
+                      placeholder={`Search`}
+                      className="w-full max-w-[120px] px-2 py-1 text-sm rounded border border-gray-300 box-border transition-colors duration-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    />
+                  ) : (
+                    <div className="h-[26px]" />
+                  )}
+                </div>
+              ))
           ))}
-        </div>
-      ))}
+      </div>
 
       <DataTable table={table} />
 
-      {/* 페이지네이션 컨트롤 */}
-      <div className="mt-4 flex items-center gap-2 mb-10"> {/* marginTop: '1rem' -> mt-4, display: 'flex', alignItems: 'center', gap: '0.5rem' -> flex items-center gap-2 */}
-        <button
-          onClick={() => table.setPageIndex(0)}
-          disabled={!table.getCanPreviousPage()}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-        >
+      {/* Pagination Controls */}
+      <div className="mt-4 flex items-center gap-2 mb-10">
+        <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
           {'<<'}
         </button>
-        <button
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-        >
+        <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
           {'<'}
         </button>
-        <button
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-        >
+        <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
           {'>'}
         </button>
-        <button
-          onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-          disabled={!table.getCanNextPage()}
-          className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
-        >
+        <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()} className="px-3 py-1 border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100">
           {'>>'}
         </button>
-        <span className="ml-2"> {/* marginLeft 추가 */}
+        <span className="ml-2">
           Page{' '}
           <strong className="font-bold">
             {pageIndex + 1} of {table.getPageCount() || 1}
-          </strong>{' '}
+          </strong>
         </span>
-        <span className="ml-2"> {/* marginLeft 추가 */}
+        <span className="ml-2">
           | Go to page:{' '}
           <input
             type="number"
@@ -238,20 +213,12 @@ const AccDataFetcher = () => {
               else if (page >= table.getPageCount()) page = table.getPageCount() - 1;
               table.setPageIndex(page);
             }}
-            className="w-12 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-blue-500" // width: '50px' -> w-12, style 추가
+            className="w-12 px-2 py-1 border border-gray-300 rounded text-center focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </span>
-        <select
-          value={pageSize}
-          onChange={e => {
-            table.setPageSize(Number(e.target.value));
-          }}
-          className="ml-4 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500" // marginLeft: '1rem' -> ml-4, style 추가
-        >
+        <select value={pageSize} onChange={e => { table.setPageSize(Number(e.target.value)); }} className="ml-4 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
           {[10, 20, 30, 40, 50].map(size => (
-            <option key={size} value={size}>
-              Show {size}
-            </option>
+            <option key={size} value={size}>Show {size}</option>
           ))}
         </select>
       </div>
