@@ -12,6 +12,9 @@ const AccDataFetcher = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const today = new Date().toISOString().split('T')[0];
+  const [fromDate, setFromDate] = useState(today);
+  const [toDate, setToDate] = useState(today);
 
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -79,8 +82,13 @@ const AccDataFetcher = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/accs`);
+        const params = new URLSearchParams({
+            from: fromDate.replace(/-/g, ''),
+            to: toDate.replace(/-/g, ''),
+        });
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/accs?${params}`);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const contentType = response.headers.get('Content-Type');
@@ -91,15 +99,15 @@ const AccDataFetcher = () => {
 
         const result = await response.json();
         setData(result);
-        setLoading(false);
       } catch (error) {
         setError(error);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [fromDate, toDate]);
 
   const table = useReactTable({
     data,
@@ -126,7 +134,17 @@ const AccDataFetcher = () => {
 
   return (
     <div className="p-6 pb-12 max-h-screen overflow-y-auto mb-4"> {/* This is the main container */}
-  <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2>
+      <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2>
+      <div className="flex gap-4 mb-4">
+        <div>
+          <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700">From</label>
+          <input type="date" id="fromDate" value={fromDate} onChange={e => setFromDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+        <div>
+          <label htmlFor="toDate" className="block text-sm font-medium text-gray-700">To</label>
+          <input type="date" id="toDate" value={toDate} onChange={e => setToDate(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+      </div>
 
       {/* Filter UI */}
       {table.getHeaderGroups().map(headerGroup => (
