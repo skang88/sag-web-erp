@@ -48,7 +48,8 @@ const AccDataFetcher = () => {
 
   const columns = useMemo(
     () => [
-      { accessorKey: 'C_Unique', header: 'ID', enableColumnFilter: true, filterFn: 'includesString' },
+      { accessorKey: 'L_UID', header: 'ID', enableColumnFilter: true, filterFn: 'includesString' },
+      { accessorKey: 'C_Unique', header: 'Employee ID', enableColumnFilter: true, filterFn: 'includesString' },
       { accessorKey: 'C_Name', header: 'Name', enableColumnFilter: true, filterFn: 'includesString' },
       {
         accessorKey: 'C_Date',
@@ -172,8 +173,8 @@ const AccDataFetcher = () => {
 
   return (
     <div className="p-6 pb-12 max-h-screen overflow-y-auto mb-4"> 
-      <h2 className="text-2xl font-bold mb-4">Staffing Check In and Out</h2>
-      <div className="flex justify-between items-center mb-4">
+      <h2 className="text-2xl font-bold mb-4 text-center">Staffing Check In and Out</h2>
+      <div className="flex justify-center items-center mb-4">
         <div className="flex gap-4">
             <div>
               <label htmlFor="fromDate" className="block text-sm font-medium text-gray-700">From</label>

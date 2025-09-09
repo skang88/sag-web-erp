@@ -108,9 +108,9 @@ const LastLoginFetcher = () => {
 
     return (
         <div className="p-6 max-h-screen overflow-y-auto mb-10"> {/* 전체 컨테이너 패딩 */}
-            <h2 className="text-2xl font-bold mb-2">Most recent fingerprint access log</h2>
-            <p className="text-gray-600 mb-1">Latest login activity (previous day)</p>
-            <p className="text-gray-700 mb-6">Total number of registered individuals: <span className="font-semibold">{data.length}</span></p>
+            <h2 className="text-2xl font-bold mb-2 text-center">Most recent fingerprint access log</h2>
+            <p className="text-gray-600 mb-1 text-center">Latest login activity (previous day)</p>
+            <p className="text-gray-700 mb-6 text-center">Total number of registered individuals: <span className="font-semibold">{data.length}</span></p>
 
             {/* Filter UI */}
             {table.getHeaderGroups().map(headerGroup => (
