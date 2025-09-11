@@ -1,4 +1,5 @@
 // app.js
+require('dotenv').config(); // .env 파일 로드
 const express = require('express');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
@@ -15,8 +16,6 @@ const userRoutes = require('./routes/userRoutes');
 const plateRecognitionRoutes = require('./routes/plateRecognitionRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 const visitorRoutes = require('./routes/visitorRoutes'); // Import visitor routes
-
-require('dotenv').config(); // .env 파일 로드
 
 const app = express();
 
