@@ -19,8 +19,10 @@ const visitorRoutes = require('./routes/visitorRoutes'); // Import visitor route
 
 const app = express();
 
-// 개발 모드에서 로그를 자세히 출력
-app.use(morgan('dev'));
+// NODE_ENV가 'production'이 아닐 때만 morgan 로깅을 활성화
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+}
 
 // MongoDB 연결
 mongoose.connect(process.env.MONGO_URI)

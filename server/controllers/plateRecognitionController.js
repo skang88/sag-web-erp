@@ -27,7 +27,7 @@ exports.createPlateRecognition = async (req, res) => {
         }
 
         if (requestBody.data_type !== 'alpr_group') {
-            console.log(`[${new Date().toISOString()}] Received data_type: ${requestBody.data_type}. Not an alpr_group, so not saving to DB.`);
+            // console.log(`[${new Date().toISOString()}] Received data_type: ${requestBody.data_type}. Not an alpr_group, so not saving to DB.`);
             return res.status(200).json({
                 message: `Received data_type: ${requestBody.data_type}. Only 'alpr_group' data is processed and saved to the database.`,
                 receivedDataType: requestBody.data_type
