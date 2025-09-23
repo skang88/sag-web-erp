@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import CiLogo from '../components/CiLogo';
 import CustomKeyboard from '../components/CustomKeyboard';
 import 'react-simple-keyboard/build/css/index.css';
@@ -390,10 +390,18 @@ const PlateRealTimeMonitoringPage = () => {
         }
     };
 
-    const handleSelectEvent = (event) => {
+    const handleSelectEvent = useCallback((event) => {
         setSelectedEvent(event);
         setEventQueue([]); // Clear queue once a selection is made
-    };
+    }, []);
+
+    // Automatically select the event if there is only one in the queue
+    // and no other event is being processed. This unifies the logic flow.
+    useEffect(() => {
+        if (eventQueue.length === 1 && !selectedEvent) {
+            handleSelectEvent(eventQueue[0]);
+        }
+    }, [eventQueue, selectedEvent, handleSelectEvent]);
 
     const handleCloseVisitorFlow = () => {
         if (selectedEvent) {
@@ -474,15 +482,7 @@ const PlateRealTimeMonitoringPage = () => {
                 />
             )}
 
-            {/* Case 2: Exactly one event in queue -> Show visitor flow directly */}
-            {eventQueue.length === 1 && !selectedEvent && (
-                 <VisitorFlowModal 
-                    event={eventQueue[0]}
-                    onClose={() => setEventQueue([])} // Simply dismiss the event
-                    onSubmit={handleRegistration}
-                    initialStep={'confirm'}
-                />
-            )}
+            {/* Case 2: Is now handled by the useEffect that populates selectedEvent */}
 
             {/* Case 3: An event has been selected by user (from list or manual) -> Show visitor flow */}
             {selectedEvent && (
