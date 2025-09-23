@@ -15,13 +15,12 @@ const navLinks = [
       submenuWidth: 'w-52',
     },
     {
-      label: 'MAT',
+      label: 'PI',
       path: '/asn',
       isRouterLink: true,
       submenu: [
         { label: 'ASN', path: '/asn', isRouterLink: true },
-        { label: 'Packing Summary', path: '/packing', isRouterLink: true },
-        { label: 'Packing items', path: '/packing/items', isRouterLink: true },
+        { label: 'Inventory Plan', path: 'https://grafana.seohanga.com/goto/gMilP3jHR?orgId=1', isRouterLink: true },
         { label: 'Packing Plans', path: '/packing/pallets', isRouterLink: true },
         { label: 'Barcode Tester', path: '/barcode-tester', isRouterLink: true },
       ],
@@ -33,7 +32,7 @@ const navLinks = [
       isRouterLink: true,
       submenu: [
         { label: 'Shelly', path: '/shelly', isRouterLink: true },
-        { label: 'Bargate Controller', path: '/bargate-controller', isRouterLink: true },
+        { label: 'Bargate Controller', url: '/bargate-controller', isRouterLink: true },
         { label: 'Plate Log', path: '/plate-log', isRouterLink: true },
         { label: 'Visitor List', path: '/visitors', isRouterLink: true },
         { label: 'Plate Monitoring', path: '/plate-monitoring', isRouterLink: true },
