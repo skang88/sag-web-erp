@@ -10,6 +10,57 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
 
+const ProgressBar = ({ startTime, duration }) => {
+    const [width, setWidth] = useState(100);
+
+    useEffect(() => {
+        let animationFrameId;
+
+        const updateProgress = () => {
+            const elapsedTime = Date.now() - startTime;
+            const progress = (elapsedTime / duration) * 100;
+            const newWidth = 100 - progress;
+
+            if (newWidth > 0) {
+                setWidth(newWidth);
+                animationFrameId = requestAnimationFrame(updateProgress);
+            } else {
+                setWidth(0);
+            }
+        };
+
+        animationFrameId = requestAnimationFrame(updateProgress);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [startTime, duration]);
+
+    return (
+        <div className="absolute bottom-0 left-0 w-full h-2.5 bg-gray-200 rounded-b-lg overflow-hidden">
+            <div 
+                className="h-full bg-blue-500"
+                style={{ width: `${width}%` }}
+            />
+        </div>
+    );
+};
+
+const EventCard = ({ event, onSelect }) => {
+    return (
+        <div 
+            className="border-4 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:shadow-xl transition relative overflow-hidden"
+            onClick={() => onSelect(event)}
+        >
+            <img src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} alt="Vehicle" className="rounded-lg w-full mb-4" />
+            <div className="text-center bg-gray-800 text-white py-3 rounded-lg">
+                <p className="text-4xl font-mono font-bold tracking-widest">{event.bestPlateNumber}</p>
+            </div>
+            <ProgressBar startTime={event.receivedAt} duration={60000} />
+        </div>
+    );
+};
+
 // --- Modal for selecting from multiple detected vehicles ---
 const EventSelectionModal = ({ events, onSelect, onClose }) => {
     return (
@@ -20,12 +71,7 @@ const EventSelectionModal = ({ events, onSelect, onClose }) => {
                 <p className="text-center text-2xl text-gray-600 mb-8">Please select your vehicle to proceed.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[60vh]">
                     {events.map(event => (
-                        <div key={event.id} className="border-4 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:shadow-xl transition" onClick={() => onSelect(event)}>
-                            <img src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} alt="Vehicle" className="rounded-lg w-full mb-4" />
-                            <div className="text-center bg-gray-800 text-white py-3 rounded-lg">
-                                <p className="text-4xl font-mono font-bold tracking-widest">{event.bestPlateNumber}</p>
-                            </div>
-                        </div>
+                        <EventCard key={event.id} event={event} onSelect={onSelect} />
                     ))}
                 </div>
                  <p className="text-center text-gray-500 mt-6">If you don't see your vehicle, please use the manual "Check In" button.</p>
@@ -36,21 +82,20 @@ const EventSelectionModal = ({ events, onSelect, onClose }) => {
 
 // --- New Modal Component for Visitor Flow ---
 const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' }) => {
-    const [step, setStep] = useState(initialStep); // 'confirm', 'purpose', 'manual', 'success', 'error'
-    const [manualStep, setManualStep] = useState('input'); // 'input', 'purpose' for manual flow
+    const [step, setStep] = useState(initialStep);
+    const [manualStep, setManualStep] = useState('input');
     const [manualPlate, setManualPlate] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [progressStart, setProgressStart] = useState(() => event.receivedAt || Date.now());
 
     useEffect(() => {
         let expireTimer = null;
 
-        // Only set the auto-close timer if the user is not in the manual input step.
-        // This prevents the modal from closing while they are typing.
         if (step !== 'manual') {
             expireTimer = setTimeout(() => {
                 onClose();
-            }, 60000); // Auto-close modal after 60 seconds of inactivity
+            }, 60000);
         }
 
         return () => {
@@ -60,6 +105,13 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
         };
     }, [step, onClose]);
 
+    useEffect(() => {
+        // Reset progress bar timer when step changes, but not for the initial render if event already has a timestamp
+        if (step !== 'confirm') {
+             setProgressStart(Date.now());
+        }
+    }, [step]);
+
     const handlePurposeSelection = async (purpose) => {
         setIsLoading(true);
         const plateToRegister = step === 'manual' ? manualPlate : event.bestPlateNumber;
@@ -67,7 +119,7 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
         setIsLoading(false);
         if (success) {
             setStep('success');
-            setTimeout(onClose, 3000); // Close success message after 3s
+            setTimeout(onClose, 3000);
         } else {
             setMessage('Registration failed. Please try again.');
             setStep('error');
@@ -177,6 +229,7 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
                 {step === 'purpose' && renderPurposeSelection()}
                 {step === 'manual' && renderManualInput()}
                 {(step === 'success' || step === 'error') && renderStatus(step)}
+                {step !== 'manual' && step !== 'success' && step !== 'error' && <ProgressBar startTime={progressStart} duration={60000} />}
             </div>
         </div>
     );
@@ -224,7 +277,7 @@ const PlateRealTimeMonitoringPage = () => {
                 try {
                     const message = JSON.parse(event.data);
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
-                        const newEvent = { ...message.payload, id: message.payload.bestUuid || `${Date.now()}-${message.payload.bestPlateNumber}` };
+                        const newEvent = { ...message.payload, id: message.payload.bestUuid || `${Date.now()}-${message.payload.bestPlateNumber}`, receivedAt: Date.now() };
 
                         if (newEvent.registrationStatus === 'UNREGISTERED') {
                             setEventQueue(prevQueue => {
@@ -267,6 +320,27 @@ const PlateRealTimeMonitoringPage = () => {
                 ws.close();
             }
         };
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setEventQueue(currentQueue => {
+                if (currentQueue.length === 0) {
+                    return currentQueue;
+                }
+                
+                const now = Date.now();
+                const timeout = 60000; // 60 seconds
+                const filteredQueue = currentQueue.filter(event => (now - event.receivedAt) < timeout);
+
+                if (filteredQueue.length !== currentQueue.length) {
+                    return filteredQueue;
+                }
+                return currentQueue;
+            });
+        }, 5000); // Check every 5 seconds
+
+        return () => clearInterval(interval);
     }, []);
 
     const handleRegistration = async (licensePlate, purpose) => {
