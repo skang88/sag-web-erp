@@ -95,7 +95,7 @@ function Navbar({ isLoggedIn }) {
   const userIdToDisplay = user ? user.email : '';
 
   const filteredNavLinks = navLinks.filter(menuItem => {
-    const hiddenLabels = ['HR', 'MAT', 'Visitor', 'Apps'];
+    const hiddenLabels = ['HR', 'PI', 'Visitor', 'Apps', 'Support'];
     if (hiddenLabels.includes(menuItem.label) && !isLoggedIn) {
       return false;
     }

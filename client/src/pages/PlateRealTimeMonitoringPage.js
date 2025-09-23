@@ -10,6 +10,30 @@ const API_BASE_URL = process.env.REACT_APP_API_URL;
 
 const purposeOptions = ['Delivery', 'Meeting', 'Parcel Delivery', 'Others'];
 
+// --- Modal for selecting from multiple detected vehicles ---
+const EventSelectionModal = ({ events, onSelect, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-auto p-8 m-4 flex flex-col relative">
+                <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+                <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">Multiple Vehicles Detected</h2>
+                <p className="text-center text-2xl text-gray-600 mb-8">Please select your vehicle to proceed.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto max-h-[60vh]">
+                    {events.map(event => (
+                        <div key={event.id} className="border-4 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 hover:shadow-xl transition" onClick={() => onSelect(event)}>
+                            <img src={`data:image/jpeg;base64,${event.vehicleCropJpeg}`} alt="Vehicle" className="rounded-lg w-full mb-4" />
+                            <div className="text-center bg-gray-800 text-white py-3 rounded-lg">
+                                <p className="text-4xl font-mono font-bold tracking-widest">{event.bestPlateNumber}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                 <p className="text-center text-gray-500 mt-6">If you don't see your vehicle, please use the manual "Check In" button.</p>
+            </div>
+        </div>
+    );
+};
+
 // --- New Modal Component for Visitor Flow ---
 const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' }) => {
     const [step, setStep] = useState(initialStep); // 'confirm', 'purpose', 'manual', 'success', 'error'
@@ -62,7 +86,7 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
             <p className="text-center text-3xl font-semibold text-gray-800 mb-auto">Is this your license plate?</p>
             <div className="grid grid-cols-2 gap-4 mt-4">
                 <button onClick={() => setStep('purpose')} className="w-full py-8 text-4xl font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">YES</button>
-                <button onClick={() => setStep('manual')} className="w-full py-8 text-4xl font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">NO</button>
+                <button onClick={onClose} className="w-full py-8 text-4xl font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">NO</button>
             </div>
         </div>
     );
@@ -160,7 +184,8 @@ const VisitorFlowModal = ({ event, onClose, onSubmit, initialStep = 'confirm' })
 
 
 const PlateRealTimeMonitoringPage = () => {
-    const [activeEvent, setActiveEvent] = useState(null);
+    const [eventQueue, setEventQueue] = useState([]);
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const [wsStatus, setWsStatus] = useState('Connecting...');
     const [globalMessage, setGlobalMessage] = useState('');
     const [loadingState, setLoadingState] = useState({});
@@ -176,7 +201,7 @@ const PlateRealTimeMonitoringPage = () => {
             plateCropJpeg: '',   // No image
             registrationStatus: 'UNREGISTERED' // Treat as unregistered to show the modal
         };
-        setActiveEvent(dummyEvent);
+        setSelectedEvent(dummyEvent);
         setLoadingState(prev => ({ ...prev, [VISITOR_ENTRANCE_GATE.openShellyId]: false }));
         setTimeout(() => setGlobalMessage(''), 3000); // Clear message after a short delay
     };
@@ -199,29 +224,21 @@ const PlateRealTimeMonitoringPage = () => {
                 try {
                     const message = JSON.parse(event.data);
                     if (message.type === 'NEW_PLATE_RECOGNITION') {
-                        const newEvent = message.payload;
-                        
-                        // Using a callback with setActiveEvent ensures we have the latest state
-                        // and avoids race conditions without needing 'activeEvent' in the dependency array.
-                        setActiveEvent(currentActiveEvent => {
-                            if (newEvent.registrationStatus === 'UNREGISTERED') {
-                                // If no modal is active, show the new one for the unregistered visitor.
-                                if (!currentActiveEvent) {
-                                    return newEvent;
+                        const newEvent = { ...message.payload, id: message.payload.bestUuid || `${Date.now()}-${message.payload.bestPlateNumber}` };
+
+                        if (newEvent.registrationStatus === 'UNREGISTERED') {
+                            setEventQueue(prevQueue => {
+                                if (prevQueue.some(e => e.id === newEvent.id)) {
+                                    return prevQueue;
                                 }
-                                // If a modal is already active, ignore the new event to prevent pop-ups over pop-ups.
-                                return currentActiveEvent;
-                            } else {
-                                // For registered staff or visitors, don't show a modal.
-                                // Just show a temporary global message for feedback.
-                                const statusText = newEvent.registrationStatus === 'REGISTERED' ? 'Staff' : 'Visitor';
-                                setGlobalMessage(`Welcome, ${statusText} ${newEvent.bestPlateNumber}!`);
-                                setTimeout(() => setGlobalMessage(''), 4000);
-                                
-                                // Do not change the active event, keeping the current modal if it exists.
-                                return currentActiveEvent;
-                            }
-                        });
+                                const updatedQueue = [...prevQueue, newEvent].slice(-5); // Keep last 5
+                                return updatedQueue;
+                            });
+                        } else {
+                            const statusText = newEvent.registrationStatus === 'REGISTERED' ? 'Staff' : 'Visitor';
+                            setGlobalMessage(`Welcome, ${statusText} ${newEvent.bestPlateNumber}!`);
+                            setTimeout(() => setGlobalMessage(''), 4000);
+                        }
                     }
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
@@ -250,7 +267,7 @@ const PlateRealTimeMonitoringPage = () => {
                 ws.close();
             }
         };
-    }, []); // Dependency array is intentionally empty to prevent WebSocket reconnects on state changes.
+    }, []);
 
     const handleRegistration = async (licensePlate, purpose) => {
         if (!licensePlate || !purpose) {
@@ -299,6 +316,18 @@ const PlateRealTimeMonitoringPage = () => {
         }
     };
 
+    const handleSelectEvent = (event) => {
+        setSelectedEvent(event);
+        setEventQueue([]); // Clear queue once a selection is made
+    };
+
+    const handleCloseVisitorFlow = () => {
+        if (selectedEvent) {
+            setEventQueue(prev => prev.filter(e => e.id !== selectedEvent.id));
+        }
+        setSelectedEvent(null);
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col items-center p-4 font-inter">
             <div className="absolute top-4 left-4">
@@ -320,7 +349,7 @@ const PlateRealTimeMonitoringPage = () => {
                 )}
 
                 <main>
-                    {!activeEvent && (
+                    {eventQueue.length === 0 && !selectedEvent && (
                         <div className="text-center py-16 bg-white rounded-lg shadow-md px-8">
                             <p className="text-gray-600 text-3xl">
                                 Waiting for vehicle entry...
@@ -360,12 +389,34 @@ const PlateRealTimeMonitoringPage = () => {
                 </div>
             </div>
 
-            {activeEvent && (
-                <VisitorFlowModal 
-                    event={activeEvent}
-                    onClose={() => setActiveEvent(null)}
+            {/* Logic for showing modals based on queue and selection */}
+            
+            {/* Case 1: More than one event in queue -> Show selection modal */}
+            {eventQueue.length > 1 && !selectedEvent && (
+                <EventSelectionModal
+                    events={eventQueue}
+                    onSelect={handleSelectEvent}
+                    onClose={() => setEventQueue([])}
+                />
+            )}
+
+            {/* Case 2: Exactly one event in queue -> Show visitor flow directly */}
+            {eventQueue.length === 1 && !selectedEvent && (
+                 <VisitorFlowModal 
+                    event={eventQueue[0]}
+                    onClose={() => setEventQueue([])} // Simply dismiss the event
                     onSubmit={handleRegistration}
-                    initialStep={activeEvent.bestPlateNumber === '' ? 'manual' : 'confirm'}
+                    initialStep={'confirm'}
+                />
+            )}
+
+            {/* Case 3: An event has been selected by user (from list or manual) -> Show visitor flow */}
+            {selectedEvent && (
+                <VisitorFlowModal 
+                    event={selectedEvent}
+                    onClose={handleCloseVisitorFlow}
+                    onSubmit={handleRegistration}
+                    initialStep={selectedEvent.bestPlateNumber === '' ? 'manual' : 'confirm'}
                 />
             )}
         </div>
