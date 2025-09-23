@@ -20,7 +20,7 @@ const navLinks = [
       isRouterLink: true,
       submenu: [
         { label: 'ASN', path: '/asn', isRouterLink: true },
-        { label: 'Inventory Plan', path: 'https://grafana.seohanga.com/goto/gMilP3jHR?orgId=1', isRouterLink: true },
+        { label: 'Inventory Plan', path: 'https://grafana.seohanga.com/goto/gMilP3jHR?orgId=1', isPopup: true },
         { label: 'Packing Plans', path: '/packing/pallets', isRouterLink: true },
         { label: 'Barcode Tester', path: '/barcode-tester', isRouterLink: true },
       ],
