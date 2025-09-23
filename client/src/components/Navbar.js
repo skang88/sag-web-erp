@@ -32,7 +32,7 @@ const navLinks = [
       isRouterLink: true,
       submenu: [
         { label: 'Shelly', path: '/shelly', isRouterLink: true },
-        { label: 'Bargate Controller', url: '/bargate-controller', isRouterLink: true },
+        { label: 'Bargate Controller', path: '/bargate-controller', isRouterLink: true },
         { label: 'Plate Log', path: '/plate-log', isRouterLink: true },
         { label: 'Visitor List', path: '/visitors', isRouterLink: true },
         { label: 'Plate Monitoring', path: '/plate-monitoring', isRouterLink: true },
