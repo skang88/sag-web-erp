@@ -53,6 +53,16 @@ const navLinks = [
           url: 'https://rstudio.seohanga.com',
           isPopup: true,
         },
+        {
+          label: 'Prometheus',
+          url: 'https://prometheus.seohanga.com/',
+          isPopup: true,
+        },
+        {
+          label: 'Graylog',
+          url: 'https://graylog.seohanga.com/',
+          isPopup: true,
+        },
       ],
       submenuWidth: 'w-60',
     },
