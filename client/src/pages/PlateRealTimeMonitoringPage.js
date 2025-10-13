@@ -242,6 +242,7 @@ const PlateRealTimeMonitoringPage = () => {
     const [wsStatus, setWsStatus] = useState('Connecting...');
     const [globalMessage, setGlobalMessage] = useState('');
     const [loadingState, setLoadingState] = useState({});
+    const [audioEnabled, setAudioEnabled] = useState(false);
 
     const handleVisitorEntranceOpen = async () => {
         setLoadingState(prev => ({ ...prev, [VISITOR_ENTRANCE_GATE.openShellyId]: true }));
@@ -403,6 +404,33 @@ const PlateRealTimeMonitoringPage = () => {
         }
     }, [eventQueue, selectedEvent, handleSelectEvent]);
 
+    useEffect(() => {
+        let audio;
+        let timeoutId;
+
+        if (audioEnabled && eventQueue.length === 0 && !selectedEvent) {
+            audio = new Audio('/welcome.mp3');
+
+            const playAudio = () => {
+                audio.play().catch(error => console.log("Audio play failed:", error));
+            };
+
+            const handleEnded = () => {
+                timeoutId = setTimeout(playAudio, 5000); // Wait 5 seconds
+            };
+
+            audio.addEventListener('ended', handleEnded);
+            playAudio(); // Start playing for the first time
+
+            return () => {
+                // Cleanup function
+                clearTimeout(timeoutId);
+                audio.removeEventListener('ended', handleEnded);
+                audio.pause();
+            };
+        }
+    }, [audioEnabled, eventQueue.length, selectedEvent]);
+
     const handleCloseVisitorFlow = () => {
         if (selectedEvent) {
             setEventQueue(prev => prev.filter(e => e.id !== selectedEvent.id));
@@ -439,6 +467,17 @@ const PlateRealTimeMonitoringPage = () => {
                             <p className="text-gray-500 text-xl mt-4">
                                 When a vehicle is recognized, a check-in screen will appear automatically.
                             </p>
+                            {!audioEnabled && (
+                                <div className="mt-8">
+                                    <button
+                                        onClick={() => setAudioEnabled(true)}
+                                        className="px-8 py-4 bg-blue-500 text-white text-xl rounded hover:bg-blue-600"
+                                    >
+                                        Enable Sound
+                                    </button>
+                                    <p className="text-gray-400 text-sm mt-2">Click to enable welcome sound.</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </main>
