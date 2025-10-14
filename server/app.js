@@ -16,6 +16,7 @@ const userRoutes = require('./routes/userRoutes');
 const plateRecognitionRoutes = require('./routes/plateRecognitionRoutes');
 const emailRoutes = require('./routes/emailRoutes');
 const visitorRoutes = require('./routes/visitorRoutes'); // Import visitor routes
+const shipsgoRoutes = require('./routes/shipsgoRoutes');
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.use('/api/shelly', shellyRoutes)
 app.use('/api/plate-recognitions', plateRecognitionRoutes); // /api/plate-recognitions 경로로 라우트
 app.use('/api/visitor', visitorRoutes); // Add visitor routes
 app.use('/api/email', emailRoutes);
+app.use('/api/shipsgo', shipsgoRoutes);
 
 app.get('/', (req, res) => {
   res.send('Welcome to Seohan Auto Georgia!!');
