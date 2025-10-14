@@ -24,6 +24,7 @@ import BargateControllerPage from './pages/BargateControllerPage';
 import AuthPage from './pages/AuthPage';
 import VisitorRegistrationPage from './pages/VisitorRegistrationPage';
 import VisitorListPage from './pages/VisitorListPage'; // Import VisitorListPage
+import CkdTrackingPage from './pages/CkdTrackingPage';
 
 // MainAppContent 컴포넌트 정의
 function MainAppContent() {
@@ -60,6 +61,7 @@ function MainAppContent() {
                 <Route path="/packing/items" element={<PackingItems />} />
                 <Route path="/packing/pallets" element={<ContainerPackingViz />} />
                 <Route path="/asn" element={<AsnPage />} />
+                <Route path="/ckd-tracking" element={<CkdTrackingPage />} />
                 <Route path="/barcode-tester" element={<StocktakingPage />} />
                 <Route path="/shelly" element={<ShellyPage />} />
                 <Route path="/bargate-controller" element={<BargateControllerPage />} />
