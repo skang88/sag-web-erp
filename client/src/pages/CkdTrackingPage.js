@@ -7,6 +7,28 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-CA'); // YYYY-MM-DD format
 };
 
+// Helper to calculate days remaining for arrival
+const getDaysRemaining = (dateString) => {
+    if (!dateString) return null;
+    const arrivalDate = new Date(dateString);
+    const today = new Date();
+
+    // Reset time to midnight for accurate day difference
+    arrivalDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const timeDiff = arrivalDate.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    if (daysDiff < 0) {
+        return 'Arrived';
+    } else if (daysDiff === 0) {
+        return 'Arriving today';
+    } else {
+        return `Arriving in ${daysDiff} days`;
+    }
+};
+
 const CkdTrackingPage = () => {
     const iframeRef = useRef(null);
     const [shipments, setShipments] = useState([]);
@@ -85,12 +107,15 @@ const CkdTrackingPage = () => {
                                     <div className="text-xs grid grid-cols-2 gap-1">
                                         <p><b>POL:</b> {shipment.route.port_of_loading.location.name}</p>
                                         <p><b>POD:</b> {shipment.route.port_of_discharge.location.name}</p>
-                                        <p><b>Load:</b> {formatDate(shipment.route.date_of_loading)}</p>
-                                        <p><b>Discharge:</b> {formatDate(shipment.route.date_of_discharge)}</p>
+                                        <p><b>Load:</b> {formatDate(shipment.route.port_of_loading.date_of_loading)}</p>
+                                        <p><b>Discharge:</b> {formatDate(shipment.route.port_of_discharge.date_of_discharge)}</p>
                                     </div>
                                     <div className="mt-2">
-                                        <p className="text-xs font-semibold">Transit: {shipment.route.transit_percentage}%</p>
-                                        <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div className="flex justify-between text-xs font-semibold">
+                                            <p>Transit: {shipment.route.transit_percentage}%</p>
+                                            <p className={`font-bold ${selectedContainer === shipment.container_number ? 'text-white' : 'text-blue-600'}`}>{getDaysRemaining(shipment.route.port_of_discharge.date_of_discharge)}</p>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                                             <div className="bg-blue-400 h-1.5 rounded-full" style={{ width: `${shipment.route.transit_percentage}%` }}></div>
                                         </div>
                                     </div>
