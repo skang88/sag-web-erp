@@ -22,9 +22,33 @@ const getUpcomingShipments = async (req, res) => {
     }
 };
 
-const handleWebhook = (req, res) => {
+const handleWebhook = async (req, res) => {
     console.log('Received ShipsGo Webhook:');
     console.log(JSON.stringify(req.body, null, 2));
+
+    const slackWebhookUrl = process.env.SHIPSGO_SLACK_WEBHOOK_URL;
+    if (!slackWebhookUrl) {
+        console.error('SHIPSGO_SLACK_WEBHOOK_URL is not set.');
+        return res.status(500).send('Webhook processor configuration error.');
+    }
+    
+    const { event_type, data } = req.body;
+
+    let message;
+    if (event_type === 'TEST') {
+        message = `ShipsGo Webhook Test:\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``;
+    } else {
+        // Here you can format the message for other event types
+        message = `New ShipsGo Event: ${event_type}\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``;
+    }
+
+    try {
+        await axios.post(slackWebhookUrl, { text: message });
+        console.log('Slack message sent successfully!');
+    } catch (error) {
+        console.error('Failed to send Slack message:', error.response ? error.response.data : error.message);
+    }
+
     res.status(200).send('Webhook received');
 };
 
