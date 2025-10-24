@@ -22,6 +22,13 @@ const getUpcomingShipments = async (req, res) => {
     }
 };
 
+const handleWebhook = (req, res) => {
+    console.log('Received ShipsGo Webhook:');
+    console.log(JSON.stringify(req.body, null, 2));
+    res.status(200).send('Webhook received');
+};
+
 module.exports = {
     getUpcomingShipments,
+    handleWebhook,
 };
