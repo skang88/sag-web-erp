@@ -408,7 +408,7 @@ const PlateRealTimeMonitoringPage = () => {
         let audio;
         let timeoutId;
 
-        if (audioEnabled && eventQueue.length === 0 && !selectedEvent) {
+        if (audioEnabled) {
             audio = new Audio('/welcome.mp3');
 
             const playAudio = () => {
@@ -429,7 +429,7 @@ const PlateRealTimeMonitoringPage = () => {
                 audio.pause();
             };
         }
-    }, [audioEnabled, eventQueue.length, selectedEvent]);
+    }, [audioEnabled]);
 
     const handleCloseVisitorFlow = () => {
         if (selectedEvent) {
