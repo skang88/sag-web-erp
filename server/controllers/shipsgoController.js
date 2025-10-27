@@ -31,15 +31,33 @@ const handleWebhook = async (req, res) => {
         console.error('SHIPSGO_SLACK_WEBHOOK_URL is not set.');
         return res.status(500).send('Webhook processor configuration error.');
     }
-    
-    const { event_type, data } = req.body;
+
+    const { event, shipment } = req.body;
 
     let message;
-    if (event_type === 'TEST') {
-        message = `ShipsGo Webhook Test:\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``;
+
+    if (event && event.name === 'TEST') {
+        message = `✅ ShipsGo Webhook Test Received Successfully.`;
+    } else if (shipment) {
+        const eventName = event ? event.name : "Unknown Event";
+        const {
+            container_number,
+            status,
+            route: { port_of_loading, port_of_discharge },
+        } = shipment;
+
+        const pol = port_of_loading.location.name;
+        const pod = port_of_discharge.location.name;
+        const eta = new Date(port_of_discharge.date_of_discharge).toLocaleDateString('en-CA'); // YYYY-MM-DD
+
+        message = `*🚢 ShipsGo Shipment Update*
+                    Event: \`${eventName}\`
+                    Container: \`${container_number}\`
+                    Status: *${status}*
+                    Route: ${pol} -> ${pod}
+                    ETA: ${eta}`;
     } else {
-        // Here you can format the message for other event types
-        message = `New ShipsGo Event: ${event_type}\n\`\`\`${JSON.stringify(data, null, 2)}\`\`\``;
+        message = 'Received an unknown ShipsGo webhook format:\n```' + JSON.stringify(req.body, null, 2) + '```';
     }
 
     try {
